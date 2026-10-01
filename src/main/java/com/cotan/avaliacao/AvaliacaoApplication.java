@@ -19,6 +19,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -47,10 +49,15 @@ import java.util.stream.Collectors;
  * - Backup do banco SQLite
  * - Tema claro/escuro com AtlantaFX
  */
+@SpringBootApplication
 public class AvaliacaoApplication extends Application {
 
     private static final String APP_NAME = "COTAN";
     private static final String APP_SUBTITLE = "Avaliação e Desempenho";
+
+    public static void main(String[] args) {
+        Application.launch(AvaliacaoApplication.class, args);
+    }
 
     private ConfigurableApplicationContext springContext;
     private Database database;
@@ -122,7 +129,6 @@ public class AvaliacaoApplication extends Application {
         pane.getChildren().add(box);
 
         Scene scene = new Scene(pane);
-        installCss(scene);
         stage.setScene(scene);
     }
 
@@ -146,7 +152,6 @@ public class AvaliacaoApplication extends Application {
         pane.getStyleClass().add("app-background");
 
         Scene scene = new Scene(pane, 1180, 720);
-        installCss(scene);
         stage.setScene(scene);
     }
 
@@ -166,24 +171,10 @@ public class AvaliacaoApplication extends Application {
         root.setBottom(buildStatusBar());
 
         Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
-        installCss(scene);
         stage.setScene(scene);
         stage.centerOnScreen();
 
         showSection("dashboard");
-    }
-
-    private void installCss(Scene scene) {
-        scene.getStylesheets().clear();
-        try {
-            String css = Objects.requireNonNull(
-                    getClass().getResource("/app.css"),
-                    "app.css não encontrado"
-            ).toExternalForm();
-            scene.getStylesheets().add(css);
-        } catch (Exception ignored) {
-            // O estilo AtlantaFX continua funcional mesmo sem CSS adicional.
-        }
     }
 
     private VBox buildSidebar() {
@@ -2112,7 +2103,7 @@ public class AvaliacaoApplication extends Application {
         tech.setVgap(12);
         tech.add(infoPill("Java", "21"), 0, 0);
         tech.add(infoPill("JavaFX", "21"), 1, 0);
-        tech.add(infoPill("AtlantaFX", "2.1.0"), 2, 0);
+        tech.add(infoPill("AtlantaFX", "3.0.0"), 2, 0);
         tech.add(infoPill("Banco", "SQLite"), 3, 0);
         tech.add(infoPill("Arquitetura", "Desktop + Spring Boot"), 0, 1);
 
