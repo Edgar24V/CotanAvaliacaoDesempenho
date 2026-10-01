@@ -456,12 +456,21 @@
 }
 
 /* -------------------------------------------------------------------------
-   AtlantaFX ModalPane / ModalBox
+   Modal nativo do COTAN
    ------------------------------------------------------------------------- */
 
-.cotan-modal-box {
+.cotan-modal-host {
     -fx-background-color: transparent;
     -fx-padding: 0;
+}
+
+.cotan-modal-scrim {
+    -fx-fill: rgba(15, 23, 42, 0.46);
+}
+
+.cotan-modal-surface {
+    -fx-background-color: transparent;
+    -fx-padding: 26px;
 }
 
 .cotan-modal {
@@ -470,7 +479,7 @@
     -fx-border-color: -color-border-default;
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, -color-shadow-default, 30, 0.22, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.26), 34, 0.18, 0, 12);
 }
 
 .cotan-modal-header {
@@ -478,7 +487,7 @@
     -fx-background-radius: 18px 18px 0 0;
     -fx-border-color: -color-border-default;
     -fx-border-width: 0 0 1px 0;
-    -fx-padding: 20px 24px 17px 24px;
+    -fx-padding: 18px 20px 16px 22px;
 }
 
 .modal-eyebrow {
@@ -494,8 +503,57 @@
     -fx-font-weight: bold;
 }
 
+.modal-close-button {
+    -fx-min-width: 34px;
+    -fx-pref-width: 34px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-background-radius: 10px;
+    -fx-padding: 5px;
+}
+
+.modal-close-button:hover {
+    -fx-background-color: -color-danger-muted;
+    -fx-border-color: -color-danger-emphasis;
+}
+
+.modal-close-button:hover .cotan-icon {
+    -fx-fill: -color-danger-fg;
+}
+
 .cotan-modal-content {
-    -fx-padding: 22px 24px 18px 24px;
+    -fx-padding: 22px 24px 20px 24px;
+}
+
+.cotan-modal-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-modal-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -color-border-muted;
+    -fx-background-radius: 8px;
+    -fx-min-width: 7px;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -color-accent-emphasis;
+}
+
+.cotan-modal-scroll .corner {
+    -fx-background-color: transparent;
 }
 
 .cotan-modal-footer {
@@ -503,7 +561,29 @@
     -fx-background-radius: 0 0 18px 18px;
     -fx-border-color: -color-border-default;
     -fx-border-width: 1px 0 0 0;
-    -fx-padding: 14px 24px 16px 24px;
+    -fx-padding: 14px 22px 16px 22px;
+}
+
+.cotan-modal .text-field,
+.cotan-modal .combo-box,
+.cotan-modal .date-picker,
+.cotan-modal .spinner,
+.cotan-modal .text-area {
+    -fx-min-height: 38px;
+}
+
+.cotan-modal .combo-box,
+.cotan-modal .date-picker,
+.cotan-modal .spinner {
+    -fx-pref-height: 38px;
+}
+
+.cotan-modal .text-area {
+    -fx-min-height: 90px;
+}
+
+.cotan-modal .button {
+    -fx-min-height: 36px;
 }
 
 .modal-message {
@@ -535,91 +615,9 @@
     -fx-border-color: -color-danger-muted;
 }
 
-.table-empty {
-    -fx-text-fill: -color-fg-muted;
-    -fx-font-size: 13px;
-}
-
-.table-row-cell {
-    -fx-background-insets: 0;
-}
-
-.table-row-cell:filled:hover {
-    -fx-cursor: hand;
-}
-
-.cotan-table .scroll-bar:vertical,
-.cotan-table .scroll-bar:horizontal {
-    -fx-background-color: transparent;
-}
-
-.cotan-table .scroll-bar:vertical .thumb,
-.cotan-table .scroll-bar:horizontal .thumb {
-    -fx-background-radius: 8px;
-}
-
-.cotan-table .placeholder {
-    -fx-background-color: transparent;
-}
-
 .cotan-dialog-pane {
     -fx-background-color: transparent;
 }
-
-.cotan-modal-scroll {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-padding: 0;
-}
-
-.cotan-modal-scroll > .viewport {
-    -fx-background-color: transparent;
-}
-
-.cotan-modal-scroll .scroll-bar:vertical {
-    -fx-background-color: transparent;
-}
-
-.cotan-modal-scroll .scroll-bar:vertical .track {
-    -fx-background-color: transparent;
-}
-
-.cotan-modal-scroll .scroll-bar:vertical .thumb {
-    -fx-background-color: -color-border-muted;
-    -fx-background-radius: 8px;
-    -fx-min-width: 7px;
-}
-
-.cotan-modal-scroll .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: -color-accent-emphasis;
-}
-
-.cotan-modal-scroll .corner {
-    -fx-background-color: transparent;
-}
-
-.cotan-modal .text-field,
-.cotan-modal .combo-box,
-.cotan-modal .date-picker,
-.cotan-modal .spinner,
-.cotan-modal .text-area {
-    -fx-min-height: 38px;
-}
-
-.cotan-modal .combo-box,
-.cotan-modal .date-picker,
-.cotan-modal .spinner {
-    -fx-pref-height: 38px;
-}
-
-.cotan-modal .text-area {
-    -fx-min-height: 90px;
-}
-
-.cotan-modal .button {
-    -fx-min-height: 36px;
-}
-
 
 /* Ikonli + global scroll */
 .cotan-icon {
