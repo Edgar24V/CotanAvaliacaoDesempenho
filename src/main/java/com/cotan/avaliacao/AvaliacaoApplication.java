@@ -239,6 +239,7 @@ public class AvaliacaoApplication extends Application {
                 navButton("▦", "Turmas", "classes"),
                 navButton("◈", "Disciplinas", "subjects"),
                 navButton("◆", "Relatórios", "reports"),
+                navButton("◇", "Indicadores", "indicators"),
                 navButton("⚙", "Configurações", "settings"),
                 navButton("?", "Sobre", "about")
         );
@@ -337,6 +338,7 @@ public class AvaliacaoApplication extends Application {
                 Map.entry("classes", "Gestão de Turmas"),
                 Map.entry("subjects", "Gestão de Disciplinas"),
                 Map.entry("reports", "Relatórios de Desempenho"),
+                Map.entry("indicators", "Indicadores de Avaliação"),
                 Map.entry("settings", "Configurações"),
                 Map.entry("about", "Sobre o sistema")
         );
@@ -365,7 +367,7 @@ public class AvaliacaoApplication extends Application {
 
     private void updateTopAction() {
         boolean hasAction = Set.of(
-                "students","teachers","administrative","classes","subjects","assessments",
+                "students","teachers","administrative","classes","subjects","assessments","indicators",
                 "professor-evaluation","administrative-evaluation"
         ).contains(currentSection);
         topAction.setVisible(hasAction);
@@ -380,6 +382,7 @@ public class AvaliacaoApplication extends Application {
                 case "classes" -> classDialog(null);
                 case "subjects" -> subjectDialog(null);
                 case "assessments" -> assessmentDialog(null);
+                case "indicators" -> indicatorDialog(null);
             }
         });
     }
@@ -406,6 +409,7 @@ public class AvaliacaoApplication extends Application {
                 case "assessments" -> content.getChildren().setAll(buildAssessments());
                 case "grades" -> content.getChildren().setAll(buildGrades());
                 case "reports" -> content.getChildren().setAll(buildReports());
+                case "indicators" -> content.getChildren().setAll(buildIndicators());
                 case "settings" -> content.getChildren().setAll(buildSettings());
                 case "about" -> content.getChildren().setAll(buildAbout());
                 default -> content.getChildren().setAll(buildDashboard());
@@ -573,6 +577,129 @@ public class AvaliacaoApplication extends Application {
             case "map-final-administrative" -> "Calcular e apresentar a consolidação final dos administrativos.";
             default -> "Executar operações do módulo.";
         };
+    }
+
+    // -------------------------------------------------------------------------
+    // INDICATORS
+    // -------------------------------------------------------------------------
+
+    private Node buildIndicators() throws SQLException {
+        VBox page = pageContainer();
+
+        HBox heading = sectionHeading(
+                "Indicadores de avaliação",
+                "Critérios configuráveis usados pelo motor de desempenho. Ajuste nomes e pesos para refletir o mapa oficial."
+        );
+
+        TableView<IndicatorRow> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        addColumn(table, "Código", 115, IndicatorRow::codeProperty);
+        addColumn(table, "Indicador", 300, IndicatorRow::nameProperty);
+        addColumn(table, "Aplicação", 160, IndicatorRow::staffTypeProperty);
+        addColumn(table, "Peso", 100, IndicatorRow::weightProperty);
+        addColumn(table, "Descrição", 420, IndicatorRow::descriptionProperty);
+
+        TableColumn<IndicatorRow, Void> actions = actionColumn(table, row -> {
+            Button edit = miniButton("Editar");
+            edit.setOnAction(e -> indicatorDialog(row));
+            Button del = miniDangerButton("Eliminar");
+            del.setOnAction(e -> confirmDelete("indicador", () -> database.deleteById("performance_indicators", row.id.get())));
+            return new HBox(5, edit, del);
+        });
+        actions.setPrefWidth(150);
+        table.getColumns().add(actions);
+
+        ObservableList<IndicatorRow> rows = FXCollections.observableArrayList();
+        String q = search();
+        for (Map<String,Object> r : database.indicators("AMBOS")) {
+            IndicatorRow row = IndicatorRow.from(r);
+            if (matches(q, row.code.get(), row.name.get(), row.staffType.get(), row.description.get())) rows.add(row);
+        }
+        table.setItems(rows);
+
+        VBox note = card();
+        note.getChildren().addAll(
+                label("Regra observada no Excel", "card-title"),
+                label("As classificações seguem as faixas: < 10 Mau • 10–13,9 Suficiente • 14–17,9 Bom • 18–20 Muito bom.", "muted")
+        );
+
+        page.getChildren().addAll(heading, note, tableFill(table));
+        return page;
+    }
+
+    private void indicatorDialog(IndicatorRow existing) {
+        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo indicador" : "Editar indicador");
+        GridPane grid = formGrid();
+
+        TextField code = field("IND-06");
+        TextField name = field("Nome do indicador");
+        ComboBox<String> staffType = combo("AMBOS", "PROFESSOR", "ADMINISTRATIVO");
+        Spinner<Double> weight = new Spinner<>(0.1, 10.0, 1.0, 0.1);
+        TextField description = field("Descrição / orientação do critério");
+
+        staffType.setValue("AMBOS");
+        if (existing != null) {
+            code.setText(existing.code.get());
+            name.setText(existing.name.get());
+            staffType.setValue(existing.staffType.get());
+            try { weight.getValueFactory().setValue(Double.parseDouble(existing.weight.get())); } catch (Exception ignored) {}
+            description.setText(existing.description.get());
+        }
+
+        grid.addRow(0, label("Código", "field-label"), code);
+        grid.addRow(1, label("Indicador", "field-label"), name);
+        grid.addRow(2, label("Aplicação", "field-label"), staffType);
+        grid.addRow(3, label("Peso", "field-label"), weight);
+        grid.addRow(4, label("Descrição", "field-label"), description);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        dialog.setResultConverter(btn -> {
+            if (btn != ButtonType.OK) return btn;
+            if (code.getText().isBlank() || name.getText().isBlank()) {
+                showWarning("Informe o código e o nome do indicador.");
+                return null;
+            }
+            try {
+                if (existing == null) {
+                    database.insert("""
+                        INSERT INTO performance_indicators(code,name,description,staff_type,weight,sort_order)
+                        VALUES(?,?,?,?,?,?)
+                        """,
+                        code.getText().trim().toUpperCase(Locale.ROOT), name.getText().trim(),
+                        blankToNull(description.getText()), staffType.getValue(),
+                        weight.getValue(), (int) database.count("performance_indicators") + 1);
+                } else {
+                    database.update("""
+                        UPDATE performance_indicators SET code=?,name=?,description=?,staff_type=?,weight=?
+                        WHERE id=?
+                        """,
+                        code.getText().trim().toUpperCase(Locale.ROOT), name.getText().trim(),
+                        blankToNull(description.getText()), staffType.getValue(), weight.getValue(), existing.id.get());
+                }
+                refreshCurrentSection();
+                showToast("Indicador guardado com sucesso.");
+            } catch (SQLException e) {
+                showError("Não foi possível guardar o indicador", e);
+                return null;
+            }
+            return btn;
+        });
+        dialog.showAndWait();
+    }
+
+    private static final class IndicatorRow {
+        final SimpleLongProperty id;
+        final SimpleStringProperty code,name,staffType,weight,description;
+        IndicatorRow(long id,String code,String name,String staffType,String weight,String description){
+            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
+            this.staffType=new SimpleStringProperty(staffType);this.weight=new SimpleStringProperty(weight);this.description=new SimpleStringProperty(description);
+        }
+        static IndicatorRow from(Map<String,Object> r){return new IndicatorRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("staff_type")),s(r.get("weight")),s(r.get("description")));}
+        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty staffTypeProperty(){return staffType;} SimpleStringProperty weightProperty(){return weight;}
+        SimpleStringProperty descriptionProperty(){return description;}
     }
 
     // -------------------------------------------------------------------------
