@@ -464,11 +464,6 @@
     -fx-padding: 0;
 }
 
-.cotan-modal-box > .close-button {
-    -fx-opacity: 0;
-    -fx-mouse-transparent: true;
-}
-
 .cotan-modal {
     -fx-background-color: -color-bg-default;
     -fx-background-radius: 18px;
