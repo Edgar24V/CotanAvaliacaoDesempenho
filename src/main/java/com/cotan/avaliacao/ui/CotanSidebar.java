@@ -31,6 +31,7 @@ public final class CotanSidebar extends VBox {
     private final ScrollPane scroller = new ScrollPane(content);
     private final List<ToggleButton> items = new ArrayList<>();
     private final List<TitledPane> groups = new ArrayList<>();
+    private final java.util.Map<ToggleButton, String> labels = new java.util.HashMap<>();
     private boolean collapsed;
 
     public CotanSidebar(Consumer<String> navigation) {
@@ -131,6 +132,7 @@ public final class CotanSidebar extends VBox {
             navigation.accept(section);
         });
         items.add(button);
+        labels.put(button, title);
         return button;
     }
 
@@ -157,12 +159,24 @@ public final class CotanSidebar extends VBox {
         if (this.collapsed == collapsed) return;
         this.collapsed = collapsed;
 
+        for (ToggleButton item : items) {
+            item.setText(collapsed ? "" : labels.getOrDefault(item, ""));
+            item.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
+            item.setAlignment(Pos.CENTER);
+            item.setPadding(collapsed ? new Insets(8) : new Insets(8, 10, 8, 12));
+            item.setTooltip(new Tooltip(labels.getOrDefault(item, "")));
+        }
+
+        for (TitledPane group : groups) {
+            group.setExpanded(collapsed ? false : group.isExpanded());
+        }
+
         if (!collapsed) {
             animateWidth(EXPANDED_WIDTH, 1.0);
             setVisible(true);
             setManaged(true);
         } else {
-            animateWidth(COMPACT_WIDTH, 0.94);
+            animateWidth(COMPACT_WIDTH, 0.96);
         }
     }
 
@@ -182,9 +196,5 @@ public final class CotanSidebar extends VBox {
         return collapsed;
     }
 
-    public void updateCompactPresentation() {
-        for (ToggleButton item : items) {
-            item.setText(collapsed ? "" : String.valueOf(item.getUserData()));
-        }
-    }
+    public void updateCompactPresentation() { setCollapsed(collapsed); }
 }
