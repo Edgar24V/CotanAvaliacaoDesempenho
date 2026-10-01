@@ -1,39 +1,60 @@
-# Cotan — Sistema de Avaliação de Desempenho
+# COTAN • Avaliação e Desempenho
 
-Sistema independente para transformar o mapa Excel de avaliação de desempenho em uma aplicação desktop JavaFX/AtlantaFX + Spring Boot + Spring Data JPA + SQLite.
+Sistema desktop académico desenvolvido em Java 21, JavaFX e AtlantaFX, com persistência local em SQLite.
+
+## Funcionalidades
+
+- Dashboard executivo com indicadores de alunos, professores, turmas, disciplinas, avaliações e média geral.
+- Gestão completa de alunos, professores, turmas e disciplinas.
+- Gestão de avaliações: prova, teste, trabalho, projeto, exame e participação.
+- Lançamento e edição de notas por avaliação.
+- Validação pelo limite máximo configurado.
+- Cálculo automático de média ponderada.
+- Estado académico com referência de aprovação em 10 valores.
+- Relatório de desempenho com exportação CSV UTF-8.
+- Pesquisa rápida nos módulos.
+- Backup da base SQLite.
+- Tema claro/escuro com AtlantaFX Primer Light / Primer Dark.
 
 ## Banco de dados
-SQLite é o banco oficial deste projeto.
 
-Arquivo padrão:
-`%USER_HOME%/.CotanFx/data/avaliacao.db`
+A base é criada automaticamente em:
 
-Não depende de MySQL, servidor, IP, porta, utilizador ou password de banco.
+`%USERPROFILE%\\.CotanAvaliacaoDesempenho\\data\\avaliacao.db`
 
-## Objetivo funcional
-- Professores
-- Administrativos
-- 1.º, 2.º e 3.º trimestre
-- Mapas finais
-- Critérios e pesos
-- Médias e totais
-- Classificação automática
-- Histórico
-- Auditoria
-- JasperReports/PDF
-- Importação e exportação controladas
-- Testes de equivalência Excel x Java
+Tabelas principais:
 
-## Stack
-- Java 25
-- JavaFX 25
-- AtlantaFX 2.1.x para a combinação compatível com JavaFX 25
-- Spring Boot
-- Spring Data JPA
-- Hibernate
-- SQLite
+`classes`, `teachers`, `subjects`, `students`, `assessments`, `grades`.
 
-> AtlantaFX 3.0.0 usa Java 25 + JavaFX 27. Portanto, para manter JavaFX 25, este projeto começa com a linha AtlantaFX 2.1.x. Caso AtlantaFX 3 seja obrigatório, a linha JavaFX deverá ser elevada para 27.
+## Tecnologias
 
-## Origem das regras
-O comportamento será reconstruído a partir do documento Excel de avaliação de desempenho 2023-2024. As fórmulas com referências `#REF!` serão validadas antes de virarem regras definitivas.
+- Java 21
+- JavaFX 21
+- AtlantaFX 2.1.0
+- Spring Boot 3.5.16
+- SQLite JDBC
+- Maven
+
+## Executar no Windows
+
+```powershell
+cd "C:\Users\HP\Documents\Antigravity\CotanAvaliacaoDesempenho"
+git pull origin master
+mvn clean
+mvn javafx:run
+```
+
+## Fluxo académico
+
+1. Ajuste as turmas.
+2. Registe professores.
+3. Registe disciplinas e pesos.
+4. Registe alunos e associe-os às turmas.
+5. Crie avaliações.
+6. Em "Lançar notas", carregue a avaliação e grave os resultados.
+7. Em "Relatórios", consulte as médias ponderadas e estados.
+8. Em "Configurações", crie backups ou altere o tema.
+
+## Build
+
+O repositório possui GitHub Actions para executar `mvn clean compile` com Java 21 em cada push/PR para `master`.
