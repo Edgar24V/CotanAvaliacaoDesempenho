@@ -364,13 +364,19 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void updateTopAction() {
-        boolean hasAction = Set.of("students","teachers","classes","subjects","assessments").contains(currentSection);
+        boolean hasAction = Set.of(
+                "students","teachers","administrative","classes","subjects","assessments",
+                "professor-evaluation","administrative-evaluation"
+        ).contains(currentSection);
         topAction.setVisible(hasAction);
         topAction.setManaged(hasAction);
         topAction.setOnAction(e -> {
             switch (currentSection) {
                 case "students" -> studentDialog(null);
-                case "teachers" -> teacherDialog(null);
+                case "teachers" -> staffDialog("PROFESSOR", null);
+                case "administrative" -> staffDialog("ADMINISTRATIVO", null);
+                case "professor-evaluation" -> showSection("professor-evaluation");
+                case "administrative-evaluation" -> showSection("administrative-evaluation");
                 case "classes" -> classDialog(null);
                 case "subjects" -> subjectDialog(null);
                 case "assessments" -> assessmentDialog(null);
@@ -383,12 +389,18 @@ public class AvaliacaoApplication extends Application {
         try {
             switch (currentSection) {
                 case "dashboard" -> content.getChildren().setAll(buildDashboard());
-                case "administrative", "professor-evaluation", "administrative-evaluation",
-                     "aaconnect-professors", "aaconnect-administrative", "map-1", "map-2", "map-3",
-                     "map-final-professor", "map-final-administrative" ->
-                        content.getChildren().setAll(buildExcelAreaPage(currentSection));
+                case "administrative" -> content.getChildren().setAll(buildStaff("ADMINISTRATIVO"));
+                case "professor-evaluation" -> content.getChildren().setAll(buildPerformanceEvaluation("PROFESSOR"));
+                case "administrative-evaluation" -> content.getChildren().setAll(buildPerformanceEvaluation("ADMINISTRATIVO"));
+                case "aaconnect-professors" -> content.getChildren().setAll(buildAaconnect("PROFESSOR"));
+                case "aaconnect-administrative" -> content.getChildren().setAll(buildAaconnect("ADMINISTRATIVO"));
+                case "map-1" -> content.getChildren().setAll(buildPerformanceMapAll(1));
+                case "map-2" -> content.getChildren().setAll(buildPerformanceMapAll(2));
+                case "map-3" -> content.getChildren().setAll(buildPerformanceMapAll(3));
+                case "map-final-professor" -> content.getChildren().setAll(buildPerformanceFinal("PROFESSOR"));
+                case "map-final-administrative" -> content.getChildren().setAll(buildPerformanceFinal("ADMINISTRATIVO"));
                 case "students" -> content.getChildren().setAll(buildStudents());
-                case "teachers" -> content.getChildren().setAll(buildTeachers());
+                case "teachers" -> content.getChildren().setAll(buildStaff("PROFESSOR"));
                 case "classes" -> content.getChildren().setAll(buildClasses());
                 case "subjects" -> content.getChildren().setAll(buildSubjects());
                 case "assessments" -> content.getChildren().setAll(buildAssessments());
@@ -683,6 +695,539 @@ public class AvaliacaoApplication extends Application {
             return btn;
         });
         dialog.showAndWait();
+    }
+
+    // -------------------------------------------------------------------------
+    // PERFORMANCE / STAFF
+    // -------------------------------------------------------------------------
+
+    private Node buildStaff(String type) throws SQLException {
+        VBox page = pageContainer();
+        String title = "PROFESSOR".equals(type) ? "Professores" : "Administrativos";
+        String description = "PROFESSOR".equals(type)
+                ? "Cadastro dos profissionais docentes que participam da avaliação de desempenho."
+                : "Cadastro dos colaboradores administrativos que participam da avaliação de desempenho.";
+
+        HBox heading = sectionHeading(title, description);
+
+        TableView<StaffRow> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        addColumn(table, "Código", 115, StaffRow::codeProperty);
+        addColumn(table, "Nome completo", 280, StaffRow::nameProperty);
+        addColumn(table, "Cargo / função", 220, StaffRow::roleProperty);
+        addColumn(table, "Departamento", 190, StaffRow::departmentProperty);
+        addColumn(table, "Telefone", 155, StaffRow::phoneProperty);
+        addColumn(table, "E-mail", 240, StaffRow::emailProperty);
+
+        TableColumn<StaffRow, Void> actions = actionColumn(table, row -> {
+            Button evaluate = miniButton("Avaliar");
+            evaluate.setOnAction(e -> {
+                selectedPerformanceStaffId = row.id.get();
+                selectedPerformanceType = type;
+                showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation");
+            });
+            Button edit = miniButton("Editar");
+            edit.setOnAction(e -> staffDialog(type, row));
+            Button del = miniDangerButton("Eliminar");
+            del.setOnAction(e -> confirmDelete("registo", () -> database.deleteById("staff", row.id.get())));
+            return new HBox(4, evaluate, edit, del);
+        });
+        actions.setPrefWidth(220);
+        table.getColumns().add(actions);
+
+        ObservableList<StaffRow> rows = FXCollections.observableArrayList();
+        String q = search();
+        for (Map<String,Object> r : database.staff(type)) {
+            StaffRow row = StaffRow.from(r);
+            if (matches(q, row.code.get(), row.name.get(), row.role.get(), row.department.get(), row.phone.get(), row.email.get())) {
+                rows.add(row);
+            }
+        }
+        table.setItems(rows);
+
+        HBox quick = new HBox(10);
+        Button evaluate = new Button("✓  Abrir avaliação");
+        evaluate.getStyleClass().add("accent-button");
+        evaluate.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
+        Button map = new Button("▤  Ver mapa trimestral");
+        map.setOnAction(e -> showSection("map-1"));
+        quick.getChildren().addAll(evaluate, map);
+
+        page.getChildren().addAll(heading, quick, tableFill(table));
+        return page;
+    }
+
+    private void staffDialog(String type, StaffRow existing) {
+        String personLabel = "PROFESSOR".equals(type) ? "professor" : "administrativo";
+        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo " + personLabel : "Editar " + personLabel);
+        GridPane grid = formGrid();
+
+        TextField code = field("Ex.: " + ("PROFESSOR".equals(type) ? "PROF-003" : "ADM-003"));
+        TextField name = field("Nome completo");
+        TextField role = field("Cargo / função");
+        TextField department = field("Departamento / área");
+        TextField phone = field("923 000 000");
+        TextField email = field("nome@cotan.edu");
+        DatePicker admission = new DatePicker();
+
+        if (existing != null) {
+            code.setText(existing.code.get());
+            name.setText(existing.name.get());
+            role.setText(existing.role.get());
+            department.setText(existing.department.get());
+            phone.setText(existing.phone.get());
+            email.setText(existing.email.get());
+            if (!existing.admission.get().isBlank()) {
+                try { admission.setValue(LocalDate.parse(existing.admission.get())); } catch (Exception ignored) {}
+            }
+        }
+
+        grid.addRow(0, label("Código", "field-label"), code);
+        grid.addRow(1, label("Nome", "field-label"), name);
+        grid.addRow(2, label("Cargo / função", "field-label"), role);
+        grid.addRow(3, label("Departamento", "field-label"), department);
+        grid.addRow(4, label("Telefone", "field-label"), phone);
+        grid.addRow(5, label("E-mail", "field-label"), email);
+        grid.addRow(6, label("Admissão", "field-label"), admission);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        dialog.setResultConverter(btn -> {
+            if (btn != ButtonType.OK) return btn;
+            if (code.getText().isBlank() || name.getText().isBlank()) {
+                showWarning("Informe o código e o nome.");
+                return null;
+            }
+            try {
+                String admissionDate = admission.getValue() == null ? null : admission.getValue().toString();
+                if (existing == null) {
+                    database.insert("""
+                        INSERT INTO staff(code,name,staff_type,role,department,phone,email,admission_date)
+                        VALUES(?,?,?,?,?,?,?,?)
+                        """,
+                        code.getText().trim(), name.getText().trim(), type,
+                        blankToNull(role.getText()), blankToNull(department.getText()),
+                        blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate);
+                } else {
+                    database.update("""
+                        UPDATE staff SET code=?,name=?,role=?,department=?,phone=?,email=?,admission_date=?
+                        WHERE id=?
+                        """,
+                        code.getText().trim(), name.getText().trim(),
+                        blankToNull(role.getText()), blankToNull(department.getText()),
+                        blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate,
+                        existing.id.get());
+                }
+                refreshCurrentSection();
+                showToast("Registo guardado com sucesso.");
+            } catch (SQLException e) {
+                showError("Não foi possível guardar o registo", e);
+                return null;
+            }
+            return btn;
+        });
+        dialog.showAndWait();
+    }
+
+    private Long selectedPerformanceStaffId;
+    private String selectedPerformanceType = "PROFESSOR";
+
+    private Node buildPerformanceEvaluation(String type) {
+        VBox page = pageContainer();
+        String title = "PROFESSOR".equals(type) ? "Avaliação de desempenho — Professores" :
+                "Avaliação de desempenho — Administrativos";
+
+        HBox heading = sectionHeading(title,
+                "Modelo digital do preenchimento do Excel: indicadores, pontuação 0–20 e classificação automática.");
+
+        ComboBox<StaffOption> staff = new ComboBox<>();
+        staff.setPrefWidth(360);
+        ComboBox<String> year = combo("2026/2027", "2027/2028");
+        year.setValue("2026/2027");
+        ComboBox<Integer> trimester = combo(1, 2, 3);
+        trimester.setValue(1);
+
+        try {
+            for (Map<String,Object> r : database.staff(type)) staff.getItems().add(StaffOption.from(r));
+        } catch (SQLException e) {
+            showError("Erro ao carregar profissionais", e);
+            return page;
+        }
+
+        if (selectedPerformanceStaffId != null) {
+            staff.getItems().stream().filter(s -> s.id() == selectedPerformanceStaffId).findFirst().ifPresent(staff::setValue);
+        } else if (!staff.getItems().isEmpty()) {
+            staff.setValue(staff.getItems().get(0));
+        }
+
+        selectedPerformanceType = type;
+
+        HBox selectors = new HBox(12,
+                label("Profissional", "field-label"), staff,
+                label("Ano", "field-label"), year,
+                label("Trimestre", "field-label"), trimester);
+        selectors.setAlignment(Pos.CENTER_LEFT);
+        selectors.getStyleClass().add("toolbar-card");
+        selectors.setPadding(new Insets(12));
+
+        VBox resultCard = card();
+        HBox result = new HBox(22);
+        result.setAlignment(Pos.CENTER_LEFT);
+        Label average = label("—", "result-number");
+        Label classification = label("Aguardando lançamento", "result-badge");
+        Label completeness = label("0/0 indicadores", "muted");
+        result.getChildren().addAll(
+                labelledMetric("MÉDIA", average),
+                labelledMetric("CLASSIFICAÇÃO", classification),
+                labelledMetric("PREENCHIMENTO", completeness)
+        );
+        resultCard.getChildren().addAll(label("Resultado do período", "card-title"), result);
+
+        TableView<PerformanceInputRow> table = new TableView<>();
+        table.setEditable(true);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        addColumn(table, "Código", 110, PerformanceInputRow::codeProperty);
+        addColumn(table, "Indicador", 280, PerformanceInputRow::nameProperty);
+        addColumn(table, "Peso", 95, PerformanceInputRow::weightProperty);
+
+        TableColumn<PerformanceInputRow,String> score = new TableColumn<>("Pontuação");
+        score.setPrefWidth(160);
+        score.setCellValueFactory(c -> c.getValue().scoreProperty());
+        score.setCellFactory(TextFieldTableCell.forTableColumn());
+        score.setOnEditCommit(e -> {
+            String v = e.getNewValue() == null ? "" : e.getNewValue().trim().replace(",", ".");
+            if (v.isBlank()) { e.getRowValue().score.set(""); recalcPerformance(table,result); return; }
+            try {
+                double n = Double.parseDouble(v);
+                if (n < 0 || n > 20) throw new NumberFormatException();
+                e.getRowValue().score.set(String.format(Locale.US, "%.2f", n));
+                recalcPerformance(table,result);
+            } catch (NumberFormatException ex) {
+                showWarning("A pontuação deve estar entre 0 e 20.");
+                table.refresh();
+            }
+        });
+
+        TableColumn<PerformanceInputRow,String> obs = new TableColumn<>("Observação");
+        obs.setPrefWidth(360);
+        obs.setCellValueFactory(c -> c.getValue().observationProperty());
+        table.getColumns().addAll(score, obs);
+
+        Runnable load = () -> {
+            try {
+                StaffOption selectedStaff = staff.getValue();
+                if (selectedStaff == null) {
+                    table.getItems().clear();
+                    return;
+                }
+                ObservableList<PerformanceInputRow> items = FXCollections.observableArrayList();
+                for (Map<String,Object> r : database.performanceScores(selectedStaff.id(), year.getValue(), trimester.getValue())) {
+                    items.add(PerformanceInputRow.from(r));
+                }
+                table.setItems(items);
+                recalcPerformance(table, result);
+            } catch (SQLException ex) {
+                showError("Não foi possível carregar os indicadores", ex);
+            }
+        };
+
+        staff.setOnAction(e -> { selectedPerformanceStaffId = staff.getValue() == null ? null : staff.getValue().id(); load.run(); });
+        year.setOnAction(e -> load.run());
+        trimester.setOnAction(e -> load.run());
+        load.run();
+
+        Button save = new Button("✓  Guardar avaliação");
+        save.getStyleClass().add("accent-button");
+        save.setOnAction(e -> {
+            StaffOption selectedStaff = staff.getValue();
+            if (selectedStaff == null) { showWarning("Selecione o profissional."); return; }
+            try {
+                for (PerformanceInputRow row : table.getItems()) {
+                    if (row.score.get().isBlank()) continue;
+                    database.upsertPerformanceScore(
+                            selectedStaff.id(), row.id.get(), year.getValue(), trimester.getValue(),
+                            Double.parseDouble(row.score.get().replace(",", ".")),
+                            row.observation.get(), "Administrador");
+                }
+                showToast("Avaliação guardada com sucesso.");
+                load.run();
+            } catch (Exception ex) {
+                showError("Não foi possível guardar a avaliação", ex);
+            }
+        });
+
+        Button clear = new Button("Limpar");
+        clear.setOnAction(e -> {
+            for (PerformanceInputRow row : table.getItems()) row.score.set("");
+            recalcPerformance(table, result);
+        });
+
+        HBox actions = new HBox(10, save, clear);
+        page.getChildren().addAll(heading, selectors, resultCard, tableFill(table), actions);
+        return page;
+    }
+
+    private HBox labelledMetric(String caption, Node value) {
+        VBox box = new VBox(4, label(caption, "metric-caption"), value);
+        HBox wrapper = new HBox(box);
+        wrapper.setMinWidth(220);
+        return wrapper;
+    }
+
+    private void recalcPerformance(TableView<PerformanceInputRow> table, HBox result) {
+        double total=0, weights=0;
+        int filled=0;
+        for (PerformanceInputRow row : table.getItems()) {
+            if (row.score.get().isBlank()) continue;
+            try {
+                double score=Double.parseDouble(row.score.get().replace(",", "."));
+                double weight=Double.parseDouble(row.weight.get());
+                total += score*weight;
+                weights += weight;
+                filled++;
+            } catch(Exception ignored) {}
+        }
+        double avg = weights == 0 ? 0 : total/weights;
+        if (!result.getChildren().isEmpty() && result.getChildren().get(0) instanceof VBox b && b.getChildren().size()>1) {
+            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "—" : String.format(Locale.US,"%.1f",avg));
+        }
+        if (result.getChildren().size()>1 && result.getChildren().get(1) instanceof VBox b && b.getChildren().size()>1) {
+            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "Aguardando lançamento" : performanceClassification(avg));
+        }
+        if (result.getChildren().size()>2 && result.getChildren().get(2) instanceof VBox b && b.getChildren().size()>1) {
+            ((Label)b.getChildren().get(1)).setText(filled+"/"+table.getItems().size()+" indicadores");
+        }
+    }
+
+    private Node buildPerformanceMapAll(int trimester) throws SQLException {
+        VBox page = pageContainer();
+        HBox heading = sectionHeading(
+                "Mapa " + ordinalTrimester(trimester),
+                "Consolidação trimestral dos professores e administrativos."
+        );
+
+        TabPane tabs = new TabPane();
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabs.getTabs().add(new Tab("Professores", buildPerformanceMapTable("PROFESSOR", trimester)));
+        tabs.getTabs().add(new Tab("Administrativos", buildPerformanceMapTable("ADMINISTRATIVO", trimester)));
+
+        page.getChildren().addAll(heading, tabs);
+        return page;
+    }
+
+    private Node buildPerformanceMapTable(String type, int trimester) throws SQLException {
+        VBox box = new VBox(12);
+        box.getChildren().add(label(
+                "Resultados do " + ordinalTrimester(trimester) + " • "
+                        + ("PROFESSOR".equals(type) ? "Professores" : "Administrativos"),
+                "card-title"));
+
+        TableView<PerformanceMapRow> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        addColumn(table,"Código",120,PerformanceMapRow::codeProperty);
+        addColumn(table,"Nome",270,PerformanceMapRow::nameProperty);
+        addColumn(table,"Cargo / função",220,PerformanceMapRow::roleProperty);
+        addColumn(table,"Departamento",190,PerformanceMapRow::departmentProperty);
+        addColumn(table,"Indicadores",120,PerformanceMapRow::filledProperty);
+        addColumn(table,"Média",120,PerformanceMapRow::averageProperty);
+        addColumn(table,"Classificação",170,PerformanceMapRow::classificationProperty);
+
+        ObservableList<PerformanceMapRow> rows=FXCollections.observableArrayList();
+        for(Map<String,Object> r: database.performanceMap(type,"2026/2027",trimester)) {
+            PerformanceMapRow row=PerformanceMapRow.from(r);
+            if(matches(search(),row.code.get(),row.name.get(),row.role.get(),row.department.get(),row.classification.get())) rows.add(row);
+        }
+        table.setItems(rows);
+        box.getChildren().add(table);
+        VBox.setVgrow(table,Priority.ALWAYS);
+
+        Button evaluate=new Button("✓  Abrir avaliação deste período");
+        evaluate.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
+        box.getChildren().add(evaluate);
+        return box;
+    }
+
+    private Node buildPerformanceFinal(String type) throws SQLException {
+        VBox page=pageContainer();
+        String title="PROFESSOR".equals(type) ? "Mapa Final — Professor" : "Mapa Final — Administrativo";
+        String desc="PROFESSOR".equals(type)
+                ? "Consolidação final dos três trimestres dos professores."
+                : "Consolidação final dos três trimestres dos administrativos.";
+
+        HBox heading=sectionHeading(title,desc);
+
+        HBox summary=new HBox(12);
+        Map<String,Object> s=database.performanceSummary(type,"2026/2027");
+        summary.getChildren().addAll(
+                statCard("Profissionais",String.valueOf(s.get("total")),"Registados","●"),
+                statCard("Avaliados",String.valueOf(s.get("evaluated")),"Com lançamentos","✓"),
+                statCard("Média global",String.valueOf(s.get("average")),"Notas lançadas","★")
+        );
+
+        TableView<PerformanceFinalRow> table=new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        addColumn(table,"Código",115,PerformanceFinalRow::codeProperty);
+        addColumn(table,"Nome",270,PerformanceFinalRow::nameProperty);
+        addColumn(table,"1º Trim.",115,PerformanceFinalRow::t1Property);
+        addColumn(table,"2º Trim.",115,PerformanceFinalRow::t2Property);
+        addColumn(table,"3º Trim.",115,PerformanceFinalRow::t3Property);
+        addColumn(table,"Média final",130,PerformanceFinalRow::finalProperty);
+        addColumn(table,"Classificação",170,PerformanceFinalRow::classificationProperty);
+
+        ObservableList<PerformanceFinalRow> rows=FXCollections.observableArrayList();
+        for(Map<String,Object> r: database.performanceFinalMap(type,"2026/2027")) {
+            PerformanceFinalRow row=PerformanceFinalRow.from(r);
+            if(matches(search(),row.code.get(),row.name.get(),row.classification.get())) rows.add(row);
+        }
+        table.setItems(rows);
+
+        Button export=new Button("⇩  Exportar mapa final");
+        export.getStyleClass().add("accent-button");
+        export.setOnAction(e -> exportPerformanceMap(type));
+
+        page.getChildren().addAll(heading,summary,tableFill(table),export);
+        return page;
+    }
+
+    private Node buildAaconnect(String type) throws SQLException {
+        VBox page=pageContainer();
+        String title="PROFESSOR".equals(type) ? "AACONECT — Professores" : "AACONECT — Administrativos";
+
+        HBox heading=sectionHeading(title,
+                "Painel de consolidação para acompanhar preenchimento, média e situação de cada profissional.");
+
+        Map<String,Object> s=database.performanceSummary(type,"2026/2027");
+        GridPane cards=new GridPane();
+        cards.setHgap(14);
+        cards.add(statCard("Profissionais",String.valueOf(s.get("total")),"Base ativa","●"),0,0);
+        cards.add(statCard("Avaliados",String.valueOf(s.get("evaluated")),"Ano 2026/2027","✓"),1,0);
+        cards.add(statCard("Média",String.valueOf(s.get("average")),"Notas lançadas","★"),2,0);
+
+        VBox consolidation=card();
+        consolidation.getChildren().addAll(
+                label("Consolidação", "card-title"),
+                label("Os dados são calculados a partir dos lançamentos trimestrais e podem ser auditados pelos mapas.", "muted")
+        );
+
+        Button evaluation=new Button("Abrir lançamento de avaliação");
+        evaluation.getStyleClass().add("accent-button");
+        evaluation.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
+
+        Button finalMap=new Button("Abrir mapa final");
+        finalMap.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "map-final-professor" : "map-final-administrative"));
+
+        HBox actions=new HBox(10,evaluation,finalMap);
+        page.getChildren().addAll(heading,cards,consolidation,actions);
+        return page;
+    }
+
+    private String ordinalTrimester(int t) {
+        return switch (t) {
+            case 1 -> "1º Trimestre";
+            case 2 -> "2º Trimestre";
+            case 3 -> "3º Trimestre";
+            default -> "Trimestre";
+        };
+    }
+
+    private String performanceClassification(double score) {
+        if (score < 10) return "Mau";
+        if (score < 14) return "Suficiente";
+        if (score < 18) return "Bom";
+        return "Muito bom";
+    }
+
+    private void exportPerformanceMap(String type) {
+        try {
+            FileChooser chooser=new FileChooser();
+            chooser.setTitle("Guardar mapa final");
+            chooser.setInitialFileName(("PROFESSOR".equals(type) ? "mapa-final-professores" : "mapa-final-administrativos")+".csv");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV","*.csv"));
+            File file=chooser.showSaveDialog(stage);
+            if(file==null)return;
+
+            StringBuilder csv=new StringBuilder("Código;Nome;1º Trimestre;2º Trimestre;3º Trimestre;Média Final;Classificação\n");
+            for(Map<String,Object> r:database.performanceFinalMap(type,"2026/2027")){
+                double finalAvg;
+                try{finalAvg=Double.parseDouble(safe(r.get("final_average")));}catch(Exception e){finalAvg=0;}
+                csv.append(csv(r.get("code"))).append(';')
+                   .append(csv(r.get("name"))).append(';')
+                   .append(csv(r.get("t1_count"))).append(';')
+                   .append(csv(r.get("t2_count"))).append(';')
+                   .append(csv(r.get("t3_count"))).append(';')
+                   .append(csv(r.get("final_average"))).append(';')
+                   .append(csv(performanceClassification(finalAvg))).append('\n');
+            }
+            Files.writeString(file.toPath(),"\uFEFF"+csv,StandardCharsets.UTF_8);
+            showToast("Mapa final exportado com sucesso.");
+        }catch(Exception ex){showError("Não foi possível exportar o mapa",ex);}
+    }
+
+    private static String safe(Object o){return o==null?"":String.valueOf(o);}
+
+    private static final class StaffRow {
+        final SimpleLongProperty id;
+        final SimpleStringProperty code,name,role,department,phone,email,admission;
+        StaffRow(long id,String code,String name,String role,String department,String phone,String email,String admission){
+            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
+            this.role=new SimpleStringProperty(role);this.department=new SimpleStringProperty(department);
+            this.phone=new SimpleStringProperty(phone);this.email=new SimpleStringProperty(email);this.admission=new SimpleStringProperty(admission);
+        }
+        static StaffRow from(Map<String,Object> r){return new StaffRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("role")),s(r.get("department")),s(r.get("phone")),s(r.get("email")),s(r.get("admission_date")));}
+        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty roleProperty(){return role;} SimpleStringProperty departmentProperty(){return department;}
+        SimpleStringProperty phoneProperty(){return phone;} SimpleStringProperty emailProperty(){return email;}
+    }
+
+    private record StaffOption(long id,String name,String code) {
+        static StaffOption from(Map<String,Object> r){return new StaffOption(n(r.get("id")),s(r.get("name")),s(r.get("code")));}
+        @Override public String toString(){return code+" • "+name;}
+    }
+
+    private static final class PerformanceInputRow {
+        final SimpleLongProperty id;
+        final SimpleStringProperty code,name,weight,score,observation;
+        PerformanceInputRow(long id,String code,String name,String weight,String score,String observation){
+            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
+            this.weight=new SimpleStringProperty(weight);this.score=new SimpleStringProperty(score);this.observation=new SimpleStringProperty(observation);
+        }
+        static PerformanceInputRow from(Map<String,Object> r){return new PerformanceInputRow(n(r.get("indicator_id")),s(r.get("code")),s(r.get("name")),s(r.get("weight")),s(r.get("score")),s(r.get("observation")));}
+        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty weightProperty(){return weight;} SimpleStringProperty scoreProperty(){return score;}
+        SimpleStringProperty observationProperty(){return observation;}
+    }
+
+    private static final class PerformanceMapRow {
+        final SimpleLongProperty id;
+        final SimpleStringProperty code,name,role,department,filled,average,classification;
+        PerformanceMapRow(long id,String code,String name,String role,String department,String filled,String average){
+            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
+            this.role=new SimpleStringProperty(role);this.department=new SimpleStringProperty(department);this.filled=new SimpleStringProperty(filled);
+            this.average=new SimpleStringProperty(average);this.classification=new SimpleStringProperty(classifyValue(average));
+        }
+        static PerformanceMapRow from(Map<String,Object> r){return new PerformanceMapRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("role")),s(r.get("department")),s(r.get("indicators_filled")),s(r.get("average_score")));}
+        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty roleProperty(){return role;} SimpleStringProperty departmentProperty(){return department;}
+        SimpleStringProperty filledProperty(){return filled;} SimpleStringProperty averageProperty(){return average;}
+        SimpleStringProperty classificationProperty(){return classification;}
+        private static String classifyValue(String v){try{double d=Double.parseDouble(v);if(d<10)return "Mau";if(d<14)return "Suficiente";if(d<18)return "Bom";if(d>0)return "Muito bom";return "Sem lançamentos";}catch(Exception e){return "Sem lançamentos";}}
+    }
+
+    private static final class PerformanceFinalRow {
+        final SimpleLongProperty id;
+        final SimpleStringProperty code,name,t1,t2,t3,finalAverage,classification;
+        PerformanceFinalRow(long id,String code,String name,String t1,String t2,String t3,String finalAverage){
+            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
+            this.t1=new SimpleStringProperty(t1);this.t2=new SimpleStringProperty(t2);this.t3=new SimpleStringProperty(t3);
+            this.finalAverage=new SimpleStringProperty(finalAverage);this.classification=new SimpleStringProperty(classifyValue(finalAverage));
+        }
+        static PerformanceFinalRow from(Map<String,Object> r){return new PerformanceFinalRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("t1_count")),s(r.get("t2_count")),s(r.get("t3_count")),s(r.get("final_average")));}
+        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty t1Property(){return t1;} SimpleStringProperty t2Property(){return t2;}
+        SimpleStringProperty t3Property(){return t3;} SimpleStringProperty finalProperty(){return finalAverage;}
+        SimpleStringProperty classificationProperty(){return classification;}
+        private static String classifyValue(String v){try{double d=Double.parseDouble(v);if(d<10)return "Mau";if(d<14)return "Suficiente";if(d<18)return "Bom";if(d>0)return "Muito bom";return "Sem avaliação";}catch(Exception e){return "Sem avaliação";}}
     }
 
     // -------------------------------------------------------------------------
