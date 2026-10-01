@@ -202,29 +202,55 @@ public class AvaliacaoApplication extends Application {
 
         brand.getChildren().addAll(brandTitle, brandSub);
 
-        VBox main = new VBox(6);
+        VBox main = new VBox(8);
         main.getChildren().addAll(
-                navButton("⌂", "Dashboard", "dashboard"),
-                navButton("●", "Alunos", "students"),
+                navGroupLabel("NAVEGAÇÃO PRINCIPAL"),
+                navButton("⌂", "Início", "dashboard"),
                 navButton("◆", "Professores", "teachers"),
-                navButton("▦", "Turmas", "classes"),
-                navButton("◈", "Disciplinas", "subjects"),
-                navButton("✓", "Avaliações", "assessments"),
-                navButton("✎", "Lançar notas", "grades"),
-                navButton("▤", "Relatórios", "reports")
+                navButton("◆", "Administrativos", "administrative")
+        );
+
+        VBox evaluations = new VBox(6);
+        evaluations.getChildren().addAll(
+                navGroupLabel("AVALIAÇÕES"),
+                navButton("✓", "Avaliação — Professores", "professor-evaluation"),
+                navButton("✓", "Avaliação — Administrativos", "administrative-evaluation"),
+                navButton("◎", "AACONECT — Professores", "aaconnect-professors"),
+                navButton("◎", "AACONECT — Administrativos", "aaconnect-administrative")
+        );
+
+        VBox maps = new VBox(6);
+        maps.getChildren().addAll(
+                navGroupLabel("MAPAS E RESULTADOS"),
+                navButton("1", "Mapa 1º Trimestre", "map-1"),
+                navButton("2", "Mapa 2º Trimestre", "map-2"),
+                navButton("3", "Mapa 3º Trimestre", "map-3"),
+                navButton("★", "Mapa Final — Professor", "map-final-professor"),
+                navButton("★", "Mapa Final — Administrativo", "map-final-administrative")
         );
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        VBox lower = new VBox(6);
-        lower.getChildren().addAll(
+        VBox support = new VBox(6);
+        support.getChildren().addAll(
+                navGroupLabel("DADOS DE APOIO"),
+                navButton("●", "Alunos", "students"),
+                navButton("▦", "Turmas", "classes"),
+                navButton("◈", "Disciplinas", "subjects"),
+                navButton("◆", "Relatórios", "reports"),
                 navButton("⚙", "Configurações", "settings"),
                 navButton("?", "Sobre", "about")
         );
-
-        side.getChildren().addAll(brand, new Separator(), main, spacer, lower);
+        side.getChildren().addAll(brand, new Separator(), main, evaluations, maps, spacer, support);
         return side;
+    }
+
+    private Label navGroupLabel(String text) {
+        Label l = new Label(text);
+        l.getStyleClass().add("nav-group-label");
+        l.setPadding(new Insets(10, 12, 3, 12));
+        return l;
     }
 
     private Button navButton(String icon, String label, String section) {
@@ -294,17 +320,25 @@ public class AvaliacaoApplication extends Application {
         currentSection = section;
         searchField.clear();
 
-        Map<String, String> titles = Map.of(
-                "dashboard", "Dashboard",
-                "students", "Gestão de Alunos",
-                "teachers", "Gestão de Professores",
-                "classes", "Gestão de Turmas",
-                "subjects", "Gestão de Disciplinas",
-                "assessments", "Avaliações",
-                "grades", "Lançamento de Notas",
-                "reports", "Relatórios de Desempenho",
-                "settings", "Configurações",
-                "about", "Sobre o sistema"
+        Map<String, String> titles = Map.ofEntries(
+                Map.entry("dashboard", "Início"),
+                Map.entry("teachers", "Professores"),
+                Map.entry("administrative", "Administrativos"),
+                Map.entry("professor-evaluation", "Avaliação — Professores"),
+                Map.entry("administrative-evaluation", "Avaliação — Administrativos"),
+                Map.entry("aaconnect-professors", "AACONECT — Professores"),
+                Map.entry("aaconnect-administrative", "AACONECT — Administrativos"),
+                Map.entry("map-1", "Mapa 1º Trimestre"),
+                Map.entry("map-2", "Mapa 2º Trimestre"),
+                Map.entry("map-3", "Mapa 3º Trimestre"),
+                Map.entry("map-final-professor", "Mapa Final — Professor"),
+                Map.entry("map-final-administrative", "Mapa Final — Administrativo"),
+                Map.entry("students", "Gestão de Alunos"),
+                Map.entry("classes", "Gestão de Turmas"),
+                Map.entry("subjects", "Gestão de Disciplinas"),
+                Map.entry("reports", "Relatórios de Desempenho"),
+                Map.entry("settings", "Configurações"),
+                Map.entry("about", "Sobre o sistema")
         );
 
         pageTitle.setText(titles.getOrDefault(section, "COTAN"));
@@ -349,6 +383,10 @@ public class AvaliacaoApplication extends Application {
         try {
             switch (currentSection) {
                 case "dashboard" -> content.getChildren().setAll(buildDashboard());
+                case "administrative", "professor-evaluation", "administrative-evaluation",
+                     "aaconnect-professors", "aaconnect-administrative", "map-1", "map-2", "map-3",
+                     "map-final-professor", "map-final-administrative" ->
+                        content.getChildren().setAll(buildExcelAreaPage(currentSection));
                 case "students" -> content.getChildren().setAll(buildStudents());
                 case "teachers" -> content.getChildren().setAll(buildTeachers());
                 case "classes" -> content.getChildren().setAll(buildClasses());
@@ -370,70 +408,159 @@ public class AvaliacaoApplication extends Application {
     // -------------------------------------------------------------------------
 
     private Node buildDashboard() throws SQLException {
-        Map<String,Object> d = database.dashboard();
-
         VBox page = pageContainer();
+
+        HBox hero = new HBox(22);
+        hero.getStyleClass().add("home-hero");
+        hero.setPadding(new Insets(28));
+        hero.setAlignment(Pos.CENTER_LEFT);
+
+        VBox intro = new VBox(7);
+        Label eyebrow = label("COTAN • SISTEMA INFORMATIZADO", "hero-eyebrow");
+        Label title = label("Avaliação de Desempenho", "hero-title");
+        title.setWrapText(true);
+        Label text = label(
+                "Transformamos a estrutura do mapa Excel num fluxo digital de cadastro, avaliação trimestral e resultados finais.",
+                "hero-subtitle"
+        );
+        text.setWrapText(true);
+        intro.getChildren().addAll(eyebrow, title, text);
+
+        Region heroSpacer = new Region();
+        HBox.setHgrow(heroSpacer, Priority.ALWAYS);
+
+        VBox excelBadge = new VBox(4);
+        excelBadge.getStyleClass().add("excel-badge");
+        excelBadge.getChildren().addAll(
+                label("MODELO DE REFERÊNCIA", "badge-caption"),
+                label("10 folhas funcionais", "badge-value"),
+                label("Professores • Administrativos • Trimestres • Mapas finais", "badge-detail")
+        );
+        excelBadge.setPadding(new Insets(15));
+        hero.getChildren().addAll(intro, heroSpacer, excelBadge);
+
         HBox heading = sectionHeading(
-                "Visão geral",
-                "Acompanhe o estado académico do sistema num único painel."
+                "Navegação do sistema",
+                "Cada cartão representa uma área que será substituída pelo processo digital do Excel."
         );
 
-        Button refresh = new Button("↻ Atualizar");
-        refresh.setOnAction(e -> refreshCurrentSection());
-        heading.getChildren().add(refresh);
+        GridPane grid = new GridPane();
+        grid.setHgap(14);
+        grid.setVgap(14);
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setPercentWidth(50);
+        ColumnConstraints c2 = new ColumnConstraints();
+        c2.setPercentWidth(50);
+        grid.getColumnConstraints().addAll(c1, c2);
 
-        GridPane cards = new GridPane();
-        cards.setHgap(14);
-        cards.setVgap(14);
-        for (int i = 0; i < 6; i++) {
-            ColumnConstraints cc = new ColumnConstraints();
-            cc.setPercentWidth(16.66);
-            cards.getColumnConstraints().add(cc);
-        }
+        addHomeCard(grid, 0, 0, "◆", "Professores", "Cadastro e acompanhamento dos professores.", "teachers");
+        addHomeCard(grid, 1, 0, "◆", "Administrativos", "Cadastro e acompanhamento dos colaboradores administrativos.", "administrative");
+        addHomeCard(grid, 0, 1, "✓", "Avaliação — Professores", "Lançamento dos indicadores e avaliação de desempenho docente.", "professor-evaluation");
+        addHomeCard(grid, 1, 1, "✓", "Avaliação — Administrativos", "Lançamento dos indicadores e avaliação de desempenho administrativo.", "administrative-evaluation");
+        addHomeCard(grid, 0, 2, "◎", "AACONECT", "Resultados/conexões dos professores e administrativos.", "aaconnect-professors");
+        addHomeCard(grid, 1, 2, "1–3", "Mapas Trimestrais", "Mapas do 1º, 2º e 3º trimestre.", "map-1");
+        addHomeCard(grid, 0, 3, "★", "Mapa Final — Professor", "Consolidação anual dos resultados dos professores.", "map-final-professor");
+        addHomeCard(grid, 1, 3, "★", "Mapa Final — Administrativo", "Consolidação anual dos resultados administrativos.", "map-final-administrative");
 
-        cards.add(statCard("Alunos", String.valueOf(d.get("students")), "Registados", "●"), 0, 0);
-        cards.add(statCard("Professores", String.valueOf(d.get("teachers")), "Activos", "◆"), 1, 0);
-        cards.add(statCard("Turmas", String.valueOf(d.get("classes")), "Em funcionamento", "▦"), 2, 0);
-        cards.add(statCard("Disciplinas", String.valueOf(d.get("subjects")), "No currículo", "◈"), 3, 0);
-        cards.add(statCard("Avaliações", String.valueOf(d.get("assessments")), "Criadas", "✓"), 4, 0);
-        cards.add(statCard("Média geral", String.valueOf(d.get("average")), "Escala de 0–20", "★"), 5, 0);
-
-        VBox performanceCard = card();
-        performanceCard.getChildren().addAll(
-                label("Desempenho recente", "card-title"),
-                label("Os melhores resultados calculados a partir das notas lançadas.", "muted")
+        VBox process = card();
+        process.getChildren().addAll(
+                label("Fluxo operacional", "card-title"),
+                label("1  Cadastro →  2  Avaliação →  3  Resultado trimestral →  4  Consolidação final →  5  Relatório", "process-flow"),
+                label("A regra de classificação observada no Excel utiliza as faixas Mau, Suficiente, Bom e Muito bom; ela ficará centralizada no motor de avaliação para evitar fórmulas espalhadas.", "muted")
         );
 
-        TableView<PerformanceRow> table = new TableView<>();
-        table.setPrefHeight(310);
-        addColumn(table, "Aluno", 240, PerformanceRow::nameProperty);
-        addColumn(table, "Turma", 150, PerformanceRow::classNameProperty);
-        addColumn(table, "Avaliações", 120, PerformanceRow::countProperty);
-        addColumn(table, "Média", 120, PerformanceRow::averageProperty);
-        addColumn(table, "Estado", 160, PerformanceRow::statusProperty);
+        page.getChildren().addAll(hero, heading, grid, process);
 
-        ObservableList<PerformanceRow> rows = FXCollections.observableArrayList();
-        for (Map<String,Object> r : database.performance()) {
-            rows.add(PerformanceRow.from(r));
-        }
-        table.setItems(rows);
+        ScrollPane scroll = new ScrollPane(page);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scroll.getStyleClass().add("edge-to-edge");
+        return scroll;
+    }
 
-        performanceCard.getChildren().add(table);
+    private void addHomeCard(GridPane grid, int col, int row, String icon, String title, String description, String section) {
+        VBox card = new VBox(8);
+        card.getStyleClass().addAll("card", "home-nav-card");
+        card.setPadding(new Insets(18));
+        card.setOnMouseClicked(e -> showSection(section));
 
-        HBox shortcuts = new HBox(12);
-        shortcuts.getChildren().addAll(
-                actionCard("Novo aluno", "Registar um estudante", () -> studentDialog(null)),
-                actionCard("Nova avaliação", "Criar uma avaliação", () -> assessmentDialog(null)),
-                actionCard("Lançar notas", "Preencher resultados", () -> showSection("grades")),
-                actionCard("Relatórios", "Analisar desempenho", () -> showSection("reports"))
+        HBox line = new HBox(10);
+        line.setAlignment(Pos.CENTER_LEFT);
+        line.getChildren().addAll(label(icon, "home-icon"), label(title, "home-card-title"));
+
+        Label desc = label(description, "muted");
+        desc.setWrapText(true);
+
+        Label action = label("Abrir módulo  →", "home-action");
+        card.getChildren().addAll(line, desc, action);
+
+        grid.add(card, col, row);
+    }
+
+    private Node buildExcelAreaPage(String section) {
+        Map<String, String[]> modules = Map.ofEntries(
+                Map.entry("administrative", new String[]{"Administrativos", "PREENCHER_ADMINISTRATIVO", "Cadastro e preparação dos dados dos colaboradores administrativos."}),
+                Map.entry("professor-evaluation", new String[]{"Avaliação — Professores", "PREENCHER_PROFESSOR", "Área principal para lançamento dos indicadores e classificação do desempenho dos professores."}),
+                Map.entry("administrative-evaluation", new String[]{"Avaliação — Administrativos", "PREENCHER_ADMINISTRATIVO", "Área principal para lançamento dos indicadores e classificação do desempenho administrativo."}),
+                Map.entry("aaconnect-professors", new String[]{"AACONECT — Professores", "AACONECT_PROFESSORES", "Área consolidada de dados/resultados dos professores."}),
+                Map.entry("aaconnect-administrative", new String[]{"AACONECT — Administrativos", "ACONECT_ADMINISTRATIVO", "Área consolidada de dados/resultados dos administrativos."}),
+                Map.entry("map-1", new String[]{"Mapa 1º Trimestre", "MAPA 1º TRIMESTRE", "Resultado do primeiro período de avaliação."}),
+                Map.entry("map-2", new String[]{"Mapa 2º Trimestre", "MAPA 2º TRIMESTRE", "Resultado do segundo período de avaliação."}),
+                Map.entry("map-3", new String[]{"Mapa 3º Trimestre", "MAPA 3º TRIMESTRE", "Resultado do terceiro período de avaliação."}),
+                Map.entry("map-final-professor", new String[]{"Mapa Final — Professor", "MAPA FINAL PROFESSOR", "Consolidação final dos resultados dos professores."}),
+                Map.entry("map-final-administrative", new String[]{"Mapa Final — Administrativo", "MAPA FINAL ADMINISTRATIVO", "Consolidação final dos resultados administrativos."})
         );
 
-        page.getChildren().addAll(heading, cards, performanceCard, shortcuts);
-        return new ScrollPane(page) {{
-            setFitToWidth(true);
-            setHbarPolicy(ScrollBarPolicy.NEVER);
-            getStyleClass().add("edge-to-edge");
-        }};
+        String[] data = modules.get(section);
+        VBox page = pageContainer();
+
+        HBox heading = sectionHeading(data == null ? "Módulo" : data[0],
+                data == null ? "Área do sistema" : data[2]);
+
+        VBox source = card();
+        source.getChildren().addAll(
+                label("Correspondência com o Excel", "card-title"),
+                label("Folha de origem: " + (data == null ? "—" : data[1]), "muted"),
+                label("Esta página já está integrada ao menu principal e representa a entrada digital da folha correspondente.", "muted")
+        );
+
+        HBox actions = new HBox(10);
+
+        Button back = new Button("← Voltar ao início");
+        back.setOnAction(e -> showSection("dashboard"));
+
+        Button reports = new Button("Abrir relatórios");
+        reports.setOnAction(e -> showSection("reports"));
+
+        actions.getChildren().addAll(back, reports);
+
+        page.getChildren().addAll(heading, source, actionPanelFor(section), actions);
+        return page;
+    }
+
+    private VBox actionPanelFor(String section) {
+        VBox box = card();
+        box.getChildren().addAll(
+                label("Próximas operações", "card-title"),
+                label(operationText(section), "muted")
+        );
+        return box;
+    }
+
+    private String operationText(String section) {
+        return switch (section) {
+            case "administrative" -> "Registar colaborador, editar dados, definir área/função e acompanhar estado.";
+            case "professor-evaluation" -> "Selecionar professor, preencher indicadores, calcular classificação e guardar o período.";
+            case "administrative-evaluation" -> "Selecionar administrativo, preencher indicadores, calcular classificação e guardar o período.";
+            case "aaconnect-professors" -> "Consolidar os resultados lançados para professores.";
+            case "aaconnect-administrative" -> "Consolidar os resultados lançados para administrativos.";
+            case "map-1" -> "Consultar, filtrar e fechar o mapa do 1º trimestre.";
+            case "map-2" -> "Consultar, filtrar e fechar o mapa do 2º trimestre.";
+            case "map-3" -> "Consultar, filtrar e fechar o mapa do 3º trimestre.";
+            case "map-final-professor" -> "Calcular e apresentar a consolidação final dos professores.";
+            case "map-final-administrative" -> "Calcular e apresentar a consolidação final dos administrativos.";
+            default -> "Executar operações do módulo.";
+        };
     }
 
     // -------------------------------------------------------------------------
