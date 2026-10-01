@@ -372,6 +372,12 @@ public class AvaliacaoApplication extends Application {
         ).contains(currentSection);
         topAction.setVisible(hasAction);
         topAction.setManaged(hasAction);
+        if ("administrative".equals(currentSection)) topAction.setText("＋  Novo administrativo");
+        else if ("teachers".equals(currentSection)) topAction.setText("＋  Novo professor");
+        else if ("indicators".equals(currentSection)) topAction.setText("＋  Novo indicador");
+        else if ("professor-evaluation".equals(currentSection) || "administrative-evaluation".equals(currentSection))
+            topAction.setText("✓  Recarregar avaliação");
+        else topAction.setText("＋  Novo");
         topAction.setOnAction(e -> {
             switch (currentSection) {
                 case "students" -> studentDialog(null);
