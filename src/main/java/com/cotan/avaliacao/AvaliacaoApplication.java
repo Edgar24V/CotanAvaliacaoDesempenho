@@ -1,7 +1,9 @@
 package com.cotan.avaliacao;
 
+import com.cotan.avaliacao.ui.CotanHeader;
 import com.cotan.avaliacao.ui.CotanIcons;
 import com.cotan.avaliacao.ui.CotanModalHost;
+import com.cotan.avaliacao.ui.CotanSidebar;
 import com.cotan.avaliacao.ui.CotanUi;
 import org.kordamp.ikonli.feather.Feather;
 
@@ -192,7 +194,7 @@ public class AvaliacaoApplication extends Application {
         root.getStyleClass().add("app-background");
 
         sidebar = buildSidebar();
-        root.setLeft(CotanUi.sidebar(sidebar));
+        root.setLeft(sidebar);
 
         root.setTop(buildTopBar());
 
@@ -216,143 +218,156 @@ public class AvaliacaoApplication extends Application {
         showSection("dashboard");
     }
 
-    private VBox buildSidebar() {
-        VBox side = new VBox(12);
-        side.getStyleClass().add("sidebar");
-        side.setPadding(new Insets(24, 14, 18, 14));
-        side.setPrefWidth(250);
-
-        VBox brand = new VBox(2);
-        brand.setPadding(new Insets(0, 12, 20, 12));
-
-        Label brandTitle = new Label("COTAN", CotanIcons.icon(Feather.ACTIVITY, 21));
-        brandTitle.getStyleClass().add("brand-title");
-
-        Label brandSub = new Label("Avaliação e Desempenho");
-        brandSub.getStyleClass().add("brand-subtitle");
-
-        brand.getChildren().addAll(brandTitle, brandSub);
-
-        VBox main = new VBox(8);
-        main.getChildren().addAll(
-                navGroupLabel("NAVEGAÇÃO PRINCIPAL"),
-                navButton("home", "Início", "dashboard"),
-                navButton("teacher", "Professores", "teachers"),
-                navButton("administrative", "Administrativos", "administrative")
-        );
-
-        VBox evaluations = new VBox(6);
-        evaluations.getChildren().addAll(
-                navGroupLabel("AVALIAÇÕES"),
-                navButton("evaluation", "Avaliação — Professores", "professor-evaluation"),
-                navButton("evaluation", "Avaliação — Administrativos", "administrative-evaluation"),
-                navButton("aaconnect", "AACONECT — Professores", "aaconnect-professors"),
-                navButton("aaconnect", "AACONECT — Administrativos", "aaconnect-administrative")
-        );
-
-        VBox maps = new VBox(6);
-        maps.getChildren().addAll(
-                navGroupLabel("MAPAS E RESULTADOS"),
-                navButton("map", "Mapa 1º Trimestre", "map-1"),
-                navButton("map", "Mapa 2º Trimestre", "map-2"),
-                navButton("map", "Mapa 3º Trimestre", "map-3"),
-                navButton("final", "Mapa Final — Professor", "map-final-professor"),
-                navButton("final", "Mapa Final — Administrativo", "map-final-administrative")
-        );
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        VBox support = new VBox(6);
-        support.getChildren().addAll(
-                navGroupLabel("DADOS DE APOIO"),
-                navButton("students", "Alunos", "students"),
-                navButton("classes", "Turmas", "classes"),
-                navButton("subjects", "Disciplinas", "subjects"),
-                navButton("reports", "Relatórios", "reports"),
-                navButton("indicators", "Indicadores", "indicators"),
-                navButton("settings", "Configurações", "settings"),
-                navButton("about", "Sobre", "about")
-        );
-        side.setMinHeight(0);
-        side.getChildren().addAll(brand, new Separator(), main, evaluations, maps, spacer, support);
-        return side;
+    private CotanSidebar buildSidebar() {
+        return new CotanSidebar(this::showSection);
     }
 
-    private Label navGroupLabel(String text) {
-        Label l = new Label(text);
-        l.getStyleClass().add("nav-group-label");
-        l.setPadding(new Insets(10, 12, 3, 12));
-        return l;
-    }
-
-    private Button navButton(String iconKey, String label, String section) {
-        Button button = new Button(label, CotanIcons.icon(CotanIcons.feather(iconKey), 17));
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setAlignment(Pos.CENTER_LEFT);
-        button.setGraphicTextGap(12);
-        button.getStyleClass().addAll("sidebar-button", "flat");
-        button.setOnAction(e -> showSection(section));
-        button.setUserData(section);
-        return button;
-    }
-
-    private HBox buildTopBar() {
-        HBox bar = new HBox(16);
-        bar.getStyleClass().add("topbar");
-        bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setPadding(new Insets(17, 24, 17, 24));
-
-        VBox titles = new VBox(2);
-        pageTitle = new Label("Dashboard");
-        pageTitle.getStyleClass().add("top-title");
-        breadcrumb = new Label("Início");
-        breadcrumb.getStyleClass().add("breadcrumb");
-        titles.getChildren().addAll(pageTitle, breadcrumb);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        searchField = new TextField();
-        searchField.setPromptText("Pesquisar neste módulo...");
-        searchField.setPrefWidth(290);
-        searchField.getStyleClass().add("search-field");
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshCurrentSection());
-
-        topAction = CotanIcons.button("Novo", Feather.PLUS, "accent-button", "accent", "large");
-        topAction.setVisible(false);
-        topAction.setManaged(false);
-
-        Label user = new Label("Administrador", CotanIcons.icon(Feather.USER, 15));
-        user.setGraphicTextGap(7);
-        user.getStyleClass().add("user-pill");
-
-        bar.getChildren().addAll(titles, spacer, searchField, topAction, user);
-        return bar;
+    private Node buildTopBar() {
+        header = new CotanHeader(
+                this::handleGlobalSearch,
+                this::toggleSidebar,
+                this::toggleTheme
+        );
+        header.setPage("Início", "Início");
+        return header;
     }
 
     private HBox buildStatusBar() {
         HBox bar = new HBox(10);
-        bar.getStyleClass().add("statusbar");
+        bar.getStyleClass().add("cotan-footer");
         bar.setAlignment(Pos.CENTER_LEFT);
-        bar.setPadding(new Insets(9, 18, 9, 18));
+        bar.setPadding(new Insets(7, 14, 7, 14));
 
-        dbStatus = new Label("●  SQLite • conectado");
+        dbStatus = new Label("Pronto  •  SQLite conectado", CotanIcons.icon(Feather.DATABASE, 13));
         dbStatus.getStyleClass().add("status-ok");
+        dbStatus.setGraphicTextGap(7);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label version = new Label("Cotan Avaliação e Desempenho • 1.0");
+        Label version = new Label("COTAN • Avaliação e Desempenho • 1.0");
         version.getStyleClass().add("muted");
 
-        bar.getChildren().addAll(dbStatus, spacer, version);
+        footerClock = new Label();
+        footerClock.getStyleClass().add("muted");
+        updateFooterClock();
+
+        bar.getChildren().addAll(dbStatus, spacer, version, new Label("  •  "), footerClock);
+
+        if (footerClockTimeline != null) footerClockTimeline.stop();
+        footerClockTimeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(
+                        javafx.util.Duration.seconds(1),
+                        e -> updateFooterClock()
+                )
+        );
+        footerClockTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        footerClockTimeline.play();
+
         return bar;
+    }
+
+    private void updateFooterClock() {
+        if (footerClock != null) {
+            footerClock.setText(java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        }
+    }
+
+    private void toggleSidebar() {
+        if (sidebar != null) sidebar.setCollapsed(!sidebar.isCollapsed());
+    }
+
+    private void toggleTheme() {
+        darkMode = !darkMode;
+        Application.setUserAgentStylesheet(darkMode ? DARK_THEME : LIGHT_THEME);
+        if (header != null) {
+            header.addNotification(darkMode ? "Modo escuro ativado." : "Modo claro ativado.");
+        }
+    }
+
+    private void handleGlobalSearch(String query) {
+        if (query == null || query.isBlank() || database == null) return;
+        String q = query.trim().toLowerCase(Locale.ROOT);
+
+        Map<String, String> aliases = new LinkedHashMap<>();
+        aliases.put("início", "dashboard");
+        aliases.put("dashboard", "dashboard");
+        aliases.put("professor", "teachers");
+        aliases.put("professores", "teachers");
+        aliases.put("administrativo", "administrative");
+        aliases.put("administrativos", "administrative");
+        aliases.put("avaliação professores", "professor-evaluation");
+        aliases.put("avaliação administrativos", "administrative-evaluation");
+        aliases.put("aaconect professores", "aaconnect-professors");
+        aliases.put("aaconect administrativos", "aaconnect-administrative");
+        aliases.put("mapa 1", "map-1");
+        aliases.put("mapa 2", "map-2");
+        aliases.put("mapa 3", "map-3");
+        aliases.put("mapa final professor", "map-final-professor");
+        aliases.put("mapa final administrativo", "map-final-administrative");
+        aliases.put("alunos", "students");
+        aliases.put("turmas", "classes");
+        aliases.put("disciplinas", "subjects");
+        aliases.put("relatórios", "reports");
+        aliases.put("relatorios", "reports");
+        aliases.put("indicadores", "indicators");
+        aliases.put("configurações", "settings");
+        aliases.put("configuracoes", "settings");
+        aliases.put("sobre", "about");
+
+        String target = aliases.get(q);
+        if (target != null) {
+            showSection(target);
+            return;
+        }
+
+        try {
+            String like = "%" + q + "%";
+
+            if (((Number) database.scalar(
+                    "SELECT COUNT(*) FROM staff WHERE lower(name) LIKE ? OR lower(code) LIKE ?",
+                    like, like)).intValue() > 0) {
+                showSection(q.startsWith("adm") ? "administrative" : "teachers");
+                return;
+            }
+
+            if (((Number) database.scalar(
+                    "SELECT COUNT(*) FROM students WHERE lower(name) LIKE ? OR lower(student_number) LIKE ?",
+                    like, like)).intValue() > 0) {
+                showSection("students");
+                return;
+            }
+
+            if (((Number) database.scalar(
+                    "SELECT COUNT(*) FROM classes WHERE lower(name) LIKE ?",
+                    like)).intValue() > 0) {
+                showSection("classes");
+                return;
+            }
+
+            if (((Number) database.scalar(
+                    "SELECT COUNT(*) FROM subjects WHERE lower(name) LIKE ? OR lower(code) LIKE ?",
+                    like, like)).intValue() > 0) {
+                showSection("subjects");
+                return;
+            }
+
+            if (((Number) database.scalar(
+                    "SELECT COUNT(*) FROM performance_indicators WHERE lower(name) LIKE ? OR lower(code) LIKE ?",
+                    like, like)).intValue() > 0) {
+                showSection("indicators");
+                return;
+            }
+
+            showToast("Nenhum resultado encontrado para: " + query);
+        } catch (SQLException ex) {
+            showError("A pesquisa global falhou", ex);
+        }
     }
 
     private void showSection(String section) {
         currentSection = section;
-        searchField.clear();
 
         Map<String, String> titles = Map.ofEntries(
                 Map.entry("dashboard", "Início"),
@@ -376,74 +391,41 @@ public class AvaliacaoApplication extends Application {
                 Map.entry("about", "Sobre o sistema")
         );
 
-        pageTitle.setText(titles.getOrDefault(section, "COTAN"));
-        breadcrumb.setText("Início  /  " + titles.getOrDefault(section, "COTAN"));
+        String title = titles.getOrDefault(section, "COTAN");
 
-        updateActiveNav();
+        if (header != null) {
+            header.setPage(title, "Início  /  " + title);
+            header.clearSearch();
+        }
+
+        if (sidebar != null) {
+            sidebar.setActive(section);
+        }
+
         updateTopAction();
-
         refreshCurrentSection();
     }
 
-    private void updateActiveNav() {
-        if (activeNav != null) activeNav.getStyleClass().remove("selected");
-        if (sidebar == null) return;
-
-        for (Node node : sidebar.lookupAll(".sidebar-button")) {
-            if (node instanceof Button button && currentSection.equals(button.getUserData())) {
-                button.getStyleClass().add("selected");
-                activeNav = button;
-                break;
-            }
-        }
-    }
-
     private void updateTopAction() {
-        boolean hasAction = Set.of(
-                "students","teachers","administrative","classes","subjects","assessments","indicators",
-                "professor-evaluation","administrative-evaluation"
-        ).contains(currentSection);
-        topAction.setVisible(hasAction);
-        topAction.setManaged(hasAction);
-        if ("administrative".equals(currentSection)) {
-            topAction.setText("Novo administrativo");
-            topAction.setGraphic(CotanIcons.icon(Feather.USER_PLUS));
-        } else if ("teachers".equals(currentSection)) {
-            topAction.setText("Novo professor");
-            topAction.setGraphic(CotanIcons.icon(Feather.USER_PLUS));
-        } else if ("indicators".equals(currentSection)) {
-            topAction.setText("Novo indicador");
-            topAction.setGraphic(CotanIcons.icon(Feather.TARGET));
-        } else if ("professor-evaluation".equals(currentSection) || "administrative-evaluation".equals(currentSection)) {
-            topAction.setText("Recarregar avaliação");
-            topAction.setGraphic(CotanIcons.icon(Feather.REFRESH_CW));
-        } else {
-            topAction.setText("Novo");
-            topAction.setGraphic(CotanIcons.icon(Feather.PLUS));
-        }
-        topAction.setOnAction(e -> {
-            switch (currentSection) {
-                case "students" -> studentDialog(null);
-                case "teachers" -> staffDialog("PROFESSOR", null);
-                case "administrative" -> staffDialog("ADMINISTRATIVO", null);
-                case "professor-evaluation" -> showSection("professor-evaluation");
-                case "administrative-evaluation" -> showSection("administrative-evaluation");
-                case "classes" -> classDialog(null);
-                case "subjects" -> subjectDialog(null);
-                case "assessments" -> assessmentDialog(null);
-                case "indicators" -> indicatorDialog(null);
-            }
-        });
-    }
+        if (header == null) return;
 
-    private void setContentPage(Node node) {
-        if (content == null) return;
-        Node view = node instanceof ScrollPane ? node : CotanUi.scroll(node);
-        if (view instanceof ScrollPane scroll) {
-            scroll.setFitToWidth(true);
-            scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
+        switch (currentSection) {
+            case "students" -> header.setPrimaryAction(
+                    "Novo aluno", Feather.USER_PLUS, () -> studentDialog(null), true);
+            case "teachers" -> header.setPrimaryAction(
+                    "Novo professor", Feather.USER_PLUS, () -> staffDialog("PROFESSOR", null), true);
+            case "administrative" -> header.setPrimaryAction(
+                    "Novo administrativo", Feather.USER_PLUS, () -> staffDialog("ADMINISTRATIVO", null), true);
+            case "classes" -> header.setPrimaryAction(
+                    "Nova turma", Feather.PLUS, () -> classDialog(null), true);
+            case "subjects" -> header.setPrimaryAction(
+                    "Nova disciplina", Feather.BOOK_OPEN, () -> subjectDialog(null), true);
+            case "indicators" -> header.setPrimaryAction(
+                    "Novo indicador", Feather.TARGET, () -> indicatorDialog(null), true);
+            case "professor-evaluation", "administrative-evaluation" -> header.setPrimaryAction(
+                    "Recarregar", Feather.REFRESH_CW, this::refreshCurrentSection, true);
+            default -> header.setPrimaryAction("", Feather.PLUS, null, false);
         }
-        content.getChildren().setAll(view);
     }
 
     private void refreshCurrentSection() {
