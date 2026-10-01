@@ -35,6 +35,7 @@ public final class Database implements AutoCloseable {
         }
         createSchema();
         seed();
+        seedPerformance();
     }
 
     private void createSchema() throws SQLException {
@@ -125,6 +126,61 @@ public final class Database implements AutoCloseable {
             st.executeUpdate("CREATE INDEX IF NOT EXISTS idx_assessments_subject ON assessments(subject_id)");
             st.executeUpdate("CREATE INDEX IF NOT EXISTS idx_grades_student ON grades(student_id)");
             st.executeUpdate("CREATE INDEX IF NOT EXISTS idx_grades_assessment ON grades(assessment_id)");
+
+            st.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS staff (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    code TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    staff_type TEXT NOT NULL CHECK(staff_type IN ('PROFESSOR','ADMINISTRATIVO')),
+                    role TEXT,
+                    department TEXT,
+                    phone TEXT,
+                    email TEXT,
+                    admission_date TEXT,
+                    active INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+            st.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS performance_indicators (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    code TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    staff_type TEXT NOT NULL DEFAULT 'AMBOS'
+                        CHECK(staff_type IN ('PROFESSOR','ADMINISTRATIVO','AMBOS')),
+                    weight REAL NOT NULL DEFAULT 1,
+                    sort_order INTEGER NOT NULL DEFAULT 0,
+                    active INTEGER NOT NULL DEFAULT 1
+                )
+                """);
+
+            st.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS performance_scores (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    staff_id INTEGER NOT NULL,
+                    indicator_id INTEGER NOT NULL,
+                    academic_year TEXT NOT NULL,
+                    trimester INTEGER NOT NULL CHECK(trimester IN (1,2,3)),
+                    score REAL NOT NULL CHECK(score >= 0 AND score <= 20),
+                    observation TEXT,
+                    evaluator TEXT,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(staff_id, indicator_id, academic_year, trimester),
+                    FOREIGN KEY(staff_id) REFERENCES staff(id) ON DELETE CASCADE,
+                    FOREIGN KEY(indicator_id) REFERENCES performance_indicators(id) ON DELETE CASCADE
+                )
+                """);
+
+            st.executeUpdate("""
+                CREATE INDEX IF NOT EXISTS idx_staff_type ON staff(staff_type)
+                """);
+            st.executeUpdate("""
+                CREATE INDEX IF NOT EXISTS idx_performance_scores_cycle
+                ON performance_scores(academic_year, trimester, staff_id)
+                """);
         }
     }
 
@@ -256,6 +312,178 @@ public final class Database implements AutoCloseable {
         return value == null ? 0 : ((Number) value).longValue();
     }
 
+    private void seedPerformance() throws SQLException {
+        if (count("staff") == 0) {
+            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
+                    "PROF-001", "Ana Manuel", "PROFESSOR", "Professora", "Área Pedagógica", "923 100 001", "ana.manuel@cotan.edu");
+            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
+                    "PROF-002", "Carlos José", "PROFESSOR", "Professor", "Área Pedagógica", "923 100 002", "carlos.jose@cotan.edu");
+            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
+                    "ADM-001", "Maria José", "ADMINISTRATIVO", "Assistente Administrativa", "Secretaria", "923 200 001", "maria.jose@cotan.edu");
+            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
+                    "ADM-002", "Paulo António", "ADMINISTRATIVO", "Técnico Administrativo", "Administração", "923 200 002", "paulo.antonio@cotan.edu");
+        }
+
+        if (count("performance_indicators") == 0) {
+            Object[][] indicators = {
+                    {"IND-01", "Qualidade do trabalho", "Qualidade, rigor e consistência das entregas.", "AMBOS", 1.0, 1},
+                    {"IND-02", "Produtividade e resultados", "Capacidade de cumprir metas, tarefas e resultados.", "AMBOS", 1.0, 2},
+                    {"IND-03", "Responsabilidade e compromisso", "Cumprimento de responsabilidades, regras e prazos.", "AMBOS", 1.0, 3},
+                    {"IND-04", "Pontualidade e assiduidade", "Presença, pontualidade e cumprimento dos horários.", "AMBOS", 1.0, 4},
+                    {"IND-05", "Relacionamento e colaboração", "Cooperação, comunicação e relacionamento profissional.", "AMBOS", 1.0, 5}
+            };
+            for (Object[] item : indicators) {
+                insert("""
+                    INSERT INTO performance_indicators(code,name,description,staff_type,weight,sort_order)
+                    VALUES(?,?,?,?,?,?)
+                    """, item);
+            }
+        }
+
+        if (count("performance_scores") == 0) {
+            List<Map<String,Object>> staffRows = staffAll();
+            List<Map<String,Object>> indicators = indicators("AMBOS");
+            if (!staffRows.isEmpty() && !indicators.isEmpty()) {
+                double[][] sample = {
+                        {17, 16, 18, 15, 17},
+                        {15, 14, 16, 14, 15},
+                        {18, 17, 16, 18, 17},
+                        {14, 15, 13, 16, 15}
+                };
+                for (int i = 0; i < Math.min(staffRows.size(), sample.length); i++) {
+                    long staffId = n(staffRows.get(i).get("id"));
+                    for (int j = 0; j < Math.min(indicators.size(), sample[i].length); j++) {
+                        long indicatorId = n(indicators.get(j).get("id"));
+                        upsertPerformanceScore(staffId, indicatorId, "2026/2027", 1, sample[i][j], "Dados demonstrativos", "Administrador");
+                        if (i < 2) {
+                            upsertPerformanceScore(staffId, indicatorId, "2026/2027", 2, Math.max(0, sample[i][j] - 1), "", "Administrador");
+                            upsertPerformanceScore(staffId, indicatorId, "2026/2027", 3, sample[i][j], "", "Administrador");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public List<Map<String,Object>> staffAll() throws SQLException {
+        return query("""
+            SELECT id,code,name,staff_type,COALESCE(role,'') role,COALESCE(department,'') department,
+                   COALESCE(phone,'') phone,COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
+            FROM staff WHERE active=1 ORDER BY staff_type,name
+            """);
+    }
+
+    public List<Map<String,Object>> staff(String type) throws SQLException {
+        return query("""
+            SELECT id,code,name,staff_type,COALESCE(role,'') role,COALESCE(department,'') department,
+                   COALESCE(phone,'') phone,COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
+            FROM staff WHERE active=1 AND staff_type=? ORDER BY name
+            """, type);
+    }
+
+    public List<Map<String,Object>> indicators(String staffType) throws SQLException {
+        return query("""
+            SELECT id,code,name,COALESCE(description,'') description,staff_type,weight,sort_order
+            FROM performance_indicators
+            WHERE active=1 AND (staff_type='AMBOS' OR staff_type=?)
+            ORDER BY sort_order,id
+            """, staffType);
+    }
+
+    public List<Map<String,Object>> performanceScores(long staffId, String academicYear, int trimester) throws SQLException {
+        return query("""
+            SELECT i.id indicator_id,i.code,i.name,i.description,i.weight,
+                   ps.score,COALESCE(ps.observation,'') observation,COALESCE(ps.evaluator,'') evaluator
+            FROM performance_indicators i
+            LEFT JOIN performance_scores ps
+              ON ps.indicator_id=i.id AND ps.staff_id=?
+             AND ps.academic_year=? AND ps.trimester=?
+            WHERE i.active=1
+            ORDER BY i.sort_order,i.id
+            """, staffId, academicYear, trimester);
+    }
+
+    public void upsertPerformanceScore(long staffId, long indicatorId, String year, int trimester,
+                                       double score, String observation, String evaluator) throws SQLException {
+        update("""
+            INSERT INTO performance_scores(
+                staff_id,indicator_id,academic_year,trimester,score,observation,evaluator,updated_at
+            ) VALUES(?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+            ON CONFLICT(staff_id,indicator_id,academic_year,trimester) DO UPDATE SET
+                score=excluded.score,
+                observation=excluded.observation,
+                evaluator=excluded.evaluator,
+                updated_at=CURRENT_TIMESTAMP
+            """, staffId, indicatorId, year, trimester, score,
+                blankToNull(observation), blankToNull(evaluator));
+    }
+
+    public List<Map<String,Object>> performanceMap(String staffType, String year, int trimester) throws SQLException {
+        return query("""
+            SELECT s.id,s.code,s.name,COALESCE(s.role,'') role,COALESCE(s.department,'') department,
+                   COUNT(ps.id) indicators_filled,
+                   ROUND(COALESCE(
+                       SUM(ps.score * i.weight) / NULLIF(SUM(i.weight),0)
+                   ,0),2) average_score
+            FROM staff s
+            LEFT JOIN performance_scores ps
+              ON ps.staff_id=s.id AND ps.academic_year=? AND ps.trimester=?
+            LEFT JOIN performance_indicators i ON i.id=ps.indicator_id
+            WHERE s.active=1 AND s.staff_type=?
+            GROUP BY s.id,s.code,s.name,s.role,s.department
+            ORDER BY average_score DESC,s.name
+            """, year, trimester, staffType);
+    }
+
+    public List<Map<String,Object>> performanceFinalMap(String staffType, String year) throws SQLException {
+        return query("""
+            SELECT s.id,s.code,s.name,COALESCE(s.role,'') role,COALESCE(s.department,'') department,
+                   COUNT(DISTINCT CASE WHEN ps.trimester=1 THEN ps.indicator_id END) t1_count,
+                   COUNT(DISTINCT CASE WHEN ps.trimester=2 THEN ps.indicator_id END) t2_count,
+                   COUNT(DISTINCT CASE WHEN ps.trimester=3 THEN ps.indicator_id END) t3_count,
+                   ROUND(COALESCE(AVG(ps.score * i.weight / NULLIF(i.weight,0)),0),2) raw_average,
+                   ROUND(COALESCE((
+                       SELECT AVG(t.avg_score) FROM (
+                           SELECT ROUND(SUM(ps2.score*i2.weight)/NULLIF(SUM(i2.weight),0),2) avg_score
+                           FROM performance_scores ps2
+                           JOIN performance_indicators i2 ON i2.id=ps2.indicator_id
+                           WHERE ps2.staff_id=s.id AND ps2.academic_year=? AND ps2.trimester IN (1,2,3)
+                           GROUP BY ps2.trimester
+                       ) t
+                   ),0),2) final_average
+            FROM staff s
+            LEFT JOIN performance_scores ps ON ps.staff_id=s.id AND ps.academic_year=?
+            LEFT JOIN performance_indicators i ON i.id=ps.indicator_id
+            WHERE s.active=1 AND s.staff_type=?
+            GROUP BY s.id,s.code,s.name,s.role,s.department
+            ORDER BY final_average DESC,s.name
+            """, year, year, staffType);
+    }
+
+    public Map<String,Object> performanceSummary(String staffType, String year) throws SQLException {
+        Map<String,Object> result = new LinkedHashMap<>();
+        Object total = scalar("SELECT COUNT(*) FROM staff WHERE active=1 AND staff_type=?", staffType);
+        Object evaluated = scalar("""
+            SELECT COUNT(DISTINCT staff_id) FROM performance_scores
+            WHERE academic_year=? AND staff_id IN (SELECT id FROM staff WHERE staff_type=? AND active=1)
+            """, year, staffType);
+        Object avg = scalar("""
+            SELECT ROUND(COALESCE(AVG(score),0),2) FROM performance_scores
+            WHERE academic_year=? AND staff_id IN (SELECT id FROM staff WHERE staff_type=? AND active=1)
+            """, year, staffType);
+        result.put("total", total == null ? 0 : total);
+        result.put("evaluated", evaluated == null ? 0 : evaluated);
+        result.put("average", avg == null ? 0 : avg);
+        return result;
+    }
+
+    private static String classification(double score) {
+        if (score < 10) return "Mau";
+        if (score < 14) return "Suficiente";
+        if (score < 18) return "Bom";
+        return "Muito bom";
+    }
+
     public List<Map<String,Object>> students() throws SQLException {
         return query("""
             SELECT s.id, s.student_number, s.name, COALESCE(s.gender,'') gender,
@@ -358,6 +586,16 @@ public final class Database implements AutoCloseable {
         Files.createDirectories(destination.getParent());
         Files.copy(databasePath, destination, StandardCopyOption.REPLACE_EXISTING);
         open();
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static long n(Object o){
+        if(o==null)return 0;
+        if(o instanceof Number number)return number.longValue();
+        try{return Long.parseLong(String.valueOf(o));}catch(Exception e){return 0;}
     }
 
     private void bind(PreparedStatement ps, Object... params) throws SQLException {
