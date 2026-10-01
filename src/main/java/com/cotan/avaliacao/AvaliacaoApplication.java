@@ -1,5 +1,9 @@
 package com.cotan.avaliacao;
 
+import com.cotan.avaliacao.ui.CotanIcons;
+import com.cotan.avaliacao.ui.CotanUi;
+import org.kordamp.ikonli.feather.Feather;
+
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import atlantafx.base.controls.ModalPane;
@@ -187,7 +191,7 @@ public class AvaliacaoApplication extends Application {
         root.getStyleClass().add("app-background");
 
         sidebar = buildSidebar();
-        root.setLeft(sidebar);
+        root.setLeft(CotanUi.sidebar(sidebar));
 
         root.setTop(buildTopBar());
 
@@ -221,7 +225,7 @@ public class AvaliacaoApplication extends Application {
         VBox brand = new VBox(2);
         brand.setPadding(new Insets(0, 12, 20, 12));
 
-        Label brandTitle = new Label("COTAN");
+        Label brandTitle = new Label("COTAN", CotanIcons.icon(Feather.ACTIVITY, 21));
         brandTitle.getStyleClass().add("brand-title");
 
         Label brandSub = new Label("Avaliação e Desempenho");
@@ -232,28 +236,28 @@ public class AvaliacaoApplication extends Application {
         VBox main = new VBox(8);
         main.getChildren().addAll(
                 navGroupLabel("NAVEGAÇÃO PRINCIPAL"),
-                navButton("⌂", "Início", "dashboard"),
-                navButton("◆", "Professores", "teachers"),
-                navButton("◆", "Administrativos", "administrative")
+                navButton("home", "Início", "dashboard"),
+                navButton("teacher", "Professores", "teachers"),
+                navButton("administrative", "Administrativos", "administrative")
         );
 
         VBox evaluations = new VBox(6);
         evaluations.getChildren().addAll(
                 navGroupLabel("AVALIAÇÕES"),
-                navButton("✓", "Avaliação — Professores", "professor-evaluation"),
-                navButton("✓", "Avaliação — Administrativos", "administrative-evaluation"),
-                navButton("◎", "AACONECT — Professores", "aaconnect-professors"),
-                navButton("◎", "AACONECT — Administrativos", "aaconnect-administrative")
+                navButton("evaluation", "Avaliação — Professores", "professor-evaluation"),
+                navButton("evaluation", "Avaliação — Administrativos", "administrative-evaluation"),
+                navButton("aaconnect", "AACONECT — Professores", "aaconnect-professors"),
+                navButton("aaconnect", "AACONECT — Administrativos", "aaconnect-administrative")
         );
 
         VBox maps = new VBox(6);
         maps.getChildren().addAll(
                 navGroupLabel("MAPAS E RESULTADOS"),
-                navButton("1", "Mapa 1º Trimestre", "map-1"),
-                navButton("2", "Mapa 2º Trimestre", "map-2"),
-                navButton("3", "Mapa 3º Trimestre", "map-3"),
-                navButton("★", "Mapa Final — Professor", "map-final-professor"),
-                navButton("★", "Mapa Final — Administrativo", "map-final-administrative")
+                navButton("map", "Mapa 1º Trimestre", "map-1"),
+                navButton("map", "Mapa 2º Trimestre", "map-2"),
+                navButton("map", "Mapa 3º Trimestre", "map-3"),
+                navButton("final", "Mapa Final — Professor", "map-final-professor"),
+                navButton("final", "Mapa Final — Administrativo", "map-final-administrative")
         );
 
         Region spacer = new Region();
@@ -262,14 +266,15 @@ public class AvaliacaoApplication extends Application {
         VBox support = new VBox(6);
         support.getChildren().addAll(
                 navGroupLabel("DADOS DE APOIO"),
-                navButton("●", "Alunos", "students"),
-                navButton("▦", "Turmas", "classes"),
-                navButton("◈", "Disciplinas", "subjects"),
-                navButton("◆", "Relatórios", "reports"),
-                navButton("◇", "Indicadores", "indicators"),
-                navButton("⚙", "Configurações", "settings"),
-                navButton("?", "Sobre", "about")
+                navButton("students", "Alunos", "students"),
+                navButton("classes", "Turmas", "classes"),
+                navButton("subjects", "Disciplinas", "subjects"),
+                navButton("reports", "Relatórios", "reports"),
+                navButton("indicators", "Indicadores", "indicators"),
+                navButton("settings", "Configurações", "settings"),
+                navButton("about", "Sobre", "about")
         );
+        side.setMinHeight(0);
         side.getChildren().addAll(brand, new Separator(), main, evaluations, maps, spacer, support);
         return side;
     }
@@ -281,10 +286,11 @@ public class AvaliacaoApplication extends Application {
         return l;
     }
 
-    private Button navButton(String icon, String label, String section) {
-        Button button = new Button(icon + "   " + label);
+    private Button navButton(String iconKey, String label, String section) {
+        Button button = new Button(label, CotanIcons.icon(CotanIcons.feather(iconKey), 17));
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
+        button.setGraphicTextGap(12);
         button.getStyleClass().addAll("sidebar-button", "flat");
         button.setOnAction(e -> showSection(section));
         button.setUserData(section);
@@ -313,12 +319,12 @@ public class AvaliacaoApplication extends Application {
         searchField.getStyleClass().add("search-field");
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshCurrentSection());
 
-        topAction = new Button("＋  Novo");
-        topAction.getStyleClass().addAll("accent-button", "accent", "large");
+        topAction = CotanIcons.button("Novo", Feather.PLUS, "accent-button", "accent", "large");
         topAction.setVisible(false);
         topAction.setManaged(false);
 
-        Label user = new Label("Administrador");
+        Label user = new Label("Administrador", CotanIcons.icon(Feather.USER, 15));
+        user.setGraphicTextGap(7);
         user.getStyleClass().add("user-pill");
 
         bar.getChildren().addAll(titles, spacer, searchField, topAction, user);
@@ -399,12 +405,22 @@ public class AvaliacaoApplication extends Application {
         ).contains(currentSection);
         topAction.setVisible(hasAction);
         topAction.setManaged(hasAction);
-        if ("administrative".equals(currentSection)) topAction.setText("＋  Novo administrativo");
-        else if ("teachers".equals(currentSection)) topAction.setText("＋  Novo professor");
-        else if ("indicators".equals(currentSection)) topAction.setText("＋  Novo indicador");
-        else if ("professor-evaluation".equals(currentSection) || "administrative-evaluation".equals(currentSection))
-            topAction.setText("✓  Recarregar avaliação");
-        else topAction.setText("＋  Novo");
+        if ("administrative".equals(currentSection)) {
+            topAction.setText("Novo administrativo");
+            topAction.setGraphic(CotanIcons.icon(Feather.USER_PLUS));
+        } else if ("teachers".equals(currentSection)) {
+            topAction.setText("Novo professor");
+            topAction.setGraphic(CotanIcons.icon(Feather.USER_PLUS));
+        } else if ("indicators".equals(currentSection)) {
+            topAction.setText("Novo indicador");
+            topAction.setGraphic(CotanIcons.icon(Feather.TARGET));
+        } else if ("professor-evaluation".equals(currentSection) || "administrative-evaluation".equals(currentSection)) {
+            topAction.setText("Recarregar avaliação");
+            topAction.setGraphic(CotanIcons.icon(Feather.REFRESH_CW));
+        } else {
+            topAction.setText("Novo");
+            topAction.setGraphic(CotanIcons.icon(Feather.PLUS));
+        }
         topAction.setOnAction(e -> {
             switch (currentSection) {
                 case "students" -> studentDialog(null);
@@ -420,32 +436,42 @@ public class AvaliacaoApplication extends Application {
         });
     }
 
+    private void setContentPage(Node node) {
+        if (content == null) return;
+        Node view = node instanceof ScrollPane ? node : CotanUi.scroll(node);
+        if (view instanceof ScrollPane scroll) {
+            scroll.setFitToWidth(true);
+            scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
+        }
+        content.getChildren().setAll(view);
+    }
+
     private void refreshCurrentSection() {
         if (content == null || database == null) return;
         try {
             switch (currentSection) {
-                case "dashboard" -> content.getChildren().setAll(buildDashboard());
-                case "administrative" -> content.getChildren().setAll(buildStaff("ADMINISTRATIVO"));
-                case "professor-evaluation" -> content.getChildren().setAll(buildPerformanceEvaluation("PROFESSOR"));
-                case "administrative-evaluation" -> content.getChildren().setAll(buildPerformanceEvaluation("ADMINISTRATIVO"));
-                case "aaconnect-professors" -> content.getChildren().setAll(buildAaconnect("PROFESSOR"));
-                case "aaconnect-administrative" -> content.getChildren().setAll(buildAaconnect("ADMINISTRATIVO"));
-                case "map-1" -> content.getChildren().setAll(buildPerformanceMapAll(1));
-                case "map-2" -> content.getChildren().setAll(buildPerformanceMapAll(2));
-                case "map-3" -> content.getChildren().setAll(buildPerformanceMapAll(3));
-                case "map-final-professor" -> content.getChildren().setAll(buildPerformanceFinal("PROFESSOR"));
-                case "map-final-administrative" -> content.getChildren().setAll(buildPerformanceFinal("ADMINISTRATIVO"));
-                case "students" -> content.getChildren().setAll(buildStudents());
-                case "teachers" -> content.getChildren().setAll(buildStaff("PROFESSOR"));
-                case "classes" -> content.getChildren().setAll(buildClasses());
-                case "subjects" -> content.getChildren().setAll(buildSubjects());
-                case "assessments" -> content.getChildren().setAll(buildAssessments());
-                case "grades" -> content.getChildren().setAll(buildGrades());
-                case "reports" -> content.getChildren().setAll(buildReports());
-                case "indicators" -> content.getChildren().setAll(buildIndicators());
-                case "settings" -> content.getChildren().setAll(buildSettings());
-                case "about" -> content.getChildren().setAll(buildAbout());
-                default -> content.getChildren().setAll(buildDashboard());
+                case "dashboard" -> setContentPage(buildDashboard());
+                case "administrative" -> setContentPage(buildStaff("ADMINISTRATIVO"));
+                case "professor-evaluation" -> setContentPage(buildPerformanceEvaluation("PROFESSOR"));
+                case "administrative-evaluation" -> setContentPage(buildPerformanceEvaluation("ADMINISTRATIVO"));
+                case "aaconnect-professors" -> setContentPage(buildAaconnect("PROFESSOR"));
+                case "aaconnect-administrative" -> setContentPage(buildAaconnect("ADMINISTRATIVO"));
+                case "map-1" -> setContentPage(buildPerformanceMapAll(1));
+                case "map-2" -> setContentPage(buildPerformanceMapAll(2));
+                case "map-3" -> setContentPage(buildPerformanceMapAll(3));
+                case "map-final-professor" -> setContentPage(buildPerformanceFinal("PROFESSOR"));
+                case "map-final-administrative" -> setContentPage(buildPerformanceFinal("ADMINISTRATIVO"));
+                case "students" -> setContentPage(buildStudents());
+                case "teachers" -> setContentPage(buildStaff("PROFESSOR"));
+                case "classes" -> setContentPage(buildClasses());
+                case "subjects" -> setContentPage(buildSubjects());
+                case "assessments" -> setContentPage(buildAssessments());
+                case "grades" -> setContentPage(buildGrades());
+                case "reports" -> setContentPage(buildReports());
+                case "indicators" -> setContentPage(buildIndicators());
+                case "settings" -> setContentPage(buildSettings());
+                case "about" -> setContentPage(buildAbout());
+                default -> setContentPage(buildDashboard());
             }
         } catch (Exception ex) {
             showError("Erro ao carregar o módulo", ex);
@@ -502,14 +528,14 @@ public class AvaliacaoApplication extends Application {
         c2.setPercentWidth(50);
         grid.getColumnConstraints().addAll(c1, c2);
 
-        addHomeCard(grid, 0, 0, "◆", "Professores", "Cadastro e acompanhamento dos professores.", "teachers");
-        addHomeCard(grid, 1, 0, "◆", "Administrativos", "Cadastro e acompanhamento dos colaboradores administrativos.", "administrative");
-        addHomeCard(grid, 0, 1, "✓", "Avaliação — Professores", "Lançamento dos indicadores e avaliação de desempenho docente.", "professor-evaluation");
-        addHomeCard(grid, 1, 1, "✓", "Avaliação — Administrativos", "Lançamento dos indicadores e avaliação de desempenho administrativo.", "administrative-evaluation");
-        addHomeCard(grid, 0, 2, "◎", "AACONECT", "Resultados/conexões dos professores e administrativos.", "aaconnect-professors");
-        addHomeCard(grid, 1, 2, "1–3", "Mapas Trimestrais", "Mapas do 1º, 2º e 3º trimestre.", "map-1");
-        addHomeCard(grid, 0, 3, "★", "Mapa Final — Professor", "Consolidação anual dos resultados dos professores.", "map-final-professor");
-        addHomeCard(grid, 1, 3, "★", "Mapa Final — Administrativo", "Consolidação anual dos resultados administrativos.", "map-final-administrative");
+        addHomeCard(grid, 0, 0, "teacher", "Professores", "Cadastro e acompanhamento dos professores.", "teachers");
+        addHomeCard(grid, 1, 0, "administrative", "Administrativos", "Cadastro e acompanhamento dos colaboradores administrativos.", "administrative");
+        addHomeCard(grid, 0, 1, "evaluation", "Avaliação — Professores", "Lançamento dos indicadores e avaliação de desempenho docente.", "professor-evaluation");
+        addHomeCard(grid, 1, 1, "evaluation", "Avaliação — Administrativos", "Lançamento dos indicadores e avaliação de desempenho administrativo.", "administrative-evaluation");
+        addHomeCard(grid, 0, 2, "aaconnect", "AACONECT", "Resultados/conexões dos professores e administrativos.", "aaconnect-professors");
+        addHomeCard(grid, 1, 2, "map", "Mapas Trimestrais", "Mapas do 1º, 2º e 3º trimestre.", "map-1");
+        addHomeCard(grid, 0, 3, "final", "Mapa Final — Professor", "Consolidação anual dos resultados dos professores.", "map-final-professor");
+        addHomeCard(grid, 1, 3, "final", "Mapa Final — Administrativo", "Consolidação anual dos resultados administrativos.", "map-final-administrative");
 
         VBox process = card();
         process.getChildren().addAll(
@@ -527,7 +553,7 @@ public class AvaliacaoApplication extends Application {
         return scroll;
     }
 
-    private void addHomeCard(GridPane grid, int col, int row, String icon, String title, String description, String section) {
+    private void addHomeCard(GridPane grid, int col, int row, String iconKey, String title, String description, String section) {
         VBox card = new VBox(8);
         card.getStyleClass().addAll("card", "home-nav-card");
         card.setPadding(new Insets(18));
@@ -535,7 +561,7 @@ public class AvaliacaoApplication extends Application {
 
         HBox line = new HBox(10);
         line.setAlignment(Pos.CENTER_LEFT);
-        line.getChildren().addAll(label(icon, "home-icon"), label(title, "home-card-title"));
+        line.getChildren().addAll(new StackPane(CotanIcons.icon(CotanIcons.feather(iconKey), 18)), label(title, "home-card-title"));
 
         Label desc = label(description, "muted");
         desc.setWrapText(true);
@@ -1113,7 +1139,7 @@ public class AvaliacaoApplication extends Application {
         trimester.setOnAction(e -> load.run());
         load.run();
 
-        Button save = new Button("✓  Guardar avaliação");
+        Button save = CotanIcons.button("Guardar avaliação", Feather.SAVE, "accent-button", "accent");
         save.getStyleClass().add("accent-button");
         save.setOnAction(e -> {
             StaffOption selectedStaff = staff.getValue();
@@ -1152,7 +1178,7 @@ public class AvaliacaoApplication extends Application {
             }
         });
 
-        Button clear = new Button("Limpar");
+        Button clear = CotanIcons.button("Limpar", Feather.ROTATE_CCW, "button-outlined");
         clear.setOnAction(e -> {
             for (PerformanceInputRow row : table.getItems()) row.score.set("");
             recalcPerformance(table, result);
@@ -1277,7 +1303,7 @@ public class AvaliacaoApplication extends Application {
         }
         table.setItems(rows);
 
-        Button export=new Button("⇩  Exportar mapa final");
+        Button export=CotanIcons.button("Exportar mapa final", Feather.DOWNLOAD, "accent-button", "accent");
         export.getStyleClass().add("accent-button");
         export.setOnAction(e -> exportPerformanceMap(type));
 
@@ -1305,11 +1331,11 @@ public class AvaliacaoApplication extends Application {
                 label("Os dados são calculados a partir dos lançamentos trimestrais e podem ser auditados pelos mapas.", "muted")
         );
 
-        Button evaluation=new Button("Abrir lançamento de avaliação");
+        Button evaluation=CotanIcons.button("Abrir lançamento de avaliação", Feather.CLIPBOARD, "accent-button", "accent");
         evaluation.getStyleClass().add("accent-button");
         evaluation.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
 
-        Button finalMap=new Button("Abrir mapa final");
+        Button finalMap=CotanIcons.button("Abrir mapa final", Feather.AWARD, "button-outlined");
         finalMap.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "map-final-professor" : "map-final-administrative"));
 
         HBox actions=new HBox(10,evaluation,finalMap);
@@ -1862,7 +1888,7 @@ public class AvaliacaoApplication extends Application {
         selectedAssessmentId = row.id.get();
         showSection("grades");
         try {
-            content.getChildren().setAll(buildGradesWithAssessment(row.id.get()));
+            setContentPage(buildGradesWithAssessment(row.id.get()));
         } catch (Exception ex) {
             showError("Não foi possível abrir o lançamento de notas", ex);
         }
@@ -1906,7 +1932,7 @@ public class AvaliacaoApplication extends Application {
         if (selected == null && !assessment.getItems().isEmpty()) selected = assessment.getItems().get(0);
         assessment.setValue(selected);
 
-        Button load = new Button("Carregar alunos");
+        Button load = CotanIcons.button("Carregar alunos", Feather.REFRESH_CW, "accent-button", "accent");
         load.getStyleClass().add("accent-button");
 
         Label hint = new Label("Escala 0–20 por padrão; a nota máxima da avaliação é respeitada.");
@@ -1954,10 +1980,10 @@ public class AvaliacaoApplication extends Application {
         table.getColumns().addAll(score, observation);
 
         Label total = label("0 aluno(s) carregados", "muted");
-        Button saveAll = new Button("✓  Guardar notas");
+        Button saveAll = CotanIcons.button("Guardar notas", Feather.SAVE, "accent-button", "accent");
         saveAll.getStyleClass().add("accent-button");
 
-        Button clear = new Button("Limpar lançamentos");
+        Button clear = CotanIcons.button("Limpar lançamentos", Feather.ROTATE_CCW, "button-outlined");
         clear.setOnAction(e -> {
             for (GradeRow r : table.getItems()) r.scoreProperty().set("");
         });
@@ -2346,13 +2372,13 @@ public class AvaliacaoApplication extends Application {
     }
 
     private Button miniButton(String text) {
-        Button b = new Button(text);
+        Button b = new Button(text, CotanIcons.icon(Feather.EDIT_2, 14));
         b.getStyleClass().addAll("mini-button", "button-outlined", "small");
         return b;
     }
 
     private Button miniDangerButton(String text) {
-        Button b = new Button(text);
+        Button b = new Button(text, CotanIcons.icon(Feather.TRASH_2, 14));
         b.getStyleClass().addAll("danger-button", "danger", "small");
         return b;
     }
@@ -2728,7 +2754,7 @@ public class AvaliacaoApplication extends Application {
         }
 
         void setContent(Node node) {
-            content.getChildren().setAll(node);
+            setContentPage(node);
         }
 
         ObservableList<ButtonType> getButtonTypes() {
