@@ -2212,7 +2212,7 @@ public class AvaliacaoApplication extends Application {
         return holder;
     }
 
-    private void styleTable(TableView<?> table) {
+    private <T> void styleTable(TableView<T> table) {
         table.getStyleClass().add("cotan-table");
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.setPlaceholder(label("Nenhum registo encontrado.", "table-empty"));
@@ -2220,7 +2220,7 @@ public class AvaliacaoApplication extends Application {
         table.setFixedCellSize(46);
         table.setPrefHeight(420);
         table.setRowFactory(tv -> {
-            TableRow<?> row = new TableRow<>();
+            TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((obs, oldItem, newItem) -> {
                 row.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("row-empty"), newItem == null);
             });
@@ -2511,7 +2511,7 @@ public class AvaliacaoApplication extends Application {
             content.getChildren().setAll(node);
         }
 
-        List<ButtonType> getButtonTypes() {
+        ObservableList<ButtonType> getButtonTypes() {
             return buttonTypes;
         }
     }
