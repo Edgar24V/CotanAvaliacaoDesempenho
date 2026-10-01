@@ -20,6 +20,17 @@ public final class CotanUi {
         return scroll;
     }
 
+    public static ScrollPane sidebar(Node content) {
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
+        scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        scroll.setPannable(true);
+        scroll.getStyleClass().add("sidebar-scroll");
+        return scroll;
+    }
+
     public static <T> void tableDefaults(TableView<T> table) {
         table.setPlaceholder(null);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
