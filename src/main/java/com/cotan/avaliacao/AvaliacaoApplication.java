@@ -765,7 +765,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(3, label("Peso", "field-label"), weight);
         grid.addRow(4, label("Descrição", "field-label"), description);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
         dialog.setResultConverter(btn -> {
@@ -899,7 +899,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(5, label("Contacto", "field-label"), phone);
         grid.addRow(6, label("Encarregado", "field-label"), guardian);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
         dialog.setResultConverter(btn -> {
@@ -1035,7 +1035,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(5, label("E-mail", "field-label"), email);
         grid.addRow(6, label("Admissão", "field-label"), admission);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
         dialog.setResultConverter(btn -> {
@@ -1568,7 +1568,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(2, label("Telefone", "field-label"), phone);
         grid.addRow(3, label("E-mail", "field-label"), email);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
@@ -1665,7 +1665,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(3, label("Sala", "field-label"), room);
         grid.addRow(4, label("Coordenador", "field-label"), coordinator);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
@@ -1765,7 +1765,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(2, label("Carga horária", "field-label"), workload);
         grid.addRow(3, label("Peso", "field-label"), weight);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
@@ -1891,7 +1891,7 @@ public class AvaliacaoApplication extends Application {
         grid.addRow(8, label("Professor", "field-label"), teacher);
         grid.addRow(9, label("Observações", "field-label"), notes);
 
-        dialog.getDialogPane().setContent(grid);
+        dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
@@ -2395,13 +2395,19 @@ public class AvaliacaoApplication extends Application {
 
     private GridPane formGrid() {
         GridPane grid = new GridPane();
+        grid.getStyleClass().add("cotan-form-grid");
         grid.setHgap(14);
         grid.setVgap(12);
-        grid.setPadding(new Insets(8));
+        grid.setPadding(new Insets(6, 2, 8, 2));
+
         ColumnConstraints left = new ColumnConstraints();
-        left.setMinWidth(130);
+        left.setMinWidth(145);
+        left.setPrefWidth(150);
+
         ColumnConstraints right = new ColumnConstraints();
+        right.setMinWidth(260);
         right.setHgrow(Priority.ALWAYS);
+
         grid.getColumnConstraints().addAll(left, right);
         return grid;
     }
