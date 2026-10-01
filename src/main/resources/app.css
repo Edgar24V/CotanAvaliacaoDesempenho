@@ -461,6 +461,12 @@
 
 .cotan-modal-box {
     -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.cotan-modal-box > .close-button {
+    -fx-opacity: 0;
+    -fx-mouse-transparent: true;
 }
 
 .cotan-modal {
@@ -564,6 +570,61 @@
 .cotan-dialog-pane {
     -fx-background-color: transparent;
 }
+
+.cotan-modal-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.cotan-modal-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -color-border-muted;
+    -fx-background-radius: 8px;
+    -fx-min-width: 7px;
+}
+
+.cotan-modal-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -color-accent-emphasis;
+}
+
+.cotan-modal-scroll .corner {
+    -fx-background-color: transparent;
+}
+
+.cotan-modal .text-field,
+.cotan-modal .combo-box,
+.cotan-modal .date-picker,
+.cotan-modal .spinner,
+.cotan-modal .text-area {
+    -fx-min-height: 38px;
+}
+
+.cotan-modal .combo-box,
+.cotan-modal .date-picker,
+.cotan-modal .spinner {
+    -fx-pref-height: 38px;
+}
+
+.cotan-modal .text-area {
+    -fx-min-height: 90px;
+}
+
+.cotan-modal .button {
+    -fx-min-height: 36px;
+}
+
 
 /* Ikonli + global scroll */
 .cotan-icon {
