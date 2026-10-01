@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 /**
  * Cotan • Avaliação e Desempenho
@@ -77,6 +78,15 @@ public class AvaliacaoApplication extends Application {
     private String currentSection = "dashboard";
     private Button activeNav;
     private boolean darkMode = false;
+
+    private static final Set<String> EXCEL_PERFORMANCE_SCORES =
+            Set.of("5", "10", "15", "20");
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final Pattern PHONE_PATTERN =
+            Pattern.compile("^(?:\\+244\\s?)?9\\d{8}$");
+    private static final Pattern ACADEMIC_YEAR_PATTERN =
+            Pattern.compile("^20\\d{2}/20\\d{2}$");
 
     private static final String LIGHT_THEME = new PrimerLight().getUserAgentStylesheet();
     private static final String DARK_THEME = new PrimerDark().getUserAgentStylesheet();
@@ -679,8 +689,10 @@ public class AvaliacaoApplication extends Application {
 
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (code.getText().isBlank() || name.getText().isBlank()) {
-                showWarning("Informe o código e o nome do indicador.");
+            String validation = validateIndicator(code.getText(), name.getText(), staffType.getValue(),
+                    weight.getValue(), existing == null ? null : existing.id.get());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -811,8 +823,10 @@ public class AvaliacaoApplication extends Application {
 
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (name.getText().isBlank() || number.getText().isBlank()) {
-                showWarning("Preencha o número e o nome do aluno.");
+            String validation = validateStudent(number.getText(), name.getText(), gender.getValue(),
+                    birth.getValue(), phone.getText(), guardian.getText());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -944,8 +958,11 @@ public class AvaliacaoApplication extends Application {
 
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (code.getText().isBlank() || name.getText().isBlank()) {
-                showWarning("Informe o código e o nome.");
+            String validation = validateStaff(type, code.getText(), name.getText(), role.getText(),
+                    department.getText(), phone.getText(), email.getText(), admission.getValue(),
+                    existing == null ? null : existing.id.get());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -1041,19 +1058,16 @@ public class AvaliacaoApplication extends Application {
         addColumn(table, "Peso", 95, PerformanceInputRow::weightProperty);
 
         TableColumn<PerformanceInputRow,String> score = new TableColumn<>("Pontuação");
-        score.setPrefWidth(160);
+        score.setPrefWidth(170);
         score.setCellValueFactory(c -> c.getValue().scoreProperty());
-        score.setCellFactory(TextFieldTableCell.forTableColumn());
+        score.setCellFactory(ComboBoxTableCell.forTableColumn("", "5", "10", "15", "20"));
         score.setOnEditCommit(e -> {
-            String v = e.getNewValue() == null ? "" : e.getNewValue().trim().replace(",", ".");
-            if (v.isBlank()) { e.getRowValue().score.set(""); recalcPerformance(table,result); return; }
-            try {
-                double n = Double.parseDouble(v);
-                if (n < 0 || n > 20) throw new NumberFormatException();
-                e.getRowValue().score.set(String.format(Locale.US, "%.2f", n));
+            String v = e.getNewValue() == null ? "" : e.getNewValue().trim();
+            if (v.isBlank() || EXCEL_PERFORMANCE_SCORES.contains(v)) {
+                e.getRowValue().score.set(v);
                 recalcPerformance(table,result);
-            } catch (NumberFormatException ex) {
-                showWarning("A pontuação deve estar entre 0 e 20.");
+            } else {
+                showWarning("Pontuação inválida. A escala do ficheiro Excel é 5, 10, 15 ou 20.");
                 table.refresh();
             }
         });
@@ -1061,6 +1075,17 @@ public class AvaliacaoApplication extends Application {
         TableColumn<PerformanceInputRow,String> obs = new TableColumn<>("Observação");
         obs.setPrefWidth(360);
         obs.setCellValueFactory(c -> c.getValue().observationProperty());
+        obs.setCellFactory(TextFieldTableCell.forTableColumn());
+        obs.setOnEditCommit(e -> {
+            String value = e.getNewValue() == null ? "" : e.getNewValue().trim();
+            if (value.length() > 500) {
+                showWarning("A observação não pode exceder 500 caracteres.");
+                table.refresh();
+                return;
+            }
+            e.getRowValue().observation.set(value);
+            table.refresh();
+        });
         table.getColumns().addAll(score, obs);
 
         Runnable load = () -> {
@@ -1092,6 +1117,25 @@ public class AvaliacaoApplication extends Application {
             StaffOption selectedStaff = staff.getValue();
             if (selectedStaff == null) { showWarning("Selecione o profissional."); return; }
             try {
+                int filled = 0;
+                for (PerformanceInputRow row : table.getItems()) {
+                    if (row.score.get().isBlank()) continue;
+                    filled++;
+                    if (!EXCEL_PERFORMANCE_SCORES.contains(row.score.get().trim())) {
+                        showWarning("A pontuação de " + row.name.get()
+                                + " deve ser 5, 10, 15 ou 20, conforme a escala do Excel.");
+                        return;
+                    }
+                    if (row.observation.get() != null && row.observation.get().length() > 500) {
+                        showWarning("A observação de " + row.name.get() + " excede 500 caracteres.");
+                        return;
+                    }
+                }
+                if (filled > 0 && filled < table.getItems().size()) {
+                    showWarning("O Excel deixa o resultado em branco quando faltam componentes. "
+                            + "Preencha todos os " + table.getItems().size() + " indicadores antes de guardar.");
+                    return;
+                }
                 for (PerformanceInputRow row : table.getItems()) {
                     if (row.score.get().isBlank()) continue;
                     database.upsertPerformanceScore(
@@ -1281,6 +1325,8 @@ public class AvaliacaoApplication extends Application {
     }
 
     private String performanceClassification(double score) {
+        if (!Double.isFinite(score)) return "Sem avaliação";
+        if (score <= 0) return "Sem avaliação";
         if (score < 10) return "Mau";
         if (score < 14) return "Suficiente";
         if (score < 18) return "Bom";
@@ -1444,8 +1490,9 @@ public class AvaliacaoApplication extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (name.getText().isBlank()) {
-                showWarning("Informe o nome do professor.");
+            String validation = validateTeacher(name.getText(), specialty.getText(), phone.getText(), email.getText());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -1540,8 +1587,10 @@ public class AvaliacaoApplication extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (name.getText().isBlank() || year.getText().isBlank()) {
-                showWarning("Informe a turma e o ano lectivo.");
+            String validation = validateClass(name.getText(), year.getText(), shift.getValue(),
+                    room.getText(), coordinator.getText());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -1638,8 +1687,10 @@ public class AvaliacaoApplication extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (name.getText().isBlank() || code.getText().isBlank()) {
-                showWarning("Informe o nome e o código da disciplina.");
+            String validation = validateSubject(name.getText(), code.getText(), workload.getValue(), weight.getValue(),
+                    existing == null ? null : existing.id.get());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -1762,8 +1813,10 @@ public class AvaliacaoApplication extends Application {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            if (title.getText().isBlank() || subject.getValue() == null) {
-                showWarning("Informe pelo menos o título e a disciplina.");
+            String validation = validateAssessment(title.getText(), type.getValue(), term.getValue(), date.getValue(),
+                    maxScore.getValue(), weight.getValue(), clazz.getValue(), subject.getValue(), teacher.getValue());
+            if (validation != null) {
+                showWarning(validation);
                 return null;
             }
             try {
@@ -1877,7 +1930,9 @@ public class AvaliacaoApplication extends Application {
             }
             try {
                 double n = Double.parseDouble(value);
-                if (n < 0) throw new NumberFormatException();
+                AssessmentOption selectedAssessment = assessment.getValue();
+                double maxAllowed = selectedAssessment == null ? 20 : selectedAssessment.maxScore();
+                if (n < 0 || n > maxAllowed) throw new NumberFormatException();
                 e.getRowValue().scoreProperty().set(String.format(Locale.US, "%.2f", n));
             } catch (NumberFormatException ex) {
                 showWarning("Digite uma nota numérica válida.");
@@ -2304,6 +2359,152 @@ public class AvaliacaoApplication extends Application {
                 .filter(Objects::nonNull)
                 .map(v -> v.toLowerCase(Locale.ROOT))
                 .anyMatch(v -> v.contains(query));
+    }
+
+    private String validateIndicator(String code, String name, String staffType, double weight, Long existingId) {
+        List<String> e = new ArrayList<>();
+        String normalizedCode = safe(code).trim().toUpperCase(Locale.ROOT);
+        String normalizedName = safe(name).trim();
+        if (!normalizedCode.matches("IND-\\d{2,3}")) e.add("Código do indicador: use o formato IND-01.");
+        if (normalizedName.length() < 3 || normalizedName.length() > 120) e.add("Nome do indicador: entre 3 e 120 caracteres.");
+        if (staffType == null || staffType.isBlank()) e.add("Selecione a aplicação do indicador.");
+        if (!Double.isFinite(weight) || weight <= 0 || weight > 10) e.add("Peso: valor entre 0,1 e 10.");
+        if (e.isEmpty()) {
+            try {
+                Object duplicate = database.scalar(
+                        "SELECT COUNT(*) FROM performance_indicators WHERE code=? AND (? IS NULL OR id<>?)",
+                        normalizedCode, existingId, existingId);
+                if (duplicate instanceof Number n && n.intValue() > 0) e.add("Já existe um indicador com esse código.");
+            } catch (SQLException ex) {
+                e.add("Não foi possível validar a unicidade do código.");
+            }
+        }
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateStudent(String number, String name, String gender, LocalDate birth,
+                                   String phone, String guardian) {
+        List<String> e = new ArrayList<>();
+        String n = safe(number).trim();
+        String nm = safe(name).trim();
+        if (!n.matches("[A-Za-z0-9][A-Za-z0-9\\-]{2,19}")) e.add("Número do aluno: use 3–20 caracteres alfanuméricos.");
+        if (nm.length() < 3 || nm.length() > 120) e.add("Nome do aluno: entre 3 e 120 caracteres.");
+        if (gender != null && gender.isBlank()) e.add("Género inválido.");
+        if (birth != null && birth.isAfter(LocalDate.now())) e.add("A data de nascimento não pode estar no futuro.");
+        if (!validPhone(phone)) e.add("Contacto inválido. Use 9XXXXXXXX ou +244 9XXXXXXXX.");
+        if (safe(guardian).trim().length() > 120) e.add("Nome do encarregado: máximo 120 caracteres.");
+        if (e.isEmpty()) {
+            try {
+                Object duplicate = database.scalar("SELECT COUNT(*) FROM students WHERE student_number=?", n);
+                if (duplicate instanceof Number count && count.intValue() > 0) {
+                    e.add("Já existe um aluno com este número.");
+                }
+            } catch (SQLException ex) {
+                e.add("Não foi possível validar o número do aluno.");
+            }
+        }
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateStaff(String type, String code, String name, String role, String department,
+                                 String phone, String email, LocalDate admission, Long existingId) {
+        List<String> e = new ArrayList<>();
+        String c = safe(code).trim().toUpperCase(Locale.ROOT);
+        String expected = "PROFESSOR".equals(type) ? "PROF" : "ADM";
+        if (!c.matches(expected + "-\\d{3}")) e.add("Código inválido. Use " + expected + "-001, " + expected + "-002, etc.");
+        if (safe(name).trim().length() < 3 || safe(name).trim().length() > 120) e.add("Nome: entre 3 e 120 caracteres.");
+        if (safe(role).trim().length() > 100) e.add("Cargo/função: máximo 100 caracteres.");
+        if (safe(department).trim().length() > 100) e.add("Departamento: máximo 100 caracteres.");
+        if (!validPhone(phone)) e.add("Telefone inválido. Use 9XXXXXXXX ou +244 9XXXXXXXX.");
+        if (!validEmail(email)) e.add("E-mail inválido.");
+        if (admission != null && admission.isAfter(LocalDate.now())) e.add("A data de admissão não pode estar no futuro.");
+        if (e.isEmpty()) {
+            try {
+                Object duplicate = database.scalar(
+                        "SELECT COUNT(*) FROM staff WHERE code=? AND (? IS NULL OR id<>?)",
+                        c, existingId, existingId);
+                if (duplicate instanceof Number n && n.intValue() > 0) e.add("Já existe um registo com este código.");
+            } catch (SQLException ex) {
+                e.add("Não foi possível validar a unicidade do código.");
+            }
+        }
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateTeacher(String name, String specialty, String phone, String email) {
+        List<String> e = new ArrayList<>();
+        if (safe(name).trim().length() < 3 || safe(name).trim().length() > 120) e.add("Nome: entre 3 e 120 caracteres.");
+        if (safe(specialty).trim().length() > 100) e.add("Especialidade: máximo 100 caracteres.");
+        if (!validPhone(phone)) e.add("Telefone inválido. Use 9XXXXXXXX ou +244 9XXXXXXXX.");
+        if (!validEmail(email)) e.add("E-mail inválido.");
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateClass(String name, String year, String shift, String room, String coordinator) {
+        List<String> e = new ArrayList<>();
+        if (safe(name).trim().length() < 2 || safe(name).trim().length() > 60) e.add("Turma: entre 2 e 60 caracteres.");
+        if (!validAcademicYear(year)) e.add("Ano lectivo inválido. Use o formato 2026/2027.");
+        if (shift == null || shift.isBlank()) e.add("Selecione o turno.");
+        if (safe(room).trim().length() > 50) e.add("Sala: máximo 50 caracteres.");
+        if (safe(coordinator).trim().length() > 120) e.add("Coordenador: máximo 120 caracteres.");
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateSubject(String name, String code, int workload, double weight, Long existingId) {
+        List<String> e = new ArrayList<>();
+        String c = safe(code).trim().toUpperCase(Locale.ROOT);
+        if (safe(name).trim().length() < 2 || safe(name).trim().length() > 120) e.add("Disciplina: entre 2 e 120 caracteres.");
+        if (!c.matches("[A-Z0-9]{2,10}")) e.add("Código da disciplina: 2–10 caracteres, sem espaços.");
+        if (workload < 1 || workload > 20) e.add("Carga horária: entre 1 e 20.");
+        if (!Double.isFinite(weight) || weight <= 0 || weight > 10) e.add("Peso: valor entre 0,1 e 10.");
+        if (e.isEmpty()) {
+            try {
+                Object duplicate = database.scalar(
+                        "SELECT COUNT(*) FROM subjects WHERE code=? AND (? IS NULL OR id<>?)",
+                        c, existingId, existingId);
+                if (duplicate instanceof Number n && n.intValue() > 0) e.add("Já existe uma disciplina com esse código.");
+            } catch (SQLException ex) {
+                e.add("Não foi possível validar a unicidade do código.");
+            }
+        }
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private String validateAssessment(String title, String type, String term, LocalDate date, double maxScore,
+                                      double weight, ClassOption clazz, SubjectOption subject, TeacherOption teacher) {
+        List<String> e = new ArrayList<>();
+        if (safe(title).trim().length() < 3 || safe(title).trim().length() > 120) e.add("Título: entre 3 e 120 caracteres.");
+        if (type == null || type.isBlank()) e.add("Selecione o tipo de avaliação.");
+        if (term == null || term.isBlank()) e.add("Selecione o período.");
+        if (date != null && date.isBefore(LocalDate.of(2000,1,1))) e.add("Data da avaliação inválida.");
+        if (!Double.isFinite(maxScore) || maxScore <= 0 || maxScore > 100) e.add("Nota máxima: entre 1 e 100.");
+        if (!Double.isFinite(weight) || weight <= 0 || weight > 10) e.add("Peso: valor entre 0,1 e 10.");
+        if (subject == null) e.add("Selecione a disciplina.");
+        return e.isEmpty() ? null : String.join("\n", e);
+    }
+
+    private boolean validPhone(String phone) {
+        String p = safe(phone).trim().replace(" ", "");
+        if (p.isBlank()) return true;
+        return PHONE_PATTERN.matcher(p).matches();
+    }
+
+    private boolean validEmail(String email) {
+        String v = safe(email).trim();
+        if (v.isBlank()) return true;
+        return EMAIL_PATTERN.matcher(v).matches();
+    }
+
+    private boolean validAcademicYear(String year) {
+        String y = safe(year).trim();
+        if (!ACADEMIC_YEAR_PATTERN.matcher(y).matches()) return false;
+        try {
+            int start = Integer.parseInt(y.substring(0,4));
+            int end = Integer.parseInt(y.substring(5));
+            return end == start + 1;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     private static String blankToNull(String value) {
