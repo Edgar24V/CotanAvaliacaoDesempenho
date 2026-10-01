@@ -1192,3 +1192,109 @@
 .scroll-bar:vertical .thumb:hover {
     -fx-background-color: #7B8A81;
 }
+
+
+/* ── Formulários COTAN — padrão profissional ─────────────────────────── */
+
+.cotan-form-grid {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E2E8E4;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+}
+
+.cotan-form-grid .field-label {
+    -fx-text-fill: #405047;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 0 4px 0 0;
+}
+
+.cotan-modal .field-label::after {
+    -fx-text-fill: #D32F2F;
+}
+
+.cotan-modal .text-field,
+.cotan-modal .text-area,
+.cotan-modal .combo-box,
+.cotan-modal .date-picker,
+.cotan-modal .spinner {
+    -fx-background-color: #FAFCFB;
+    -fx-border-color: #C9D4CE;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 7px 10px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #212121;
+}
+
+.cotan-modal .text-field:hover,
+.cotan-modal .text-area:hover,
+.cotan-modal .combo-box:hover,
+.cotan-modal .date-picker:hover,
+.cotan-modal .spinner:hover {
+    -fx-border-color: #A5D6A7;
+    -fx-background-color: #FFFFFF;
+}
+
+.cotan-modal .text-field:focused,
+.cotan-modal .text-area:focused,
+.cotan-modal .combo-box:focused,
+.cotan-modal .date-picker:focused,
+.cotan-modal .spinner:focused {
+    -fx-border-color: #217346;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(33,115,70,0.12), 7, 0, 0, 1);
+}
+
+.cotan-modal .combo-box .list-cell,
+.cotan-modal .date-picker .text-field {
+    -fx-font-size: 12px;
+}
+
+.cotan-modal .spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-modal .check-box,
+.cotan-modal .radio-button {
+    -fx-text-fill: #405047;
+    -fx-font-size: 12px;
+}
+
+.cotan-modal .separator .line {
+    -fx-border-color: #E2E8E4;
+}
+
+.cotan-modal .button {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-font-weight: bold;
+}
+
+.cotan-modal .accent-button,
+.cotan-modal .button.accent {
+    -fx-background-color: #217346;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #1B5E3B;
+}
+
+.cotan-modal .accent-button:hover,
+.cotan-modal .button.accent:hover {
+    -fx-background-color: #1E6B3C;
+}
+
+.cotan-modal .button-outlined {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #217346;
+    -fx-border-color: #AEBBB3;
+}
+
+.cotan-modal .button-outlined:hover {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: #217346;
+}
