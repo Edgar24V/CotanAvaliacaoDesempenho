@@ -2756,7 +2756,7 @@ public class AvaliacaoApplication extends Application {
         }
 
         void setContent(Node node) {
-            setContentPage(node);
+            content.getChildren().setAll(node);
         }
 
         ObservableList<ButtonType> getButtonTypes() {
