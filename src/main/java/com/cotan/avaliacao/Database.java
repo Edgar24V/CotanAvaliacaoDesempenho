@@ -588,8 +588,12 @@ public final class Database implements AutoCloseable {
             """, studentId, assessmentId, score, observation == null ? "" : observation);
     }
 
-    public void deleteById(String table, long id) throws SQLException {
-        update("DELETE FROM " + table + " WHERE id=?", id);
+    public void deleteById(String table, long id) {
+        try {
+            update("DELETE FROM " + table + " WHERE id=?", id);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Não foi possível eliminar o registo.", e);
+        }
     }
 
     public void backup(Path destination) throws IOException, SQLException {
