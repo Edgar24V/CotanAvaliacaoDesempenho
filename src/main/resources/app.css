@@ -680,3 +680,515 @@
 .home-nav-card {
     -fx-cursor: hand;
 }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   COTAN — Visual System inspirado no Kubata
+   Layout corporativo: verde, superfícies limpas, navegação agrupada,
+   pesquisa global, métricas, estados e tabelas orientadas a dados.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+.root {
+    -fx-font-family: "Segoe UI", "Calibri", "Arial", system;
+    -fx-font-size: 13px;
+    -fx-accent: #217346;
+    -fx-focus-color: #4CAF50;
+    -fx-faint-focus-color: rgba(33, 115, 70, 0.16);
+}
+
+.app-background {
+    -fx-background-color: #F5F7F6;
+}
+
+/* ── Barra superior ───────────────────────────────────────────────────── */
+
+.cotan-header {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDE5E0;
+    -fx-border-width: 0 0 1px 0;
+    -fx-effect: dropshadow(gaussian, rgba(16, 24, 40, 0.08), 8, 0, 0, 2);
+}
+
+.header-titles {
+    -fx-min-width: 190px;
+}
+
+.header-titles .label:first-child {
+    -fx-text-fill: #1E6B3C;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.header-titles .label:last-child {
+    -fx-text-fill: #757575;
+    -fx-font-size: 11px;
+}
+
+.header-search-wrap {
+    -fx-max-width: 430px;
+}
+
+.header-search {
+    -fx-background-color: #F8FAF9;
+    -fx-background-radius: 20px;
+    -fx-border-color: #D4DED8;
+    -fx-border-radius: 20px;
+    -fx-padding: 8px 12px 8px 34px;
+    -fx-min-height: 36px;
+}
+
+.header-search:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #4CAF50;
+    -fx-effect: dropshadow(gaussian, rgba(33, 115, 70, 0.14), 8, 0, 0, 1);
+}
+
+.header-icon-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 9px;
+    -fx-min-width: 36px;
+    -fx-pref-width: 36px;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-padding: 7px;
+}
+
+.header-icon-button:hover {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: #A5D6A7;
+}
+
+.header-primary-action {
+    -fx-background-color: #217346;
+    -fx-border-color: #1B5E3B;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 14px;
+}
+
+.header-primary-action:hover {
+    -fx-background-color: #1E6B3C;
+}
+
+.account-menu {
+    -fx-background-color: #F5F7F6;
+    -fx-border-color: #D4DED8;
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-padding: 5px 10px;
+    -fx-font-weight: bold;
+}
+
+.account-menu:hover {
+    -fx-background-color: #E8F5E9;
+}
+
+.notification-badge {
+    -fx-background-color: #D32F2F;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 10px;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 5px;
+    -fx-min-width: 17px;
+    -fx-alignment: CENTER;
+}
+
+/* ── Menu lateral tipo Kubata ────────────────────────────────────────── */
+
+.cotan-sidebar {
+    -fx-background-color: #1E6B3C;
+    -fx-border-color: #185C37;
+    -fx-border-width: 0 1px 0 0;
+    -fx-padding: 8px;
+}
+
+.cotan-sidebar-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-sidebar-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.cotan-sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-background-radius: 8px;
+}
+
+.cotan-sidebar-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(255,255,255,0.36);
+}
+
+.cotan-brand {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255,255,255,0.12);
+    -fx-border-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.cotan-brand .label:first-child {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.cotan-brand .label:last-child {
+    -fx-text-fill: rgba(255,255,255,0.66);
+    -fx-font-size: 10px;
+}
+
+.cotan-nav-group {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-nav-group > .title {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.56);
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 10px 6px 10px;
+}
+
+.cotan-nav-group > .title:hover,
+.cotan-nav-group:expanded > .title {
+    -fx-background-color: rgba(255,255,255,0.07);
+}
+
+.cotan-nav-group > .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 2px 0 4px 0;
+}
+
+.cotan-nav-item {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-font-size: 12px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.cotan-nav-item:hover {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-text-fill: #FFFFFF;
+}
+
+.cotan-nav-item:selected {
+    -fx-background-color: rgba(255,255,255,0.20);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent transparent #FFFFFF;
+    -fx-border-width: 0 0 0 3px;
+}
+
+.cotan-nav-item .cotan-icon {
+    -fx-fill: rgba(255,255,255,0.78);
+}
+
+.cotan-nav-item:selected .cotan-icon,
+.cotan-nav-item:hover .cotan-icon {
+    -fx-fill: #FFFFFF;
+}
+
+/* ── Footer/status bar ───────────────────────────────────────────────── */
+
+.cotan-footer {
+    -fx-background-color: #217346;
+    -fx-border-color: #1B5E3B;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.cotan-footer .label {
+    -fx-text-fill: rgba(255,255,255,0.88);
+    -fx-font-size: 10px;
+}
+
+/* ── Conteúdo / cartões ─────────────────────────────────────────────── */
+
+.page-title,
+.section-title {
+    -fx-text-fill: #1E6B3C;
+}
+
+.card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E0E6E2;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 7, 0, 0, 1);
+}
+
+.card:hover {
+    -fx-border-color: #A5D6A7;
+}
+
+.toolbar-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 7px;
+    -fx-border-color: #E0E6E2;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1px;
+}
+
+.field-label {
+    -fx-text-fill: #5F6B64;
+    -fx-font-size: 11px;
+}
+
+/* ── Métricas ───────────────────────────────────────────────────────── */
+
+.cotan-metric-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 7px;
+    -fx-border-color: #E0E6E2;
+    -fx-border-radius: 7px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 7, 0, 0, 1);
+}
+
+.cotan-metric-card:hover {
+    -fx-border-color: #A5D6A7;
+    -fx-effect: dropshadow(gaussian, rgba(33,115,70,0.12), 10, 0, 0, 2);
+}
+
+.metric-icon {
+    -fx-background-radius: 6px;
+    -fx-padding: 7px;
+    -fx-font-weight: bold;
+}
+
+.tone-accent .metric-icon {
+    -fx-background-color: #E3F2E8;
+}
+.tone-accent .metric-icon .cotan-icon {
+    -fx-fill: #217346;
+}
+.tone-success .metric-icon {
+    -fx-background-color: #E8F5E9;
+}
+.tone-success .metric-icon .cotan-icon {
+    -fx-fill: #2E7D32;
+}
+.tone-info .metric-icon {
+    -fx-background-color: #E8F1F7;
+}
+.tone-info .metric-icon .cotan-icon {
+    -fx-fill: #0277BD;
+}
+
+.metric-title {
+    -fx-text-fill: #757575;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.metric-value {
+    -fx-text-fill: #1E6B3C;
+    -fx-font-size: 27px;
+    -fx-font-weight: bold;
+}
+
+.metric-note {
+    -fx-text-fill: #8A938E;
+    -fx-font-size: 10px;
+}
+
+/* ── Tabelas tipo Kubata / Excel ───────────────────────────────────── */
+
+.cotan-table,
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E6E2;
+    -fx-border-width: 1px;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: transparent transparent #A5D6A7 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent #D5DDD8 transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+    -fx-size: 36px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #1E6B3C;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #F0F3F1 transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-cell-size: 36px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FAFCFB;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #E8F5E9;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #C8E6C9;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #1E6B3C;
+}
+
+.table-cell {
+    -fx-padding: 5px 9px;
+    -fx-text-fill: #45514A;
+    -fx-font-size: 11px;
+}
+
+/* ── Botões ─────────────────────────────────────────────────────────── */
+
+.button {
+    -fx-background-color: #EEEEEE;
+    -fx-text-fill: #212121;
+    -fx-border-color: #BDBDBD;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-padding: 7px 13px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #E4E7E5;
+}
+
+.button-primary,
+.accent-button,
+.button.accent {
+    -fx-background-color: #217346;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #1B5E3B;
+    -fx-font-weight: bold;
+}
+
+.button-primary:hover,
+.accent-button:hover,
+.button.accent:hover {
+    -fx-background-color: #1E6B3C;
+}
+
+.button-secondary,
+.button-outlined {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #217346;
+    -fx-border-color: #217346;
+}
+
+.button-secondary:hover,
+.button-outlined:hover {
+    -fx-background-color: #E8F5E9;
+}
+
+.danger-button,
+.button-danger,
+.button.danger {
+    -fx-background-color: #D32F2F;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #B71C1C;
+}
+
+/* ── Campos ─────────────────────────────────────────────────────────── */
+
+.text-field,
+.text-area,
+.combo-box,
+.date-picker,
+.spinner {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #BDBDBD;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #212121;
+}
+
+.text-field:focused,
+.text-area:focused,
+.combo-box:focused,
+.date-picker:focused,
+.spinner:focused {
+    -fx-border-color: #217346;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(33,115,70,0.13), 5, 0, 0, 0);
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────────── */
+
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 7px 14px;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #217346 transparent;
+    -fx-border-width: 0 0 2px 0;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #217346;
+    -fx-font-weight: bold;
+}
+
+/* ── Menus / popups ───────────────────────────────────────────────── */
+
+.context-menu,
+.menu-button {
+    -fx-background-radius: 5px;
+}
+
+.context-menu .menu-item:focused,
+.context-menu .menu-item:hover {
+    -fx-background-color: #E8F5E9;
+}
+
+.tooltip {
+    -fx-background-color: #424242;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 4px;
+    -fx-font-size: 10px;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 9px;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #B8C2BC;
+    -fx-background-radius: 999px;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #7B8A81;
+}
