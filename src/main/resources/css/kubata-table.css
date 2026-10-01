@@ -1,0 +1,394 @@
+/* ============================================================
+   kubata-table.css — Corrigido e modernizado
+   Base: AtlantaFX + Fluent Design System
+   ============================================================ */
+
+/* -----------------------------------------------
+   Tokens de referência
+   -----------------------------------------------
+   JavaFX CSS não suporta variáveis declaradas como
+   propriedades CSS comuns. Os valores são definidos
+   directamente nas regras abaixo para manter compatibilidade
+   com as versões suportadas pelo Kubata.
+*/
+
+/* ============================================================
+   TABELA BASE
+   ============================================================ */
+.advanced-table {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7dee8-soft;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.advanced-table:focused {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 1.2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 24, 40, 0.08), 10, 0, 0, 2);
+}
+
+/* Cabeçalho */
+.advanced-table .column-header {
+    -fx-background-color: #f6f8fb;
+    -fx-text-fill: #1f3a5f;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-padding: 10px 10px;
+    -fx-border-color: transparent #d7dee8-soft transparent transparent;
+}
+
+.advanced-table .column-header-background {
+    -fx-background-color: #f6f8fb;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+/* Linhas */
+.advanced-table .table-row-cell {
+    -fx-cell-size: 36px;
+    -fx-border-color: transparent transparent #d7dee8-soft transparent;
+    -fx-background-insets: 0;
+}
+
+.advanced-table .table-row-cell:hover {
+    -fx-background-color: #e8f5e9;
+}
+
+.advanced-table .table-row-cell:selected {
+    -fx-background-color: #4e9452;
+}
+
+/* Células */
+.advanced-table .table-cell {
+    -fx-padding: 6px 10px;
+    -fx-text-fill: rgba(31, 58, 95, 0.75);
+    -fx-alignment: CENTER-LEFT;  /* alinhamento profissional, padrão à esquerda */
+}
+
+/* Forçar texto centralizado se desejar (descomente a linha abaixo) */
+/* .advanced-table .table-cell { -fx-alignment: CENTER; } */
+
+.advanced-table .table-cell:filled:selected,
+.advanced-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #000000;
+}
+
+/* Linhas zebradas (apenas se a tabela tiver classe .report-table) */
+.report-table .table-row-cell:even {
+    -fx-background-color: #fbfcfe;
+}
+
+/* ============================================================
+   CÉLULAS EDITÁVEIS
+   ============================================================ */
+.editable-table-cell {
+    -fx-padding: 6px 10px;
+    -fx-cursor: text;
+}
+
+.cell-editor {
+    -fx-background-color: white;
+    -fx-border-color: #1f3a5f;
+    -fx-border-width: 0 0 2px 0;
+    -fx-background-radius: 3px 3px 0 0;
+    -fx-padding: 3px 6px;
+    -fx-font-size: 12px;
+}
+
+.cell-error {
+    -fx-background-color: #dc2626-bg;
+    -fx-border-color: #dc2626;
+    -fx-border-width: 0 0 2px 0;
+}
+
+.error-tooltip {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 4px;
+}
+
+/* ============================================================
+   CÉLULA MONETÁRIA (Kwanza)
+   ============================================================ */
+.currency-cell {
+    -fx-alignment: CENTER-RIGHT;
+    -fx-font-family: "JetBrains Mono", monospace;
+    -fx-font-size: 12px;
+}
+
+.currency-editor {
+    -fx-alignment: CENTER-RIGHT;
+    -fx-font-family: "JetBrains Mono", monospace;
+}
+
+/* ============================================================
+   CÉLULA DE AVALIAÇÃO (Estrelas)
+   ============================================================ */
+.star-filled {
+    -fx-text-fill: #f5a623;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+.star-empty {
+    -fx-text-fill: #d7dee8;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+/* ============================================================
+   BARRA DE PESQUISA
+   ============================================================ */
+.table-toolbar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #d7dee8-soft transparent;
+    -fx-padding: 10px 12px;
+}
+
+.table-toolbar .label {
+    -fx-text-fill: rgba(31, 58, 95, 0.75);
+}
+
+.table-search-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-color: #d7dee8-soft;
+    -fx-padding: 8px 14px;
+    -fx-prompt-text-fill: rgba(31, 58, 95, 0.45);
+}
+
+.table-search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 24, 40, 0.08), 10, 0, 0, 2);
+}
+
+/* ============================================================
+   PAGINAÇÃO
+   ============================================================ */
+.pagination-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7dee8-soft transparent transparent transparent;
+    -fx-padding: 10px 12px;
+}
+
+.pagination-bar .button {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #d7dee8-soft;
+    -fx-background-color: #ffffff;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.pagination-bar .button:hover {
+    -fx-background-color: #e8f5e9;
+}
+
+/* ============================================================
+   SCROLLBAR MODERNA (discreta)
+   ============================================================ */
+.advanced-table .scroll-bar:vertical,
+.advanced-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.advanced-table .scroll-bar .thumb {
+    -fx-background-color: rgba(31, 58, 95, 0.20);
+    -fx-background-radius: 999px;
+}
+
+.advanced-table .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(31, 58, 95, 0.28);
+}
+
+/* ============================================================
+   ESTADO DE CARREGAMENTO
+   ============================================================ */
+.table-loading {
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* ============================================================
+   CONTROLOS DA TABELA AVANÇADA — PAGINAÇÃO E ESTADOS
+   ============================================================ */
+
+.table-result-count,
+.table-page-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(31, 58, 95, 0.75);
+    -fx-font-weight: 600;
+}
+
+.table-pager {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7dee8-soft transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 7px 10px;
+}
+
+.table-pager .button {
+    -fx-min-width: 32px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+    -fx-background-radius: 7px;
+    -fx-border-radius: 7px;
+}
+
+.table-pager .button:disabled {
+    -fx-opacity: 0.45;
+}
+
+.table-pager .table-page-label {
+    -fx-padding: 0 8px;
+}
+
+.table-toolbar {
+    -fx-spacing: 8px;
+    -fx-background-insets: 0;
+}
+
+.table-toolbar .button-icon {
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-max-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+    -fx-max-height: 30px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+}
+
+.table-loading {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-padding: 24px;
+}
+
+.table-loading .progress-indicator {
+    -fx-progress-color: #217346;
+}
+
+.context-menu {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 5px;
+}
+
+.context-menu .menu-item {
+    -fx-padding: 7px 12px;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #e8f5e9;
+}
+
+.advanced-table .placeholder .label {
+    -fx-text-fill: rgba(31, 58, 95, 0.75);
+}
+
+.advanced-table .column-header .sort-order {
+    -fx-background-color: #1f3a5f;
+}
+
+.advanced-table .table-row-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.advanced-table .table-row-cell:selected {
+    -fx-background-color: derive(#4e9452, 8%);
+}
+
+.advanced-table .table-row-cell:selected:hover {
+    -fx-background-color: derive(#4e9452, 14%);
+}
+
+/* Selecção manual */
+.advanced-table .check-box {
+    -fx-padding: 0;
+}
+
+.advanced-table .check-box .box {
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #d7dee8;
+}
+
+.advanced-table .check-box:selected .box {
+    -fx-background-color: #4e9452;
+    -fx-border-color: #4e9452;
+}
+
+
+
+/* ============================================================
+   DENSIDADE DE DADOS
+   ============================================================ */
+
+.advanced-table.table-density-compact .table-row-cell {
+    -fx-cell-size: 30px;
+}
+
+.advanced-table.table-density-compact .table-cell {
+    -fx-padding: 4px 8px;
+    -fx-font-size: 11px;
+}
+
+.advanced-table.table-density-comfortable .table-row-cell {
+    -fx-cell-size: 36px;
+}
+
+.advanced-table.table-density-spacious .table-row-cell {
+    -fx-cell-size: 44px;
+}
+
+.advanced-table.table-density-spacious .table-cell {
+    -fx-padding: 8px 10px;
+}
+
+/* Selector de quantidade por página */
+.table-page-size {
+    -fx-min-width: 72px;
+    -fx-pref-width: 82px;
+    -fx-max-width: 95px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.table-page-size .list-cell {
+    -fx-padding: 5px 8px;
+}
+
+/* Estado de carregamento */
+.table-loading {
+    -fx-spacing: 8px;
+}
+
+.table-loading .label {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(31, 58, 95, 0.75);
+}
+
+/* Melhor leitura de dados seleccionados */
+.advanced-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #000000;
+}
+
+.advanced-table .table-row-cell:selected .check-box .box {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-border-color: rgba(255,255,255,0.96);
+}
+
+.advanced-table .table-row-cell:selected .check-box:selected .mark {
+    -fx-background-color: #4e9452;
+}
+
+/* Evita expansão excessiva de toolbars em ecrãs estreitos */
+.table-toolbar .label {
+    -fx-max-width: 260px;
+}
+
