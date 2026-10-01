@@ -6,6 +6,8 @@ import com.cotan.avaliacao.ui.CotanMetricCard;
 import com.cotan.avaliacao.ui.CotanModalHost;
 import com.cotan.avaliacao.ui.CotanSidebar;
 import com.cotan.avaliacao.ui.CotanUi;
+import com.cotan.avaliacao.ui.table.AdvancedTableView;
+import com.cotan.avaliacao.ui.table.TableUtils;
 import org.kordamp.ikonli.feather.Feather;
 
 import atlantafx.base.theme.PrimerDark;
@@ -704,7 +706,7 @@ public class AvaliacaoApplication extends Application {
                 "Critérios configuráveis usados pelo motor de desempenho. Ajuste nomes e pesos para refletir o mapa oficial."
         );
 
-        TableView<IndicatorRow> table = new TableView<>();
+        AdvancedTableView<IndicatorRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Código", 115, IndicatorRow::codeProperty);
         addColumn(table, "Indicador", 300, IndicatorRow::nameProperty);
@@ -829,7 +831,7 @@ public class AvaliacaoApplication extends Application {
                 "Cadastro, organização e acompanhamento dos estudantes."
         );
 
-        TableView<StudentRow> table = new TableView<>();
+        AdvancedTableView<StudentRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         addColumn(table, "Nº", 125, StudentRow::numberProperty);
@@ -955,7 +957,7 @@ public class AvaliacaoApplication extends Application {
 
         HBox heading = sectionHeading(title, description);
 
-        TableView<StaffRow> table = new TableView<>();
+        AdvancedTableView<StaffRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Código", 115, StaffRow::codeProperty);
         addColumn(table, "Nome completo", 280, StaffRow::nameProperty);
@@ -1132,7 +1134,7 @@ public class AvaliacaoApplication extends Application {
         );
         resultCard.getChildren().addAll(label("Resultado do período", "card-title"), result);
 
-        TableView<PerformanceInputRow> table = new TableView<>();
+        AdvancedTableView<PerformanceInputRow> table = new AdvancedTableView<>();
         table.setEditable(true);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Código", 110, PerformanceInputRow::codeProperty);
@@ -1250,7 +1252,7 @@ public class AvaliacaoApplication extends Application {
         return wrapper;
     }
 
-    private void recalcPerformance(TableView<PerformanceInputRow> table, HBox result) {
+    private void recalcPerformance(AdvancedTableView<PerformanceInputRow> table, HBox result) {
         double total=0, weights=0;
         int filled=0;
         for (PerformanceInputRow row : table.getItems()) {
@@ -1298,7 +1300,7 @@ public class AvaliacaoApplication extends Application {
                         + ("PROFESSOR".equals(type) ? "Professores" : "Administrativos"),
                 "card-title"));
 
-        TableView<PerformanceMapRow> table = new TableView<>();
+        AdvancedTableView<PerformanceMapRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table,"Código",120,PerformanceMapRow::codeProperty);
         addColumn(table,"Nome",270,PerformanceMapRow::nameProperty);
@@ -1340,7 +1342,7 @@ public class AvaliacaoApplication extends Application {
                 statCard("Média global",String.valueOf(s.get("average")),"Notas lançadas","★")
         );
 
-        TableView<PerformanceFinalRow> table=new TableView<>();
+        AdvancedTableView<PerformanceFinalRow> table=new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table,"Código",115,PerformanceFinalRow::codeProperty);
         addColumn(table,"Nome",270,PerformanceFinalRow::nameProperty);
@@ -1518,7 +1520,7 @@ public class AvaliacaoApplication extends Application {
                 "Gestão dos docentes e respetivas áreas de especialização."
         );
 
-        TableView<TeacherRow> table = new TableView<>();
+        AdvancedTableView<TeacherRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Nome", 270, TeacherRow::nameProperty);
         addColumn(table, "Especialidade", 220, TeacherRow::specialtyProperty);
@@ -1609,7 +1611,7 @@ public class AvaliacaoApplication extends Application {
                 "Organize anos letivos, turnos, salas e coordenação."
         );
 
-        TableView<ClassRow> table = new TableView<>();
+        AdvancedTableView<ClassRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Turma", 170, ClassRow::nameProperty);
         addColumn(table, "Ano lectivo", 150, ClassRow::yearProperty);
@@ -1714,7 +1716,7 @@ public class AvaliacaoApplication extends Application {
                 "Defina código, carga horária e peso usado no cálculo ponderado."
         );
 
-        TableView<SubjectRow> table = new TableView<>();
+        AdvancedTableView<SubjectRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Disciplina", 300, SubjectRow::nameProperty);
         addColumn(table, "Código", 120, SubjectRow::codeProperty);
@@ -1807,7 +1809,7 @@ public class AvaliacaoApplication extends Application {
                 "Crie provas, trabalhos e projetos ligados a uma turma e disciplina."
         );
 
-        TableView<AssessmentRow> table = new TableView<>();
+        AdvancedTableView<AssessmentRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Avaliação", 240, AssessmentRow::titleProperty);
         addColumn(table, "Tipo", 120, AssessmentRow::typeProperty);
@@ -1994,7 +1996,7 @@ public class AvaliacaoApplication extends Application {
 
         controls.getChildren().addAll(new Label("Avaliação"), assessment, load, hint);
 
-        TableView<GradeRow> table = new TableView<>();
+        AdvancedTableView<GradeRow> table = new AdvancedTableView<>();
         table.setEditable(true);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Nº", 120, GradeRow::numberProperty);
@@ -2127,7 +2129,7 @@ public class AvaliacaoApplication extends Application {
         tools.getChildren().addAll(export, refresh);
         heading.getChildren().add(tools);
 
-        TableView<PerformanceRow> table = new TableView<>();
+        AdvancedTableView<PerformanceRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         addColumn(table, "Aluno", 290, PerformanceRow::nameProperty);
         addColumn(table, "Nº", 130, PerformanceRow::numberProperty);
@@ -2348,27 +2350,54 @@ public class AvaliacaoApplication extends Application {
 
     private Node tableFill(TableView<?> table) {
         styleTable(table);
+
         VBox holder = card();
-        VBox.setVgrow(table, Priority.ALWAYS);
-        holder.getChildren().add(table);
+        Node tableNode = table;
+
+        if (table instanceof AdvancedTableView<?> advanced) {
+            @SuppressWarnings("unchecked")
+            AdvancedTableView<Object> advancedTable = (AdvancedTableView<Object>) advanced;
+            advancedTable.setEntityName("registo");
+            advancedTable.setOnRefresh(this::refreshCurrentSection);
+            tableNode = advancedTable.withSearchBar();
+            tableNode.getStyleClass().add("cotan-table-shell");
+        }
+
+        VBox.setVgrow(tableNode, Priority.ALWAYS);
+        holder.getChildren().add(tableNode);
         VBox.setVgrow(holder, Priority.ALWAYS);
         return holder;
     }
 
     private <T> void styleTable(TableView<T> table) {
-        table.getStyleClass().add("cotan-table");
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        if (table instanceof AdvancedTableView<?>) {
+            TableUtils.standardize(table);
+        } else {
+            table.getStyleClass().add("cotan-table");
+            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        }
+
+        if (!table.getStyleClass().contains("cotan-table")) {
+            table.getStyleClass().add("cotan-table");
+        }
+
         table.setPlaceholder(label("Nenhum registo encontrado.", "table-empty"));
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        table.setFixedCellSize(46);
+        table.setFixedCellSize(-1);
         table.setPrefHeight(420);
-        table.setRowFactory((TableView<T> tv) -> {
-            TableRow<T> row = new TableRow<>();
-            row.itemProperty().addListener((obs, oldItem, newItem) -> {
-                row.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("row-empty"), newItem == null);
+
+        if (!(table instanceof AdvancedTableView<?>)) {
+            table.setRowFactory((TableView<T> tv) -> {
+                TableRow<T> row = new TableRow<>();
+                row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                    row.pseudoClassStateChanged(
+                            javafx.css.PseudoClass.getPseudoClass("row-empty"),
+                            newItem == null
+                    );
+                });
+                return row;
             });
-            return row;
-        });
+        }
     }
 
     private Label label(String text, String style) {
@@ -2448,7 +2477,7 @@ public class AvaliacaoApplication extends Application {
         closeTopModal();
     }
 
-    private <T> void addColumn(TableView<T> table, String title, double width,
+    private <T> void addColumn(AdvancedTableView<T> table, String title, double width,
                                java.util.function.Function<T, javafx.beans.value.ObservableValue<String>> value) {
         TableColumn<T,String> c = new TableColumn<>(title);
         c.setPrefWidth(width);
@@ -3065,7 +3094,7 @@ public class AvaliacaoApplication extends Application {
     private interface ControlFactory<T> { Node create(T row); }
 
     // Override helper to support controls returned as Node.
-    private <T> TableColumn<T, Void> actionColumn(TableView<T> table, ControlFactory<T> factory) {
+    private <T> TableColumn<T, Void> actionColumn(AdvancedTableView<T> table, ControlFactory<T> factory) {
         TableColumn<T, Void> column = new TableColumn<>("Ações");
         column.setCellFactory(tc -> new TableCell<>() {
             @Override
