@@ -2489,15 +2489,27 @@ public class AvaliacaoApplication extends Application {
         table.getColumns().add(c);
     }
 
-    private Button miniButton(String text) {
-        Button b = new Button(text, CotanIcons.icon(Feather.EDIT_2, 14));
-        b.getStyleClass().addAll("mini-button", "button-outlined", "small");
+    private Button miniButton(String action) {
+        Feather icon = switch (action) {
+            case "Avaliar" -> Feather.CLIPBOARD;
+            case "Notas" -> Feather.FILE_TEXT;
+            default -> Feather.EDIT_2;
+        };
+
+        Button b = new Button("", CotanIcons.icon(icon, 15));
+        b.getStyleClass().addAll("mini-button", "table-action-button", "button-flat", "small");
+        b.setTooltip(new Tooltip(action));
+        b.setAccessibleText(action);
+        b.setFocusTraversable(true);
         return b;
     }
 
-    private Button miniDangerButton(String text) {
-        Button b = new Button(text, CotanIcons.icon(Feather.TRASH_2, 14));
-        b.getStyleClass().addAll("danger-button", "danger", "small");
+    private Button miniDangerButton(String action) {
+        Button b = new Button("", CotanIcons.icon(Feather.TRASH_2, 15));
+        b.getStyleClass().addAll("danger-button", "table-action-button", "button-flat", "small");
+        b.setTooltip(new Tooltip(action));
+        b.setAccessibleText(action);
+        b.setFocusTraversable(true);
         return b;
     }
 
