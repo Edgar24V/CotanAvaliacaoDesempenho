@@ -1,6 +1,5 @@
 package com.cotan.avaliacao.ui;
 
-import atlantafx.base.theme.Styles;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import org.kordamp.ikonli.feather.Feather;
