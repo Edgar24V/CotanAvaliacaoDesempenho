@@ -303,3 +303,29 @@
     -fx-font-weight: 750;
     -fx-text-fill: -color-fg-default;
 }
+
+.result-number {
+    -fx-font-size: 28px;
+    -fx-font-weight: 850;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.result-badge {
+    -fx-background-color: -color-accent-muted;
+    -fx-background-radius: 999;
+    -fx-padding: 6 11;
+    -fx-font-size: 12px;
+    -fx-font-weight: 750;
+}
+
+.metric-caption {
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.nav-group-label {
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-fg-muted;
+}
