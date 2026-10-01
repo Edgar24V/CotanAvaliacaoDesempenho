@@ -105,6 +105,16 @@ public class AvaliacaoApplication extends Application {
         stage.setOnCloseRequest(e -> shutdown());
     }
 
+    private void applyAppStyles(Scene scene) {
+        var css = getClass().getResource("/app.css");
+        if (css != null) {
+            String stylesheet = css.toExternalForm();
+            if (!scene.getStylesheets().contains(stylesheet)) {
+                scene.getStylesheets().add(stylesheet);
+            }
+        }
+    }
+
     private void showLoading() {
         Application.setUserAgentStylesheet(LIGHT_THEME);
         StackPane pane = new StackPane();
@@ -129,6 +139,7 @@ public class AvaliacaoApplication extends Application {
         pane.getChildren().add(box);
 
         Scene scene = new Scene(pane);
+        applyAppStyles(scene);
         stage.setScene(scene);
     }
 
@@ -152,6 +163,7 @@ public class AvaliacaoApplication extends Application {
         pane.getStyleClass().add("app-background");
 
         Scene scene = new Scene(pane, 1180, 720);
+        applyAppStyles(scene);
         stage.setScene(scene);
     }
 
@@ -171,6 +183,7 @@ public class AvaliacaoApplication extends Application {
         root.setBottom(buildStatusBar());
 
         Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+        applyAppStyles(scene);
         stage.setScene(scene);
         stage.centerOnScreen();
 
@@ -250,7 +263,7 @@ public class AvaliacaoApplication extends Application {
         Button button = new Button(icon + "   " + label);
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
-        button.getStyleClass().add("sidebar-button");
+        button.getStyleClass().addAll("sidebar-button", "flat");
         button.setOnAction(e -> showSection(section));
         button.setUserData(section);
         return button;
@@ -279,7 +292,7 @@ public class AvaliacaoApplication extends Application {
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshCurrentSection());
 
         topAction = new Button("＋  Novo");
-        topAction.getStyleClass().add("accent-button");
+        topAction.getStyleClass().addAll("accent-button", "accent", "large");
         topAction.setVisible(false);
         topAction.setManaged(false);
 
@@ -2197,6 +2210,7 @@ public class AvaliacaoApplication extends Application {
         TextField field = new TextField();
         field.setPromptText(prompt);
         field.setMaxWidth(Double.MAX_VALUE);
+        field.getStyleClass().add("rounded");
         return field;
     }
 
@@ -2204,6 +2218,7 @@ public class AvaliacaoApplication extends Application {
     private final <T> ComboBox<T> combo(T... items) {
         ComboBox<T> c = new ComboBox<>(FXCollections.observableArrayList(items));
         c.setMaxWidth(Double.MAX_VALUE);
+        c.getStyleClass().add("rounded");
         return c;
     }
 
@@ -2225,6 +2240,7 @@ public class AvaliacaoApplication extends Application {
         d.setTitle("COTAN • " + title);
         d.setHeaderText(title);
         d.getDialogPane().setPrefWidth(560);
+        d.getDialogPane().getStyleClass().add("cotan-dialog");
         return d;
     }
 
@@ -2238,13 +2254,13 @@ public class AvaliacaoApplication extends Application {
 
     private Button miniButton(String text) {
         Button b = new Button(text);
-        b.getStyleClass().add("mini-button");
+        b.getStyleClass().addAll("mini-button", "button-outlined", "small");
         return b;
     }
 
     private Button miniDangerButton(String text) {
         Button b = new Button(text);
-        b.getStyleClass().add("danger-button");
+        b.getStyleClass().addAll("danger-button", "danger", "small");
         return b;
     }
 
