@@ -288,6 +288,15 @@ public class AvaliacaoApplication extends Application {
         }
     }
 
+    private void applyResponsiveLayout(double width) {
+        if (sidebar == null) return;
+        if (width < 1080) {
+            sidebar.setCollapsed(true);
+        } else if (width >= 1200 && sidebar.isCollapsed()) {
+            sidebar.setCollapsed(false);
+        }
+    }
+
     private void handleGlobalSearch(String query) {
         if (query == null || query.isBlank() || database == null) return;
         String q = query.trim().toLowerCase(Locale.ROOT);
@@ -428,6 +437,18 @@ public class AvaliacaoApplication extends Application {
                     "Recarregar", Feather.REFRESH_CW, this::refreshCurrentSection, true);
             default -> header.setPrimaryAction("", Feather.PLUS, null, false);
         }
+    }
+
+    private void setContentPage(Node node) {
+        if (content == null) return;
+
+        Node view = node instanceof ScrollPane ? node : CotanUi.scroll(node);
+        if (view instanceof ScrollPane scroll) {
+            scroll.setFitToWidth(true);
+            scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
+        }
+
+        content.getChildren().setAll(view);
     }
 
     private void refreshCurrentSection() {
@@ -2442,7 +2463,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private String search() {
-        return searchField == null ? "" : searchField.getText().trim().toLowerCase(Locale.ROOT);
+        return header == null ? "" : header.getSearchText().trim().toLowerCase(Locale.ROOT);
     }
 
     private boolean matches(String query, String... values) {
