@@ -564,3 +564,65 @@
 .cotan-dialog-pane {
     -fx-background-color: transparent;
 }
+
+/* Ikonli + global scroll */
+.cotan-icon {
+    -fx-fill: -color-fg-default;
+    -fx-text-fill: -color-fg-default;
+}
+
+.sidebar-button .cotan-icon {
+    -fx-fill: -color-fg-muted;
+}
+
+.sidebar-button:hover .cotan-icon,
+.sidebar-button.selected .cotan-icon {
+    -fx-fill: -color-accent-fg;
+}
+
+.accent-button .cotan-icon {
+    -fx-fill: -color-accent-fg;
+}
+
+.cotan-scroll,
+.sidebar-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-scroll > .viewport,
+.sidebar-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.cotan-scroll .scroll-bar,
+.sidebar-scroll .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.cotan-scroll .scroll-bar:vertical .track,
+.sidebar-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.cotan-scroll .scroll-bar:vertical .thumb,
+.sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -color-border-muted;
+    -fx-background-radius: 8px;
+    -fx-min-width: 7px;
+}
+
+.cotan-scroll .scroll-bar:vertical .thumb:hover,
+.sidebar-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -color-accent-emphasis;
+}
+
+.home-icon {
+    -fx-background-color: -color-accent-muted;
+    -fx-background-radius: 10px;
+    -fx-padding: 8px;
+}
+
+.home-nav-card {
+    -fx-cursor: hand;
+}
