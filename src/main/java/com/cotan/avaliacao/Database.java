@@ -438,26 +438,37 @@ public final class Database implements AutoCloseable {
     public List<Map<String,Object>> performanceFinalMap(String staffType, String year) throws SQLException {
         return query("""
             SELECT s.id,s.code,s.name,COALESCE(s.role,'') role,COALESCE(s.department,'') department,
-                   COUNT(DISTINCT CASE WHEN ps.trimester=1 THEN ps.indicator_id END) t1_count,
-                   COUNT(DISTINCT CASE WHEN ps.trimester=2 THEN ps.indicator_id END) t2_count,
-                   COUNT(DISTINCT CASE WHEN ps.trimester=3 THEN ps.indicator_id END) t3_count,
-                   ROUND(COALESCE(AVG(ps.score * i.weight / NULLIF(i.weight,0)),0),2) raw_average,
+                   ROUND(COALESCE((
+                       SELECT SUM(ps1.score*i1.weight)/NULLIF(SUM(i1.weight),0)
+                       FROM performance_scores ps1
+                       JOIN performance_indicators i1 ON i1.id=ps1.indicator_id
+                       WHERE ps1.staff_id=s.id AND ps1.academic_year=? AND ps1.trimester=1
+                   ),0),2) t1_average,
+                   ROUND(COALESCE((
+                       SELECT SUM(ps2.score*i2.weight)/NULLIF(SUM(i2.weight),0)
+                       FROM performance_scores ps2
+                       JOIN performance_indicators i2 ON i2.id=ps2.indicator_id
+                       WHERE ps2.staff_id=s.id AND ps2.academic_year=? AND ps2.trimester=2
+                   ),0),2) t2_average,
+                   ROUND(COALESCE((
+                       SELECT SUM(ps3.score*i3.weight)/NULLIF(SUM(i3.weight),0)
+                       FROM performance_scores ps3
+                       JOIN performance_indicators i3 ON i3.id=ps3.indicator_id
+                       WHERE ps3.staff_id=s.id AND ps3.academic_year=? AND ps3.trimester=3
+                   ),0),2) t3_average,
                    ROUND(COALESCE((
                        SELECT AVG(t.avg_score) FROM (
-                           SELECT ROUND(SUM(ps2.score*i2.weight)/NULLIF(SUM(i2.weight),0),2) avg_score
-                           FROM performance_scores ps2
-                           JOIN performance_indicators i2 ON i2.id=ps2.indicator_id
-                           WHERE ps2.staff_id=s.id AND ps2.academic_year=? AND ps2.trimester IN (1,2,3)
-                           GROUP BY ps2.trimester
+                           SELECT SUM(ps4.score*i4.weight)/NULLIF(SUM(i4.weight),0) avg_score
+                           FROM performance_scores ps4
+                           JOIN performance_indicators i4 ON i4.id=ps4.indicator_id
+                           WHERE ps4.staff_id=s.id AND ps4.academic_year=? AND ps4.trimester IN (1,2,3)
+                           GROUP BY ps4.trimester
                        ) t
                    ),0),2) final_average
             FROM staff s
-            LEFT JOIN performance_scores ps ON ps.staff_id=s.id AND ps.academic_year=?
-            LEFT JOIN performance_indicators i ON i.id=ps.indicator_id
             WHERE s.active=1 AND s.staff_type=?
-            GROUP BY s.id,s.code,s.name,s.role,s.department
             ORDER BY final_average DESC,s.name
-            """, year, year, staffType);
+            """, year, year, year, year, staffType);
     }
 
     public Map<String,Object> performanceSummary(String staffType, String year) throws SQLException {
