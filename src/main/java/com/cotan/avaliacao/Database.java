@@ -597,8 +597,13 @@ public final class Database implements AutoCloseable {
     }
 
     public void backup(Path destination) throws IOException, SQLException {
+        if (connection != null && !connection.isClosed()) {
+            try (Statement st = connection.createStatement()) {
+                st.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+            }
+        }
         closeConnectionOnly();
-        Files.createDirectories(destination.getParent());
+        if (destination.getParent() != null) Files.createDirectories(destination.getParent());
         Files.copy(databasePath, destination, StandardCopyOption.REPLACE_EXISTING);
         open();
     }
