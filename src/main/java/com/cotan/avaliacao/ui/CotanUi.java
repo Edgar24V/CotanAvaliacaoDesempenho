@@ -36,6 +36,5 @@ public final class CotanUi {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.setFixedCellSize(46);
         table.setFocusTraversable(false);
-        table.setPannable(true);
     }
 }
