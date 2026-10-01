@@ -10,6 +10,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -99,12 +100,11 @@ public final class CotanHeader extends HBox {
 
         getChildren().addAll(menu, titles, searchWrap, primaryAction, spacerLeft, bellWrap, theme, account);
 
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> {
-            String query = newValue == null ? "" : newValue.trim().toLowerCase(Locale.ROOT);
-            if (query.isBlank()) return;
-            PauseTransition pause = new PauseTransition(Duration.millis(220));
-            pause.setOnFinished(e -> searchConsumer.accept(query));
-            pause.play();
+        searchField.setOnAction(e -> {
+            String query = searchField.getText() == null
+                    ? ""
+                    : searchField.getText().trim().toLowerCase(Locale.ROOT);
+            if (!query.isBlank()) searchConsumer.accept(query);
         });
     }
 
@@ -165,5 +165,9 @@ public final class CotanHeader extends HBox {
 
     public void clearSearch() {
         searchField.clear();
+    }
+
+    public String getSearchText() {
+        return searchField.getText() == null ? "" : searchField.getText();
     }
 }
