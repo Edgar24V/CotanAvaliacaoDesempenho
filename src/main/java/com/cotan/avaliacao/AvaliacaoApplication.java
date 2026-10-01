@@ -1316,8 +1316,12 @@ public class AvaliacaoApplication extends Application {
             if(matches(search(),row.code.get(),row.name.get(),row.role.get(),row.department.get(),row.classification.get())) rows.add(row);
         }
         table.setItems(rows);
-        box.getChildren().add(table);
-        VBox.setVgrow(table,Priority.ALWAYS);
+        table.setEntityName("resultado");
+        table.setOnRefresh(this::refreshCurrentSection);
+        Node tableNode = table.withSearchBar();
+        tableNode.getStyleClass().add("cotan-table-shell");
+        box.getChildren().add(tableNode);
+        VBox.setVgrow(tableNode,Priority.ALWAYS);
 
         Button evaluate=CotanIcons.button("Abrir avaliação deste período", Feather.CLIPBOARD, "accent-button", "accent");
         evaluate.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
