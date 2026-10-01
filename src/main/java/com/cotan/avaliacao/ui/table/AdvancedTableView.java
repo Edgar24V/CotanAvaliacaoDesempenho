@@ -807,7 +807,13 @@ public class AdvancedTableView<S> extends TableView<S> {
             contextMenu.getItems().add(new SeparatorMenuItem());
 
             MenuItem refreshItem = new MenuItem("Actualizar");
-            refreshItem.setOnAction(e -> refreshPage());
+            refreshItem.setOnAction(e -> {
+                if (onRefreshCallback != null) {
+                    onRefreshCallback.run();
+                } else {
+                    refreshPage();
+                }
+            });
             contextMenu.getItems().add(refreshItem);
         }
 
