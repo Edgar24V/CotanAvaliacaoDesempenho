@@ -345,10 +345,10 @@ public final class Database implements AutoCloseable {
             List<Map<String,Object>> indicators = indicators("AMBOS");
             if (!staffRows.isEmpty() && !indicators.isEmpty()) {
                 double[][] sample = {
-                        {17, 16, 18, 15, 17},
-                        {15, 14, 16, 14, 15},
-                        {18, 17, 16, 18, 17},
-                        {14, 15, 13, 16, 15}
+                        {20, 15, 20, 15, 20},
+                        {15, 10, 15, 10, 15},
+                        {20, 20, 15, 20, 15},
+                        {10, 15, 10, 15, 10}
                 };
                 for (int i = 0; i < Math.min(staffRows.size(), sample.length); i++) {
                     long staffId = n(staffRows.get(i).get("id"));
@@ -405,6 +405,27 @@ public final class Database implements AutoCloseable {
 
     public void upsertPerformanceScore(long staffId, long indicatorId, String year, int trimester,
                                        double score, String observation, String evaluator) throws SQLException {
+        if (staffId <= 0 || indicatorId <= 0) {
+            throw new IllegalArgumentException("Profissional e indicador são obrigatórios.");
+        }
+        if (year == null || !year.matches("20\\d{2}/20\\d{2}$")) {
+            throw new IllegalArgumentException("Ano lectivo inválido.");
+        }
+        int startYear = Integer.parseInt(year.substring(0, 4));
+        int endYear = Integer.parseInt(year.substring(5));
+        if (endYear != startYear + 1) {
+            throw new IllegalArgumentException("O ano lectivo deve seguir o formato 2026/2027.");
+        }
+        if (trimester < 1 || trimester > 3) {
+            throw new IllegalArgumentException("O trimestre deve ser 1, 2 ou 3.");
+        }
+        if (!Double.isFinite(score) || !(score == 5 || score == 10 || score == 15 || score == 20)) {
+            throw new IllegalArgumentException("A pontuação deve ser 5, 10, 15 ou 20.");
+        }
+        if (observation != null && observation.length() > 500) {
+            throw new IllegalArgumentException("A observação não pode exceder 500 caracteres.");
+        }
+
         update("""
             INSERT INTO performance_scores(
                 staff_id,indicator_id,academic_year,trimester,score,observation,evaluator,updated_at
@@ -607,6 +628,21 @@ public final class Database implements AutoCloseable {
     }
 
     public void upsertGrade(long studentId, long assessmentId, double score, String observation) throws SQLException {
+        if (studentId <= 0 || assessmentId <= 0) {
+            throw new IllegalArgumentException("Aluno e avaliação são obrigatórios.");
+        }
+        Object maxObject = scalar("SELECT max_score FROM assessments WHERE id=?", assessmentId);
+        if (!(maxObject instanceof Number maxNumber)) {
+            throw new IllegalArgumentException("A avaliação selecionada não existe.");
+        }
+        double maxScore = maxNumber.doubleValue();
+        if (!Double.isFinite(score) || score < 0 || score > maxScore) {
+            throw new IllegalArgumentException("A nota deve estar entre 0 e " + maxScore + ".");
+        }
+        if (observation != null && observation.length() > 500) {
+            throw new IllegalArgumentException("A observação não pode exceder 500 caracteres.");
+        }
+
         update("""
             INSERT INTO grades(student_id,assessment_id,score,observation,updated_at)
             VALUES(?,?,?,?,CURRENT_TIMESTAMP)
