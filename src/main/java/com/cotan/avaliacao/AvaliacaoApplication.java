@@ -1,13 +1,12 @@
 package com.cotan.avaliacao;
 
 import com.cotan.avaliacao.ui.CotanIcons;
+import com.cotan.avaliacao.ui.CotanModalHost;
 import com.cotan.avaliacao.ui.CotanUi;
 import org.kordamp.ikonli.feather.Feather;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
-import atlantafx.base.controls.ModalPane;
-import atlantafx.base.layout.ModalBox;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -80,7 +79,7 @@ public class AvaliacaoApplication extends Application {
     private Label dbStatus;
     private TextField searchField;
     private Button topAction;
-    private ModalPane modalPane;
+    private CotanModalHost modalHost;
     private final Deque<Node> modalHistory = new ArrayDeque<>();
     private String currentSection = "dashboard";
     private Button activeNav;
@@ -203,15 +202,11 @@ public class AvaliacaoApplication extends Application {
 
         root.setBottom(buildStatusBar());
 
-        modalPane = new ModalPane();
-        modalPane.setAlignment(Pos.CENTER);
-        modalPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        modalPane.setPersistent(true);
-        // O diálogo entra com zoom a partir do centro, sem deslizar desde o rodapé.
-        modalPane.usePredefinedTransitionFactories(null);
+        modalHost = new CotanModalHost();
+        modalHost.setEscapeHandler(event -> closeTopModal());
 
-        StackPane sceneRoot = new StackPane(root, modalPane);
-        StackPane.setAlignment(modalPane, Pos.CENTER);
+        StackPane sceneRoot = new StackPane(root, modalHost);
+        StackPane.setAlignment(modalHost, Pos.CENTER);
 
         Scene scene = new Scene(sceneRoot, stage.getWidth(), stage.getHeight());
         applyAppStyles(scene);
@@ -2364,30 +2359,35 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void openModal(CotanModal modal) {
-        if (modalPane == null) {
+        if (modalHost == null) {
             return;
         }
 
-        Node current = modalPane.getContent();
-        if (current != null && current != modal.getModalBox()) {
+        Node current = modalHost.getContent();
+        if (current != null && current != modal.getRootBox()) {
             modalHistory.push(current);
         }
-        modal.open(modalPane);
+        modal.open(modalHost);
+    }
+
+    private void closeTopModal() {
+        if (modalHost == null) return;
+        modalHost.hide(true);
+        if (!modalHistory.isEmpty()) {
+            modalHost.show(modalHistory.pop());
+        }
     }
 
     private void closeModal(CotanModal modal) {
-        if (modalPane == null) {
+        if (modalHost == null) {
             return;
         }
 
-        if (modalPane.getContent() != modal.getModalBox()) {
+        if (modalHost.getContent() != modal.getRootBox()) {
             return;
         }
 
-        modalPane.hide(true);
-        if (!modalHistory.isEmpty()) {
-            modalPane.show(modalHistory.pop());
-        }
+        closeTopModal();
     }
 
     private <T> void addColumn(TableView<T> table, String title, double width,
@@ -2675,33 +2675,42 @@ public class AvaliacaoApplication extends Application {
     private final class CotanModal {
         private final String title;
         private final VBox rootBox = new VBox(0);
-        private final VBox header = new VBox(4);
+        private final VBox header = new VBox(8);
+        private final HBox titleLine = new HBox(12);
+        private final VBox titleArea = new VBox(3);
         private final VBox body = new VBox(14);
         private final ScrollPane bodyScroll = new ScrollPane(body);
         private final HBox footer = new HBox(8);
         private final CotanDialogPane dialogPane = new CotanDialogPane();
         private Function<ButtonType, ButtonType> resultConverter;
-        private ModalBox modalBox;
 
         CotanModal(String title) {
             this.title = title;
+
             rootBox.getStyleClass().add("cotan-modal");
             rootBox.setPrefWidth(680);
             rootBox.setMinWidth(520);
-            rootBox.setMaxWidth(760);
+            rootBox.setMaxWidth(780);
             rootBox.setMaxHeight(700);
 
-            header.getStyleClass().add("cotan-modal-header");
-            header.getChildren().addAll(
+            titleArea.getChildren().addAll(
                     label("COTAN", "modal-eyebrow"),
                     label(title, "modal-header-title")
             );
 
+            Button close = CotanIcons.button("", Feather.X, "modal-close-button", "button-outlined", "small");
+            close.setAccessibleText("Fechar");
+            close.setOnAction(e -> closeModal(this));
+
+            HBox.setHgrow(titleArea, Priority.ALWAYS);
+            titleLine.setAlignment(Pos.CENTER_LEFT);
+            titleLine.getChildren().addAll(titleArea, close);
+
+            header.getStyleClass().add("cotan-modal-header");
+            header.getChildren().add(titleLine);
+
             body.getStyleClass().add("cotan-modal-content");
             dialogPane.setContent(body);
-            dialogPane.getButtonTypes().addListener(
-                    (ListChangeListener<ButtonType>) change -> Platform.runLater(this::rebuildFooter)
-            );
 
             bodyScroll.setFitToWidth(true);
             bodyScroll.setFitToHeight(false);
@@ -2715,14 +2724,18 @@ public class AvaliacaoApplication extends Application {
 
             VBox.setVgrow(bodyScroll, Priority.ALWAYS);
             rootBox.getChildren().addAll(header, bodyScroll, footer);
+
+            dialogPane.getButtonTypes().addListener(
+                    (javafx.collections.ListChangeListener<ButtonType>) change -> Platform.runLater(this::rebuildFooter)
+            );
         }
 
         CotanDialogPane getDialogPane() {
             return dialogPane;
         }
 
-        ModalBox getModalBox() {
-            return modalBox;
+        Node getRootBox() {
+            return rootBox;
         }
 
         void setContent(Node node) {
@@ -2742,18 +2755,14 @@ public class AvaliacaoApplication extends Application {
             openModal(this);
         }
 
-        void open(ModalPane pane) {
+        void open(CotanModalHost host) {
             rebuildFooter();
 
-            modalBox = new ModalBox(pane, rootBox);
-            modalBox.getStyleClass().add("cotan-modal-box");
+            rootBox.setOpacity(1);
+            rootBox.setScaleX(1);
+            rootBox.setScaleY(1);
 
-            // O X padrão do ModalBox primeiro fecha; aqui interceptamos o fecho
-            // para restaurar o formulário anterior quando este for um diálogo aninhado.
-            modalBox.setClearOnClose(false);
-            modalBox.setOnClose(e -> closeModal(this));
-
-            pane.show(modalBox);
+            host.show(rootBox);
         }
 
         private void rebuildFooter() {
@@ -2784,8 +2793,6 @@ public class AvaliacaoApplication extends Application {
                             ? type
                             : resultConverter.apply(type);
 
-                    // null significa que o formulário deve permanecer aberto,
-                    // normalmente após uma validação ou erro tratado.
                     if (result != null && result == type) {
                         closeModal(this);
                     }
