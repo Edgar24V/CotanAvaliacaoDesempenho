@@ -226,3 +226,80 @@
 .dialog-pane {
     -fx-padding: 8;
 }
+
+.nav-group-label {
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-fg-muted;
+    -fx-letter-spacing: 0.8px;
+}
+
+.home-hero {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 16;
+    -fx-border-color: -color-accent-muted;
+    -fx-border-radius: 16;
+}
+
+.hero-eyebrow {
+    -fx-font-size: 10px;
+    -fx-font-weight: 850;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.excel-badge {
+    -fx-background-color: -color-canvas-default;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 12;
+    -fx-min-width: 290px;
+}
+
+.badge-caption {
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.badge-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+}
+
+.badge-detail {
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.home-nav-card {
+    -fx-min-height: 125px;
+    -fx-cursor: hand;
+}
+
+.home-nav-card:hover {
+    -fx-translate-y: -2px;
+    -fx-border-color: -color-accent-emphasis;
+}
+
+.home-icon {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.home-card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 750;
+}
+
+.home-action {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.process-flow {
+    -fx-font-size: 14px;
+    -fx-font-weight: 750;
+    -fx-text-fill: -color-fg-default;
+}
