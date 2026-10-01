@@ -2,6 +2,8 @@ package com.cotan.avaliacao;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.controls.ModalPane;
+import atlantafx.base.layout.ModalBox;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -34,6 +36,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +73,7 @@ public class AvaliacaoApplication extends Application {
     private Label dbStatus;
     private TextField searchField;
     private Button topAction;
+    private ModalPane modalPane;
     private String currentSection = "dashboard";
     private Button activeNav;
     private boolean darkMode = false;
@@ -182,7 +186,14 @@ public class AvaliacaoApplication extends Application {
 
         root.setBottom(buildStatusBar());
 
-        Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
+        modalPane = new ModalPane();
+        modalPane.setAlignment(Pos.CENTER);
+        modalPane.setPersistent(true);
+        modalPane.usePredefinedTransitionFactories(javafx.geometry.Side.BOTTOM);
+
+        StackPane sceneRoot = new StackPane(root, modalPane);
+
+        Scene scene = new Scene(sceneRoot, stage.getWidth(), stage.getHeight());
         applyAppStyles(scene);
         stage.setScene(scene);
         stage.centerOnScreen();
@@ -2193,11 +2204,28 @@ public class AvaliacaoApplication extends Application {
     }
 
     private Node tableFill(TableView<?> table) {
+        styleTable(table);
         VBox holder = card();
         VBox.setVgrow(table, Priority.ALWAYS);
         holder.getChildren().add(table);
         VBox.setVgrow(holder, Priority.ALWAYS);
         return holder;
+    }
+
+    private void styleTable(TableView<?> table) {
+        table.getStyleClass().add("cotan-table");
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.setPlaceholder(label("Nenhum registo encontrado.", "table-empty"));
+        table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        table.setFixedCellSize(46);
+        table.setPrefHeight(420);
+        table.setRowFactory(tv -> {
+            TableRow<?> row = new TableRow<>();
+            row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                row.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("row-empty"), newItem == null);
+            });
+            return row;
+        });
     }
 
     private Label label(String text, String style) {
@@ -2235,13 +2263,15 @@ public class AvaliacaoApplication extends Application {
         return grid;
     }
 
-    private Dialog<ButtonType> dialog(String title) {
-        Dialog<ButtonType> d = new Dialog<>();
-        d.setTitle("COTAN • " + title);
-        d.setHeaderText(title);
-        d.getDialogPane().setPrefWidth(560);
-        d.getDialogPane().getStyleClass().add("cotan-dialog");
-        return d;
+    private CotanModal dialog(String title) {
+        return new CotanModal(title);
+    }
+
+    private void openModal(CotanModal modal) {
+        if (modalPane == null) {
+            return;
+        }
+        modal.open(modalPane);
     }
 
     private <T> void addColumn(TableView<T> table, String title, double width,
@@ -2286,12 +2316,16 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void confirmDelete(String what, Runnable action) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmar eliminação");
-        alert.setHeaderText("Eliminar " + what + "?");
-        alert.setContentText("Esta ação pode afetar dados relacionados. Deseja continuar?");
-        alert.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
-        alert.showAndWait().ifPresent(btn -> {
+        VBox body = new VBox(12,
+                label("Eliminar " + what + "?", "modal-title"),
+                label("Esta ação pode afetar dados relacionados. Deseja continuar?", "modal-message")
+        );
+        body.getStyleClass().add("modal-body");
+
+        CotanModal modal = new CotanModal("Confirmar eliminação");
+        modal.setContent(body);
+        modal.setButtons(ButtonType.CANCEL, ButtonType.OK);
+        modal.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 try {
                     action.run();
@@ -2299,9 +2333,12 @@ public class AvaliacaoApplication extends Application {
                     showToast("Registo eliminado.");
                 } catch (Exception ex) {
                     showError("Não foi possível eliminar o registo", ex);
+                    return null;
                 }
             }
+            return btn;
         });
+        modal.showAndWait();
     }
 
     private void showToast(String text) {
@@ -2311,19 +2348,29 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void showWarning(String message) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle("COTAN");
-        a.setHeaderText("Atenção");
-        a.setContentText(message);
-        a.showAndWait();
+        VBox body = new VBox(10,
+                label("Atenção", "modal-title"),
+                label(message, "modal-message")
+        );
+        body.getStyleClass().addAll("modal-body", "modal-warning");
+
+        CotanModal modal = new CotanModal("COTAN");
+        modal.setContent(body);
+        modal.setButtons(ButtonType.OK);
+        modal.showAndWait();
     }
 
     private void showInfo(String message) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("COTAN");
-        a.setHeaderText("Informação");
-        a.setContentText(message);
-        a.showAndWait();
+        VBox body = new VBox(10,
+                label("Informação", "modal-title"),
+                label(message, "modal-message")
+        );
+        body.getStyleClass().addAll("modal-body", "modal-info");
+
+        CotanModal modal = new CotanModal("COTAN");
+        modal.setContent(body);
+        modal.setButtons(ButtonType.OK);
+        modal.showAndWait();
     }
 
     private void showError(String message, Throwable ex) {
@@ -2331,17 +2378,142 @@ public class AvaliacaoApplication extends Application {
             dbStatus.setText("●  " + message);
             dbStatus.getStyleClass().add("status-error");
         }
-        Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle("COTAN • Erro");
-        a.setHeaderText(message);
-        a.setContentText(ex.getMessage() == null ? ex.toString() : ex.getMessage());
-        a.showAndWait();
+
+        String detail = ex == null ? "" : (ex.getMessage() == null ? ex.toString() : ex.getMessage());
+        VBox body = new VBox(10,
+                label("Não foi possível concluir a operação.", "modal-title"),
+                label(message, "modal-message"),
+                label(detail, "modal-detail")
+        );
+        body.getStyleClass().addAll("modal-body", "modal-error");
+
+        CotanModal modal = new CotanModal("COTAN • Erro");
+        modal.setContent(body);
+        modal.setButtons(ButtonType.OK);
+        modal.showAndWait();
     }
 
     private void shutdown() {
         if (database != null) database.close();
         if (springContext != null) springContext.close();
         Platform.exit();
+    }
+
+    private final class CotanModal {
+        private final String title;
+        private final VBox rootBox = new VBox(0);
+        private final VBox header = new VBox(4);
+        private final VBox body = new VBox(14);
+        private final HBox footer = new HBox(8);
+        private final CotanDialogPane dialogPane = new CotanDialogPane();
+        private final List<ButtonType> buttonTypes = new ArrayList<>();
+        private Function<ButtonType, ButtonType> resultConverter;
+
+        CotanModal(String title) {
+            this.title = title;
+            rootBox.getStyleClass().add("cotan-modal");
+            rootBox.setMaxWidth(680);
+            rootBox.setMinWidth(520);
+
+            header.getStyleClass().add("cotan-modal-header");
+            header.getChildren().addAll(
+                    label("COTAN", "modal-eyebrow"),
+                    label(title, "modal-header-title")
+            );
+
+            body.getStyleClass().add("cotan-modal-content");
+            dialogPane.setContent(body);
+
+            footer.getStyleClass().add("cotan-modal-footer");
+            footer.setAlignment(Pos.CENTER_RIGHT);
+            rootBox.getChildren().addAll(header, body, footer);
+        }
+
+        CotanDialogPane getDialogPane() {
+            return dialogPane;
+        }
+
+        void setContent(Node node) {
+            body.getChildren().setAll(node);
+        }
+
+        void setButtons(ButtonType... buttons) {
+            buttonTypes.clear();
+            buttonTypes.addAll(buttons);
+            rebuildFooter();
+        }
+
+        void setResultConverter(Function<ButtonType, ButtonType> converter) {
+            this.resultConverter = converter;
+            rebuildFooter();
+        }
+
+        void showAndWait() {
+            openModal(this);
+        }
+
+        void open(ModalPane pane) {
+            rebuildFooter();
+            ModalBox modalBox = new ModalBox(pane, rootBox);
+            modalBox.getStyleClass().add("cotan-modal-box");
+            modalBox.setClearOnClose(true);
+            pane.show(modalBox);
+        }
+
+        private void rebuildFooter() {
+            if (footer == null) return;
+            footer.getChildren().clear();
+            if (buttonTypes.isEmpty()) {
+                Button close = new Button("Fechar");
+                close.getStyleClass().addAll("button-outlined", "small");
+                close.setOnAction(e -> modalPane.hide(true));
+                footer.getChildren().add(close);
+                return;
+            }
+
+            for (ButtonType type : buttonTypes) {
+                Button button = new Button(buttonText(type));
+                if (type == ButtonType.OK) {
+                    button.getStyleClass().addAll("accent", "accent-button");
+                } else {
+                    button.getStyleClass().addAll("button-outlined");
+                }
+                button.setOnAction(e -> {
+                    ButtonType result = resultConverter == null ? type : resultConverter.apply(type);
+                    if (result != null && result == type) {
+                        modalPane.hide(true);
+                    }
+                });
+                footer.getChildren().add(button);
+            }
+        }
+
+        private String buttonText(ButtonType type) {
+            if (type == ButtonType.OK) return "Guardar";
+            if (type == ButtonType.CANCEL) return "Cancelar";
+            if (type == ButtonType.YES) return "Sim";
+            if (type == ButtonType.NO) return "Não";
+            return type.getText();
+        }
+    }
+
+    private static final class CotanDialogPane extends VBox {
+        private final VBox content = new VBox(14);
+        private final List<ButtonType> buttonTypes = new ArrayList<>();
+
+        CotanDialogPane() {
+            getStyleClass().add("cotan-dialog-pane");
+            setPadding(new Insets(0));
+            getChildren().add(content);
+        }
+
+        void setContent(Node node) {
+            content.getChildren().setAll(node);
+        }
+
+        List<ButtonType> getButtonTypes() {
+            return buttonTypes;
+        }
     }
 
     // -------------------------------------------------------------------------
