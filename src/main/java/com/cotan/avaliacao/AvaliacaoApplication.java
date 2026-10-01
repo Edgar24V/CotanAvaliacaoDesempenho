@@ -1153,9 +1153,9 @@ public class AvaliacaoApplication extends Application {
                 try{finalAvg=Double.parseDouble(safe(r.get("final_average")));}catch(Exception e){finalAvg=0;}
                 csv.append(csv(r.get("code"))).append(';')
                    .append(csv(r.get("name"))).append(';')
-                   .append(csv(r.get("t1_count"))).append(';')
-                   .append(csv(r.get("t2_count"))).append(';')
-                   .append(csv(r.get("t3_count"))).append(';')
+                   .append(csv(r.get("t1_average"))).append(';')
+                   .append(csv(r.get("t2_average"))).append(';')
+                   .append(csv(r.get("t3_average"))).append(';')
                    .append(csv(r.get("final_average"))).append(';')
                    .append(csv(performanceClassification(finalAvg))).append('\n');
             }
@@ -1222,7 +1222,7 @@ public class AvaliacaoApplication extends Application {
             this.t1=new SimpleStringProperty(t1);this.t2=new SimpleStringProperty(t2);this.t3=new SimpleStringProperty(t3);
             this.finalAverage=new SimpleStringProperty(finalAverage);this.classification=new SimpleStringProperty(classifyValue(finalAverage));
         }
-        static PerformanceFinalRow from(Map<String,Object> r){return new PerformanceFinalRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("t1_count")),s(r.get("t2_count")),s(r.get("t3_count")),s(r.get("final_average")));}
+        static PerformanceFinalRow from(Map<String,Object> r){return new PerformanceFinalRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("t1_average")),s(r.get("t2_average")),s(r.get("t3_average")),s(r.get("final_average")));}
         SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
         SimpleStringProperty t1Property(){return t1;} SimpleStringProperty t2Property(){return t2;}
         SimpleStringProperty t3Property(){return t3;} SimpleStringProperty finalProperty(){return finalAverage;}
