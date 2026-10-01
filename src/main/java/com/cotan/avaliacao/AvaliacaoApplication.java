@@ -801,9 +801,6 @@ public class AvaliacaoApplication extends Application {
         Spinner<Double> weight = new Spinner<>(0.1, 10.0, 1.0, 0.1);
         workload.setMaxWidth(Double.MAX_VALUE);
         weight.setMaxWidth(Double.MAX_VALUE);
-        TextFormatter<Double> formatter = new TextFormatter<>(new javafx.util.converter.DoubleStringConverter());
-        weight.getValueFactory().valueProperty().bindBidirectional(new SimpleDoubleProperty(1.0).asObject()); // initial style-safe binding
-
         if (existing != null) {
             name.setText(existing.name.get());
             code.setText(existing.code.get());
@@ -986,12 +983,13 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void openGradesFor(AssessmentRow row) {
+        selectedAssessmentId = row.id.get();
         showSection("grades");
-        Platform.runLater(() -> {
-            if (content.getChildren().isEmpty()) return;
-        });
-        // O módulo de notas lê a primeira avaliação compatível quando aberto.
-        buildGradesWithAssessment(row.id.get());
+        try {
+            content.getChildren().setAll(buildGradesWithAssessment(row.id.get()));
+        } catch (Exception ex) {
+            showError("Não foi possível abrir o lançamento de notas", ex);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -1439,27 +1437,6 @@ public class AvaliacaoApplication extends Application {
         c.setPrefWidth(width);
         c.setCellValueFactory(cell -> value.apply(cell.getValue()));
         table.getColumns().add(c);
-    }
-
-    private <T> TableColumn<T, Void> actionColumn(TableView<T> table, Consumer<T> renderer) {
-        TableColumn<T, Void> column = new TableColumn<>("Ações");
-        column.setCellFactory(tc -> new TableCell<>() {
-            private final HBox box = new HBox(6);
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) setGraphic(null);
-                else {
-                    box.getChildren().clear();
-                    T row = getTableView().getItems().get(getIndex());
-                    Node controls = renderer.apply(row);
-                    // Consumer renderer is used only to add controls via a temporary holder.
-                    if (controls instanceof Parent p) setGraphic(p);
-                    else setGraphic(null);
-                }
-            }
-        });
-        return column;
     }
 
     private Button miniButton(String text) {
