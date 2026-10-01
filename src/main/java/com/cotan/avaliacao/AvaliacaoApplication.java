@@ -174,7 +174,7 @@ public class AvaliacaoApplication extends Application {
         detail.setWrapText(true);
         detail.setMaxWidth(850);
 
-        Button close = new Button("Fechar");
+        Button close = CotanIcons.button("Fechar", Feather.X, "button-outlined");
         close.setOnAction(e -> stage.close());
 
         box.getChildren().addAll(title, detail, close);
@@ -561,7 +561,9 @@ public class AvaliacaoApplication extends Application {
 
         HBox line = new HBox(10);
         line.setAlignment(Pos.CENTER_LEFT);
-        line.getChildren().addAll(new StackPane(CotanIcons.icon(CotanIcons.feather(iconKey), 18)), label(title, "home-card-title"));
+        StackPane iconWrap = new StackPane(CotanIcons.icon(CotanIcons.feather(iconKey), 18));
+        iconWrap.getStyleClass().add("home-icon");
+        line.getChildren().addAll(iconWrap, label(title, "home-card-title"));
 
         Label desc = label(description, "muted");
         desc.setWrapText(true);
@@ -601,10 +603,10 @@ public class AvaliacaoApplication extends Application {
 
         HBox actions = new HBox(10);
 
-        Button back = new Button("← Voltar ao início");
+        Button back = CotanIcons.button("Voltar ao início", Feather.HOME, "button-outlined");
         back.setOnAction(e -> showSection("dashboard"));
 
-        Button reports = new Button("Abrir relatórios");
+        Button reports = CotanIcons.button("Abrir relatórios", Feather.FILE_TEXT, "button-outlined");
         reports.setOnAction(e -> showSection("reports"));
 
         actions.getChildren().addAll(back, reports);
@@ -937,10 +939,10 @@ public class AvaliacaoApplication extends Application {
         table.setItems(rows);
 
         HBox quick = new HBox(10);
-        Button evaluate = new Button("✓  Abrir avaliação");
+        Button evaluate = CotanIcons.button("Abrir avaliação", Feather.CLIPBOARD, "accent-button", "accent");
         evaluate.getStyleClass().add("accent-button");
         evaluate.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
-        Button map = new Button("▤  Ver mapa trimestral");
+        Button map = CotanIcons.button("Ver mapa trimestral", Feather.BAR_CHART_2, "button-outlined");
         map.setOnAction(e -> showSection("map-1"));
         quick.getChildren().addAll(evaluate, map);
 
@@ -1263,7 +1265,7 @@ public class AvaliacaoApplication extends Application {
         box.getChildren().add(table);
         VBox.setVgrow(table,Priority.ALWAYS);
 
-        Button evaluate=new Button("✓  Abrir avaliação deste período");
+        Button evaluate=CotanIcons.button("Abrir avaliação deste período", Feather.CLIPBOARD, "accent-button", "accent");
         evaluate.setOnAction(e -> showSection("PROFESSOR".equals(type) ? "professor-evaluation" : "administrative-evaluation"));
         box.getChildren().add(evaluate);
         return box;
@@ -2065,10 +2067,10 @@ public class AvaliacaoApplication extends Application {
         );
 
         HBox tools = new HBox(10);
-        Button export = new Button("⇩  Exportar CSV");
+        Button export = CotanIcons.button("Exportar CSV", Feather.DOWNLOAD, "accent-button", "accent");
         export.getStyleClass().add("accent-button");
         export.setOnAction(e -> exportPerformance());
-        Button refresh = new Button("↻ Atualizar");
+        Button refresh = CotanIcons.button("Atualizar", Feather.REFRESH_CW, "button-outlined");
         refresh.setOnAction(e -> refreshCurrentSection());
         tools.getChildren().addAll(export, refresh);
         heading.getChildren().add(tools);
@@ -2162,10 +2164,10 @@ public class AvaliacaoApplication extends Application {
         );
 
         HBox dbActions = new HBox(10);
-        Button backup = new Button("⇩  Criar backup");
+        Button backup = CotanIcons.button("Criar backup", Feather.DATABASE, "accent-button", "accent");
         backup.getStyleClass().add("accent-button");
         backup.setOnAction(e -> createBackup());
-        Button seedInfo = new Button("Dados de demonstração");
+        Button seedInfo = CotanIcons.button("Dados de demonstração", Feather.INFO, "button-outlined");
         seedInfo.setOnAction(e -> showInfo("O sistema cria automaticamente alguns registos de demonstração apenas quando a base está vazia."));
         dbActions.getChildren().addAll(backup, seedInfo);
         databaseCard.getChildren().add(dbActions);
@@ -2710,7 +2712,7 @@ public class AvaliacaoApplication extends Application {
             if (footer == null) return;
             footer.getChildren().clear();
             if (dialogPane.getButtonTypes().isEmpty()) {
-                Button close = new Button("Fechar");
+                Button close = CotanIcons.button("Fechar", Feather.X, "button-outlined");
                 close.getStyleClass().addAll("button-outlined", "small");
                 close.setOnAction(e -> modalPane.hide(true));
                 footer.getChildren().add(close);
@@ -2718,7 +2720,7 @@ public class AvaliacaoApplication extends Application {
             }
 
             for (ButtonType type : dialogPane.getButtonTypes()) {
-                Button button = new Button(buttonText(type));
+                Button button = CotanIcons.button(buttonText(type), type == ButtonType.OK ? Feather.CHECK : Feather.X);
                 if (type == ButtonType.OK) {
                     button.getStyleClass().addAll("accent", "accent-button");
                 } else {
