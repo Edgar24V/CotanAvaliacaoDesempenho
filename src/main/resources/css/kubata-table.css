@@ -498,3 +498,65 @@
 .cotan-table-shell {
     -fx-spacing: 0;
 }
+
+
+/* ============================================================
+   COTAN — Ações de tabela: flat + icon-only
+   ============================================================ */
+.table-action-button {
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-max-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+    -fx-max-height: 30px;
+    -fx-padding: 5px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.table-action-button .cotan-icon {
+    -fx-fill: #617067;
+}
+
+.table-action-button:hover {
+    -fx-background-color: #E8F5E9;
+    -fx-border-color: transparent;
+}
+
+.table-action-button:hover .cotan-icon {
+    -fx-fill: #217346;
+}
+
+.table-action-button:focused {
+    -fx-border-color: #A5D6A7;
+    -fx-border-width: 1px;
+}
+
+.table-action-button.danger-button .cotan-icon {
+    -fx-fill: #B44A4A;
+}
+
+.table-action-button.danger-button:hover {
+    -fx-background-color: #FDECEC;
+}
+
+.table-action-button.danger-button:hover .cotan-icon {
+    -fx-fill: #C62828;
+}
+
+.table-action-button.small {
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.mini-button,
+.danger-button {
+    -fx-text-fill: transparent;
+    -fx-content-display: GRAPHIC_ONLY;
+}
