@@ -650,7 +650,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void indicatorDialog(IndicatorRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo indicador" : "Editar indicador");
+        CotanModal dialog = dialog(existing == null ? "Novo indicador" : "Editar indicador");
         GridPane grid = formGrid();
 
         TextField code = field("IND-06");
@@ -769,7 +769,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void studentDialog(StudentRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo aluno" : "Editar aluno");
+        CotanModal dialog = dialog(existing == null ? "Novo aluno" : "Editar aluno");
         GridPane grid = formGrid();
 
         TextField number = field("2026-0005");
@@ -908,7 +908,7 @@ public class AvaliacaoApplication extends Application {
 
     private void staffDialog(String type, StaffRow existing) {
         String personLabel = "PROFESSOR".equals(type) ? "professor" : "administrativo";
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo " + personLabel : "Editar " + personLabel);
+        CotanModal dialog = dialog(existing == null ? "Novo " + personLabel : "Editar " + personLabel);
         GridPane grid = formGrid();
 
         TextField code = field("Ex.: " + ("PROFESSOR".equals(type) ? "PROF-003" : "ADM-003"));
@@ -1420,7 +1420,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void teacherDialog(TeacherRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Novo professor" : "Editar professor");
+        CotanModal dialog = dialog(existing == null ? "Novo professor" : "Editar professor");
         GridPane grid = formGrid();
 
         TextField name = field("Nome completo");
@@ -1511,7 +1511,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void classDialog(ClassRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Nova turma" : "Editar turma");
+        CotanModal dialog = dialog(existing == null ? "Nova turma" : "Editar turma");
         GridPane grid = formGrid();
 
         TextField name = field("Ex.: 10ª A");
@@ -1613,7 +1613,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void subjectDialog(SubjectRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Nova disciplina" : "Editar disciplina");
+        CotanModal dialog = dialog(existing == null ? "Nova disciplina" : "Editar disciplina");
         GridPane grid = formGrid();
 
         TextField name = field("Ex.: Matemática");
@@ -1709,7 +1709,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void assessmentDialog(AssessmentRow existing) {
-        Dialog<ButtonType> dialog = dialog(existing == null ? "Nova avaliação" : "Editar avaliação");
+        CotanModal dialog = dialog(existing == null ? "Nova avaliação" : "Editar avaliação");
         GridPane grid = formGrid();
 
         TextField title = field("Ex.: 1ª Prova");
@@ -2219,7 +2219,7 @@ public class AvaliacaoApplication extends Application {
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         table.setFixedCellSize(46);
         table.setPrefHeight(420);
-        table.setRowFactory(tv -> {
+        table.setRowFactory((TableView<T> tv) -> {
             TableRow<T> row = new TableRow<>();
             row.itemProperty().addListener((obs, oldItem, newItem) -> {
                 row.pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("row-empty"), newItem == null);
@@ -2439,7 +2439,7 @@ public class AvaliacaoApplication extends Application {
 
         void setButtons(ButtonType... buttons) {
             dialogPane.getButtonTypes().clear();
-            dialogPane.getButtonTypes().addAll(buttons);
+            dialogPane.getButtonTypes().addAll(Arrays.asList(buttons));
             rebuildFooter();
         }
 
