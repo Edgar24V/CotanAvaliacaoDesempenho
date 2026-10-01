@@ -36,6 +36,7 @@ public final class CotanHeader extends HBox {
     private final Runnable themeToggle;
     private final ContextMenu notificationMenu = new ContextMenu();
     private final MenuButton account = new MenuButton();
+    private final Button primaryAction = CotanIcons.button("", Feather.PLUS, "header-primary-action", "accent-button", "accent");
 
     public CotanHeader(Consumer<String> searchConsumer, Runnable toggleSidebar, Runnable themeToggle) {
         this.searchConsumer = searchConsumer;
@@ -66,6 +67,9 @@ public final class CotanHeader extends HBox {
         Region spacerLeft = new Region();
         HBox.setHgrow(spacerLeft, Priority.ALWAYS);
 
+        primaryAction.setVisible(false);
+        primaryAction.setManaged(false);
+
         Button bell = CotanIcons.button("", Feather.BELL, "header-icon-button");
         bell.setTooltip(new Tooltip("Notificações"));
         notificationBadge.getStyleClass().add("notification-badge");
@@ -93,7 +97,7 @@ public final class CotanHeader extends HBox {
         about.setOnAction(e -> searchConsumer.accept("about"));
         account.getItems().addAll(profile, new SeparatorMenuItem(), settings, about);
 
-        getChildren().addAll(menu, titles, searchWrap, spacerLeft, bellWrap, theme, account);
+        getChildren().addAll(menu, titles, searchWrap, primaryAction, spacerLeft, bellWrap, theme, account);
 
         searchField.textProperty().addListener((obs, oldValue, newValue) -> {
             String query = newValue == null ? "" : newValue.trim().toLowerCase(Locale.ROOT);
@@ -146,6 +150,17 @@ public final class CotanHeader extends HBox {
         }
 
         notificationMenu.show(anchor, javafx.geometry.Side.BOTTOM, 0, 5);
+    }
+
+
+    public void setPrimaryAction(String text, Feather icon, Runnable action, boolean visible) {
+        primaryAction.setText(text == null ? "" : text);
+        primaryAction.setGraphic(CotanIcons.icon(icon == null ? Feather.PLUS : icon, 15));
+        primaryAction.setOnAction(e -> {
+            if (action != null) action.run();
+        });
+        primaryAction.setVisible(visible);
+        primaryAction.setManaged(visible);
     }
 
     public void clearSearch() {
