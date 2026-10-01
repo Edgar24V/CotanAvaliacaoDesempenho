@@ -75,17 +75,15 @@ public class AvaliacaoApplication extends Application {
     private Stage stage;
     private BorderPane root;
     private StackPane content;
-    private VBox sidebar;
-    private Label pageTitle;
-    private Label breadcrumb;
     private Label dbStatus;
-    private TextField searchField;
-    private Button topAction;
     private CotanModalHost modalHost;
+    private CotanSidebar sidebar;
+    private CotanHeader header;
     private final Deque<Node> modalHistory = new ArrayDeque<>();
     private String currentSection = "dashboard";
-    private Button activeNav;
     private boolean darkMode = false;
+    private Label footerClock;
+    private javafx.animation.Timeline footerClockTimeline;
 
     private static final Set<String> EXCEL_PERFORMANCE_SCORES =
             Set.of("5", "10", "15", "20");
@@ -212,8 +210,11 @@ public class AvaliacaoApplication extends Application {
 
         Scene scene = new Scene(sceneRoot, stage.getWidth(), stage.getHeight());
         applyAppStyles(scene);
+        scene.widthProperty().addListener((obs, oldWidth, newWidth) ->
+                applyResponsiveLayout(newWidth.doubleValue()));
         stage.setScene(scene);
         stage.centerOnScreen();
+        applyResponsiveLayout(stage.getWidth());
 
         showSection("dashboard");
     }
@@ -2649,6 +2650,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void shutdown() {
+        if (footerClockTimeline != null) footerClockTimeline.stop();
         if (database != null) database.close();
         if (springContext != null) springContext.close();
         Platform.exit();
