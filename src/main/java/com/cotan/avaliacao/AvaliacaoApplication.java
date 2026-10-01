@@ -721,7 +721,7 @@ public class AvaliacaoApplication extends Application {
             del.setOnAction(e -> confirmDelete("indicador", () -> database.deleteById("performance_indicators", row.id.get())));
             return new HBox(5, edit, del);
         });
-        actions.setPrefWidth(150);
+        actions.setPrefWidth(92);
         table.getColumns().add(actions);
 
         ObservableList<IndicatorRow> rows = FXCollections.observableArrayList();
@@ -848,7 +848,7 @@ public class AvaliacaoApplication extends Application {
             delete.setOnAction(e -> confirmDelete("aluno", () -> database.deleteById("students", row.id.get())));
             return new HBox(6, edit, delete);
         });
-        actions.setPrefWidth(155);
+        actions.setPrefWidth(92);
         table.getColumns().add(actions);
 
         ObservableList<StudentRow> rows = FXCollections.observableArrayList();
@@ -979,7 +979,7 @@ public class AvaliacaoApplication extends Application {
             del.setOnAction(e -> confirmDelete("registo", () -> database.deleteById("staff", row.id.get())));
             return new HBox(4, evaluate, edit, del);
         });
-        actions.setPrefWidth(220);
+        actions.setPrefWidth(130);
         table.getColumns().add(actions);
 
         ObservableList<StaffRow> rows = FXCollections.observableArrayList();
