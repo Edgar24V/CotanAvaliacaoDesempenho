@@ -2406,7 +2406,7 @@ public class AvaliacaoApplication extends Application {
         private final VBox body = new VBox(14);
         private final HBox footer = new HBox(8);
         private final CotanDialogPane dialogPane = new CotanDialogPane();
-        private final List<ButtonType> buttonTypes = new ArrayList<>();
+        private final ObservableList<ButtonType> buttonTypes = FXCollections.observableArrayList();
         private Function<ButtonType, ButtonType> resultConverter;
 
         CotanModal(String title) {
@@ -2438,8 +2438,8 @@ public class AvaliacaoApplication extends Application {
         }
 
         void setButtons(ButtonType... buttons) {
-            buttonTypes.clear();
-            buttonTypes.addAll(buttons);
+            dialogPane.getButtonTypes().clear();
+            dialogPane.getButtonTypes().addAll(buttons);
             rebuildFooter();
         }
 
@@ -2463,7 +2463,7 @@ public class AvaliacaoApplication extends Application {
         private void rebuildFooter() {
             if (footer == null) return;
             footer.getChildren().clear();
-            if (buttonTypes.isEmpty()) {
+            if (dialogPane.getButtonTypes().isEmpty()) {
                 Button close = new Button("Fechar");
                 close.getStyleClass().addAll("button-outlined", "small");
                 close.setOnAction(e -> modalPane.hide(true));
@@ -2471,7 +2471,7 @@ public class AvaliacaoApplication extends Application {
                 return;
             }
 
-            for (ButtonType type : buttonTypes) {
+            for (ButtonType type : dialogPane.getButtonTypes()) {
                 Button button = new Button(buttonText(type));
                 if (type == ButtonType.OK) {
                     button.getStyleClass().addAll("accent", "accent-button");
@@ -2499,7 +2499,7 @@ public class AvaliacaoApplication extends Application {
 
     private static final class CotanDialogPane extends VBox {
         private final VBox content = new VBox(14);
-        private final List<ButtonType> buttonTypes = new ArrayList<>();
+        private final ObservableList<ButtonType> buttonTypes = FXCollections.observableArrayList();
 
         CotanDialogPane() {
             getStyleClass().add("cotan-dialog-pane");
