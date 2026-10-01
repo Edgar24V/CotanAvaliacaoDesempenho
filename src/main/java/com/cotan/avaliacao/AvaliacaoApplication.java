@@ -2274,7 +2274,7 @@ public class AvaliacaoApplication extends Application {
 
     private static String csv(Object value) {
         String s = value == null ? "" : String.valueOf(value);
-        return """ + s.replace(""", """") + """;
+        return "\"" + s.replace("\"", "\"\"") + "\"";
     }
 
     private void confirmDelete(String what, Runnable action) {
