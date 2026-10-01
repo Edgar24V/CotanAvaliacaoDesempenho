@@ -2,6 +2,7 @@ package com.cotan.avaliacao;
 
 import com.cotan.avaliacao.ui.CotanHeader;
 import com.cotan.avaliacao.ui.CotanIcons;
+import com.cotan.avaliacao.ui.CotanMetricCard;
 import com.cotan.avaliacao.ui.CotanModalHost;
 import com.cotan.avaliacao.ui.CotanSidebar;
 import com.cotan.avaliacao.ui.CotanUi;
@@ -497,9 +498,44 @@ public class AvaliacaoApplication extends Application {
         excelBadge.setPadding(new Insets(15));
         hero.getChildren().addAll(intro, heroSpacer, excelBadge);
 
+        FlowPane metrics = new FlowPane();
+        metrics.setHgap(14);
+        metrics.setVgap(14);
+        metrics.setPrefWrapLength(1160);
+
+        long teachersCount = database.scalar(
+                "SELECT COUNT(*) FROM staff WHERE staff_type='PROFESSOR'") instanceof Number n1 ? n1.longValue() : 0;
+        long adminCount = database.scalar(
+                "SELECT COUNT(*) FROM staff WHERE staff_type='ADMINISTRATIVO'") instanceof Number n2 ? n2.longValue() : 0;
+        long studentsCount = database.count("students");
+        long classesCount = database.count("classes");
+        long subjectsCount = database.count("subjects");
+        long assessmentsCount = database.count("assessments");
+        long indicatorsCount = database.count("performance_indicators");
+        long performanceEntries = database.count("performance_scores");
+
+        metrics.getChildren().addAll(
+                new CotanMetricCard("Professores", String.valueOf(teachersCount),
+                        "Profissionais docentes registados", Feather.USER, "accent"),
+                new CotanMetricCard("Administrativos", String.valueOf(adminCount),
+                        "Colaboradores administrativos", Feather.BRIEFCASE, "success"),
+                new CotanMetricCard("Alunos", String.valueOf(studentsCount),
+                        "Alunos vinculados às turmas", Feather.USERS, "accent"),
+                new CotanMetricCard("Turmas", String.valueOf(classesCount),
+                        "Turmas no ano lectivo", Feather.GRID, "info"),
+                new CotanMetricCard("Disciplinas", String.valueOf(subjectsCount),
+                        "Disciplinas cadastradas", Feather.BOOK_OPEN, "accent"),
+                new CotanMetricCard("Avaliações", String.valueOf(assessmentsCount),
+                        "Avaliações académicas criadas", Feather.CLIPBOARD, "success"),
+                new CotanMetricCard("Indicadores", String.valueOf(indicatorsCount),
+                        "Indicadores de desempenho", Feather.TARGET, "info"),
+                new CotanMetricCard("Lançamentos", String.valueOf(performanceEntries),
+                        "Pontuações de desempenho", Feather.CHECK_CIRCLE, "success")
+        );
+
         HBox heading = sectionHeading(
-                "Navegação do sistema",
-                "Cada cartão representa uma área que será substituída pelo processo digital do Excel."
+                "Centro de controlo",
+                "Visão executiva do ciclo de avaliação e acesso rápido aos módulos."
         );
 
         GridPane grid = new GridPane();
@@ -527,7 +563,19 @@ public class AvaliacaoApplication extends Application {
                 label("A regra de classificação observada no Excel utiliza as faixas Mau, Suficiente, Bom e Muito bom; ela ficará centralizada no motor de avaliação para evitar fórmulas espalhadas.", "muted")
         );
 
-        page.getChildren().addAll(hero, heading, grid, process);
+        HBox shortcuts = new HBox(12);
+        shortcuts.getChildren().addAll(
+                actionCard("Nova avaliação", "Criar uma avaliação académica e definir turma, disciplina e peso.",
+                        () -> assessmentDialog(null)),
+                actionCard("Avaliar professor", "Lançar os indicadores de desempenho do professor seleccionado.",
+                        () -> showSection("professor-evaluation")),
+                actionCard("Mapa trimestral", "Consultar resultados consolidados por trimestre.",
+                        () -> showSection("map-1")),
+                actionCard("Relatórios", "Abrir a análise consolidada e exportar os resultados.",
+                        () -> showSection("reports"))
+        );
+
+        page.getChildren().addAll(hero, metrics, heading, grid, shortcuts, process);
 
         ScrollPane scroll = new ScrollPane(page);
         scroll.setFitToWidth(true);
