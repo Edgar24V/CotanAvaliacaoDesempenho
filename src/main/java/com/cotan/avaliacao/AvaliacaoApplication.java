@@ -824,7 +824,8 @@ public class AvaliacaoApplication extends Application {
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
             String validation = validateStudent(number.getText(), name.getText(), gender.getValue(),
-                    birth.getValue(), phone.getText(), guardian.getText());
+                    birth.getValue(), phone.getText(), guardian.getText(),
+                    existing == null ? null : existing.id.get());
             if (validation != null) {
                 showWarning(validation);
                 return null;
@@ -1183,7 +1184,7 @@ public class AvaliacaoApplication extends Application {
         }
         double avg = weights == 0 ? 0 : total/weights;
         if (!result.getChildren().isEmpty() && result.getChildren().get(0) instanceof VBox b && b.getChildren().size()>1) {
-            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "—" : String.format(Locale.US,"%.1f",avg));
+            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "—" : String.format(Locale.US,"%.1f",Math.round(avg * 10.0) / 10.0));
         }
         if (result.getChildren().size()>1 && result.getChildren().get(1) instanceof VBox b && b.getChildren().size()>1) {
             ((Label)b.getChildren().get(1)).setText(weights == 0 ? "Aguardando lançamento" : performanceClassification(avg));
@@ -1935,7 +1936,13 @@ public class AvaliacaoApplication extends Application {
                 if (n < 0 || n > maxAllowed) throw new NumberFormatException();
                 e.getRowValue().scoreProperty().set(String.format(Locale.US, "%.2f", n));
             } catch (NumberFormatException ex) {
-                showWarning("Digite uma nota numérica válida.");
+                AssessmentOption selectedAssessment = assessment.getValue();
+                double maxAllowed = selectedAssessment == null ? 20 : selectedAssessment.maxScore();
+                if (isNumeric(value)) {
+                    showWarning("A nota deve estar entre 0 e " + trim(maxAllowed) + ".");
+                } else {
+                    showWarning("Digite uma nota numérica válida.");
+                }
                 table.refresh();
             }
         });
@@ -2383,7 +2390,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private String validateStudent(String number, String name, String gender, LocalDate birth,
-                                   String phone, String guardian) {
+                                   String phone, String guardian, Long existingId) {
         List<String> e = new ArrayList<>();
         String n = safe(number).trim();
         String nm = safe(name).trim();
@@ -2395,7 +2402,9 @@ public class AvaliacaoApplication extends Application {
         if (safe(guardian).trim().length() > 120) e.add("Nome do encarregado: máximo 120 caracteres.");
         if (e.isEmpty()) {
             try {
-                Object duplicate = database.scalar("SELECT COUNT(*) FROM students WHERE student_number=?", n);
+                Object duplicate = database.scalar(
+                        "SELECT COUNT(*) FROM students WHERE student_number=? AND (? IS NULL OR id<>?)",
+                        n, existingId, existingId);
                 if (duplicate instanceof Number count && count.intValue() > 0) {
                     e.add("Já existe um aluno com este número.");
                 }
@@ -2502,6 +2511,15 @@ public class AvaliacaoApplication extends Application {
             int start = Integer.parseInt(y.substring(0,4));
             int end = Integer.parseInt(y.substring(5));
             return end == start + 1;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private static boolean isNumeric(String value) {
+        try {
+            Double.parseDouble(safe(value).replace(",", "."));
+            return true;
         } catch (Exception ex) {
             return false;
         }
