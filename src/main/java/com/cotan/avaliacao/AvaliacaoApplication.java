@@ -10,6 +10,7 @@ import com.cotan.avaliacao.ui.table.AdvancedTableView;
 import com.cotan.avaliacao.ui.table.TableUtils;
 import com.cotan.avaliacao.report.AvaliacaoProfessorRelatorio;
 import com.cotan.avaliacao.report.AvaliacaoProfessorReportService;
+import com.cotan.avaliacao.domain.AvaliacaoDesempenhoAnual;
 import atlantafx.base.controls.Card;
 import atlantafx.base.controls.Message;
 import atlantafx.base.controls.Tile;
@@ -1029,10 +1030,12 @@ public class AvaliacaoApplication extends Application {
 
         AdvancedTableView<StaffRow> table = new AdvancedTableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        addColumn(table, "Código", 115, StaffRow::codeProperty);
-        addColumn(table, "Nome completo", 280, StaffRow::nameProperty);
-        addColumn(table, "Cargo / função", 220, StaffRow::roleProperty);
-        addColumn(table, "Departamento", 190, StaffRow::departmentProperty);
+        addColumn(table, "Código", 105, StaffRow::codeProperty);
+        addColumn(table, "Nome completo", 245, StaffRow::nameProperty);
+        addColumn(table, "Categoria", 240, StaffRow::categoryProperty);
+        addColumn(table, "Agente nº", 115, StaffRow::agentNumberProperty);
+        addColumn(table, "Cargo / função", 190, StaffRow::roleProperty);
+        addColumn(table, "Departamento", 170, StaffRow::departmentProperty);
         addColumn(table, "Telefone", 155, StaffRow::phoneProperty);
         addColumn(table, "E-mail", 240, StaffRow::emailProperty);
 
@@ -1056,7 +1059,7 @@ public class AvaliacaoApplication extends Application {
         String q = search();
         for (Map<String,Object> r : database.staff(type)) {
             StaffRow row = StaffRow.from(r);
-            if (matches(q, row.code.get(), row.name.get(), row.role.get(), row.department.get(), row.phone.get(), row.email.get())) {
+            if (matches(q, row.code.get(), row.name.get(), row.category.get(), row.agentNumber.get(), row.role.get(), row.department.get(), row.phone.get(), row.email.get())) {
                 rows.add(row);
             }
         }
@@ -1080,6 +1083,8 @@ public class AvaliacaoApplication extends Application {
 
         TextField code = field("Ex.: " + ("PROFESSOR".equals(type) ? "PROF-003" : "ADM-003"));
         TextField name = field("Nome completo");
+        TextField category = field("Categoria / carreira");
+        TextField agentNumber = field("Número de agente / funcionário");
         TextField role = field("Cargo / função");
         TextField department = field("Departamento / área");
         TextField phone = field("923 000 000");
@@ -1089,6 +1094,8 @@ public class AvaliacaoApplication extends Application {
         if (existing != null) {
             code.setText(existing.code.get());
             name.setText(existing.name.get());
+            category.setText(existing.category.get());
+            agentNumber.setText(existing.agentNumber.get());
             role.setText(existing.role.get());
             department.setText(existing.department.get());
             phone.setText(existing.phone.get());
@@ -1098,21 +1105,24 @@ public class AvaliacaoApplication extends Application {
             }
         }
 
-        grid.addRow(0, label("Código", "field-label"), code);
-        grid.addRow(1, label("Nome", "field-label"), name);
-        grid.addRow(2, label("Cargo / função", "field-label"), role);
-        grid.addRow(3, label("Departamento", "field-label"), department);
-        grid.addRow(4, label("Telefone", "field-label"), phone);
-        grid.addRow(5, label("E-mail", "field-label"), email);
-        grid.addRow(6, label("Admissão", "field-label"), admission);
+        grid.addRow(0, label("Código interno", "field-label"), code);
+        grid.addRow(1, label("Nome completo", "field-label"), name);
+        grid.addRow(2, label("Categoria / carreira", "field-label"), category);
+        grid.addRow(3, label("Agente nº", "field-label"), agentNumber);
+        grid.addRow(4, label("Cargo / função", "field-label"), role);
+        grid.addRow(5, label("Departamento", "field-label"), department);
+        grid.addRow(6, label("Telefone", "field-label"), phone);
+        grid.addRow(7, label("E-mail", "field-label"), email);
+        grid.addRow(8, label("Admissão", "field-label"), admission);
 
         dialog.setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
         dialog.setResultConverter(btn -> {
             if (btn != ButtonType.OK) return btn;
-            String validation = validateStaff(type, code.getText(), name.getText(), role.getText(),
-                    department.getText(), phone.getText(), email.getText(), admission.getValue(),
+            String validation = validateStaff(type, code.getText(), name.getText(),
+                    category.getText(), agentNumber.getText(), role.getText(), department.getText(),
+                    phone.getText(), email.getText(), admission.getValue(),
                     existing == null ? null : existing.id.get());
             if (validation != null) {
                 showWarning(validation);
@@ -1122,20 +1132,20 @@ public class AvaliacaoApplication extends Application {
                 String admissionDate = admission.getValue() == null ? null : admission.getValue().toString();
                 if (existing == null) {
                     database.insert("""
-                        INSERT INTO staff(code,name,staff_type,role,department,phone,email,admission_date)
-                        VALUES(?,?,?,?,?,?,?,?)
+                        INSERT INTO staff(code,name,staff_type,role,category,agent_number,department,phone,email,admission_date)
+                        VALUES(?,?,?,?,?,?,?,?,?,?)
                         """,
                         code.getText().trim(), name.getText().trim(), type,
-                        blankToNull(role.getText()), blankToNull(department.getText()),
-                        blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate);
+                        blankToNull(role.getText()), blankToNull(category.getText()), blankToNull(agentNumber.getText()),
+                        blankToNull(department.getText()), blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate);
                 } else {
                     database.update("""
-                        UPDATE staff SET code=?,name=?,role=?,department=?,phone=?,email=?,admission_date=?
+                        UPDATE staff SET code=?,name=?,role=?,category=?,agent_number=?,department=?,phone=?,email=?,admission_date=?
                         WHERE id=?
                         """,
                         code.getText().trim(), name.getText().trim(),
-                        blankToNull(role.getText()), blankToNull(department.getText()),
-                        blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate,
+                        blankToNull(role.getText()), blankToNull(category.getText()), blankToNull(agentNumber.getText()),
+                        blankToNull(department.getText()), blankToNull(phone.getText()), blankToNull(email.getText()), admissionDate,
                         existing.id.get());
                 }
                 refreshCurrentSection();
@@ -1729,16 +1739,33 @@ public class AvaliacaoApplication extends Application {
 
     private static final class StaffRow {
         final SimpleLongProperty id;
-        final SimpleStringProperty code,name,role,department,phone,email,admission;
-        StaffRow(long id,String code,String name,String role,String department,String phone,String email,String admission){
-            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
-            this.role=new SimpleStringProperty(role);this.department=new SimpleStringProperty(department);
-            this.phone=new SimpleStringProperty(phone);this.email=new SimpleStringProperty(email);this.admission=new SimpleStringProperty(admission);
+        final SimpleStringProperty code,name,category,agentNumber,role,department,phone,email,admission;
+        StaffRow(long id,String code,String name,String category,String agentNumber,String role,String department,String phone,String email,String admission){
+            this.id=new SimpleLongProperty(id);
+            this.code=new SimpleStringProperty(code);
+            this.name=new SimpleStringProperty(name);
+            this.category=new SimpleStringProperty(category);
+            this.agentNumber=new SimpleStringProperty(agentNumber);
+            this.role=new SimpleStringProperty(role);
+            this.department=new SimpleStringProperty(department);
+            this.phone=new SimpleStringProperty(phone);
+            this.email=new SimpleStringProperty(email);
+            this.admission=new SimpleStringProperty(admission);
         }
-        static StaffRow from(Map<String,Object> r){return new StaffRow(n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("role")),s(r.get("department")),s(r.get("phone")),s(r.get("email")),s(r.get("admission_date")));}
-        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
-        SimpleStringProperty roleProperty(){return role;} SimpleStringProperty departmentProperty(){return department;}
-        SimpleStringProperty phoneProperty(){return phone;} SimpleStringProperty emailProperty(){return email;}
+        static StaffRow from(Map<String,Object> r){
+            return new StaffRow(
+                n(r.get("id")),s(r.get("code")),s(r.get("name")),s(r.get("category")),
+                s(r.get("agent_number")),s(r.get("role")),s(r.get("department")),
+                s(r.get("phone")),s(r.get("email")),s(r.get("admission_date")));
+        }
+        SimpleStringProperty codeProperty(){return code;}
+        SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty categoryProperty(){return category;}
+        SimpleStringProperty agentNumberProperty(){return agentNumber;}
+        SimpleStringProperty roleProperty(){return role;}
+        SimpleStringProperty departmentProperty(){return department;}
+        SimpleStringProperty phoneProperty(){return phone;}
+        SimpleStringProperty emailProperty(){return email;}
     }
 
     private record StaffOption(long id,String name,String code) {
@@ -2831,13 +2858,16 @@ public class AvaliacaoApplication extends Application {
         return e.isEmpty() ? null : String.join("\n", e);
     }
 
-    private String validateStaff(String type, String code, String name, String role, String department,
+    private String validateStaff(String type, String code, String name, String category,
+                                 String agentNumber, String role, String department,
                                  String phone, String email, LocalDate admission, Long existingId) {
         List<String> e = new ArrayList<>();
         String c = safe(code).trim().toUpperCase(Locale.ROOT);
         String expected = "PROFESSOR".equals(type) ? "PROF" : "ADM";
         if (!c.matches(expected + "-\\d{3}")) e.add("Código inválido. Use " + expected + "-001, " + expected + "-002, etc.");
         if (safe(name).trim().length() < 3 || safe(name).trim().length() > 120) e.add("Nome: entre 3 e 120 caracteres.");
+        if (safe(category).trim().length() > 160) e.add("Categoria/carreira: máximo 160 caracteres.");
+        if (safe(agentNumber).trim().length() > 40) e.add("Agente nº: máximo 40 caracteres.");
         if (safe(role).trim().length() > 100) e.add("Cargo/função: máximo 100 caracteres.");
         if (safe(department).trim().length() > 100) e.add("Departamento: máximo 100 caracteres.");
         if (!validPhone(phone)) e.add("Telefone inválido. Use 9XXXXXXXX ou +244 9XXXXXXXX.");
@@ -2849,6 +2879,16 @@ public class AvaliacaoApplication extends Application {
                         "SELECT COUNT(*) FROM staff WHERE code=? AND (? IS NULL OR id<>?)",
                         c, existingId, existingId);
                 if (duplicate instanceof Number n && n.intValue() > 0) e.add("Já existe um registo com este código.");
+
+                String agent = safe(agentNumber).trim();
+                if (!agent.isBlank()) {
+                    Object agentDuplicate = database.scalar(
+                            "SELECT COUNT(*) FROM staff WHERE agent_number=? AND (? IS NULL OR id<>?)",
+                            agent, existingId, existingId);
+                    if (agentDuplicate instanceof Number n && n.intValue() > 0) {
+                        e.add("Já existe um profissional com este número de agente.");
+                    }
+                }
             } catch (SQLException ex) {
                 e.add("Não foi possível validar a unicidade do código.");
             }
