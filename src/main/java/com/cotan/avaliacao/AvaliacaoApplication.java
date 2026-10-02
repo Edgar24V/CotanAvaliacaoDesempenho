@@ -34,6 +34,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -2957,17 +2959,69 @@ public class AvaliacaoApplication extends Application {
         }
 
         String detail = ex == null ? "" : (ex.getMessage() == null ? ex.toString() : ex.getMessage());
+        String visibleError = detail.isBlank() ? message : message + "\n" + detail;
+        String technicalError = buildTechnicalError(message, ex);
+
         Message body = new Message(
             "Não foi possível concluir a operação.",
-            detail.isBlank() ? message : message + "\n" + detail,
+            visibleError,
             CotanIcons.icon(Feather.ALERT_CIRCLE, 18)
         );
         body.getStyleClass().add("danger");
 
         CotanModal modal = new CotanModal("COTAN • Erro");
         modal.setContent(body);
-        modal.setButtons(ButtonType.OK);
+        modal.setButtons(COPY_ERROR_BUTTON, ButtonType.OK);
+        modal.setResultConverter(type -> {
+            if (type == COPY_ERROR_BUTTON) {
+                copyErrorToClipboard(technicalError);
+                showToast("Erro copiado para a área de transferência.");
+                return null;
+            }
+            return type;
+        });
         modal.showAndWait();
+    }
+
+    private String buildTechnicalError(String message, Throwable ex) {
+        StringBuilder error = new StringBuilder();
+        error.append("COTAN — Erro").append(System.lineSeparator());
+        error.append("Operação: ").append(message == null ? "" : message).append(System.lineSeparator());
+
+        if (ex == null) {
+            error.append("Detalhes: sem exceção técnica disponível.");
+            return error.toString();
+        }
+
+        error.append("Exceção: ").append(ex.getClass().getName()).append(System.lineSeparator());
+        error.append("Mensagem: ")
+                .append(ex.getMessage() == null ? ex.toString() : ex.getMessage())
+                .append(System.lineSeparator());
+
+        Throwable cause = ex.getCause();
+        int level = 1;
+        while (cause != null && level <= 5) {
+            error.append("Causa ").append(level).append(": ")
+                    .append(cause.getClass().getName())
+                    .append(" — ")
+                    .append(cause.getMessage() == null ? cause.toString() : cause.getMessage())
+                    .append(System.lineSeparator());
+            cause = cause.getCause();
+            level++;
+        }
+
+        error.append(System.lineSeparator()).append("Stack trace:").append(System.lineSeparator());
+        for (StackTraceElement element : ex.getStackTrace()) {
+            error.append("    at ").append(element).append(System.lineSeparator());
+        }
+
+        return error.toString().trim();
+    }
+
+    private void copyErrorToClipboard(String errorText) {
+        ClipboardContent content = new ClipboardContent();
+        content.putString(errorText == null ? "" : errorText);
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
     private void shutdown() {
@@ -2976,6 +3030,9 @@ public class AvaliacaoApplication extends Application {
         if (springContext != null) springContext.close();
         Platform.exit();
     }
+
+    private static final ButtonType COPY_ERROR_BUTTON =
+            new ButtonType("Copiar erro", ButtonBar.ButtonData.OTHER);
 
     private final class CotanModal {
         private final String title;
@@ -3085,10 +3142,13 @@ public class AvaliacaoApplication extends Application {
             for (ButtonType type : dialogPane.getButtonTypes()) {
                 Button button = CotanIcons.button(
                         buttonText(type),
-                        type == ButtonType.OK ? Feather.CHECK : Feather.X
+                        type == COPY_ERROR_BUTTON ? Feather.COPY
+                                : (type == ButtonType.OK ? Feather.CHECK : Feather.X)
                 );
 
-                if (type == ButtonType.OK) {
+                if (type == COPY_ERROR_BUTTON) {
+                    button.getStyleClass().addAll("button-outlined", "copy-error-button");
+                } else if (type == ButtonType.OK) {
                     button.getStyleClass().add("accent");
                 } else {
                     button.getStyleClass().add("button-outlined");
