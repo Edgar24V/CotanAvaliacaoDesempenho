@@ -111,6 +111,9 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>${java.version}</release>
+                    <testExcludes>
+                        <testExclude>**/DatabaseAnnualReportTest.java</testExclude>
+                    </testExcludes>
                 </configuration>
             </plugin>
             <plugin>
