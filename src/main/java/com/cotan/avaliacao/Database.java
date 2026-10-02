@@ -183,11 +183,6 @@ public final class Database implements AutoCloseable {
                 CREATE INDEX IF NOT EXISTS idx_staff_type ON staff(staff_type)
                 """);
             st.executeUpdate("""
-                CREATE UNIQUE INDEX IF NOT EXISTS uq_staff_agent_number
-                ON staff(agent_number)
-                WHERE agent_number IS NOT NULL AND trim(agent_number) <> ''
-                """);
-            st.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS institution_profile (
                     id INTEGER PRIMARY KEY CHECK(id = 1),
                     provincial_office TEXT NOT NULL DEFAULT '',
@@ -249,6 +244,14 @@ public final class Database implements AutoCloseable {
         ensureColumn("staff", "agent_number", "TEXT");
         ensureColumn("institution_profile", "default_evaluator_staff_id", "INTEGER");
         ensureColumn("institution_profile", "default_homologante_staff_id", "INTEGER");
+
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate("""
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_staff_agent_number
+                ON staff(agent_number)
+                WHERE agent_number IS NOT NULL AND trim(agent_number) <> ''
+                """);
+        }
     }
 
     private void ensureColumn(String table, String column, String definition) throws SQLException {
