@@ -20,10 +20,15 @@ public final class CotanSidebar extends Sidebar<String> {
 
     public CotanSidebar(Consumer<String> navigation) {
         this.navigation = navigation;
+        getStyleClass().add("cotan-ribbon-sidebar");
         setPrefWidth(EXPANDED_WIDTH);
         setMinWidth(72);
-        setHeader(new SidebarHeader<>("COTAN", CotanIcons.icon(Feather.ACTIVITY, 20)));
-        setFooter(new SidebarFooter<>("Avaliação e Desempenho", CotanIcons.icon(Feather.BAR_CHART_2, 16)));
+        SidebarHeader<String> header = new SidebarHeader<>("COTAN", CotanIcons.icon(Feather.ACTIVITY, 20));
+        header.getStyleClass().add("cotan-sidebar-brand");
+        setHeader(header);
+        SidebarFooter<String> footer = new SidebarFooter<>("Avaliação e Desempenho", CotanIcons.icon(Feather.BAR_CHART_2, 16));
+        footer.getStyleClass().add("cotan-sidebar-footer");
+        setFooter(footer);
         setOnItemClick(event -> {
             String route = event.getItem().getValue();
             if (route != null) {
