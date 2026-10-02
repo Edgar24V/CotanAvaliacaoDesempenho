@@ -16,7 +16,7 @@
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>3.5.16</spring.boot.version>
-        <javafx.version>21.0.8</javafx.version>
+        <javafx.version>25</javafx.version>
         <atlantafx.version>3.0.0</atlantafx.version>
         <sqlite.version>3.53.1.0</sqlite.version>
         <junit.version>5.10.2</junit.version>

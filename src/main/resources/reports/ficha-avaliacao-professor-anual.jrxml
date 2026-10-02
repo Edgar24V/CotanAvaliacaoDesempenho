@@ -126,7 +126,7 @@
                     </jr:column>
                     <jr:column width="231" uuid="f1e96f73-b1a9-467b-b397-b034bd387f90">
                         <jr:columnHeader height="32" style="TableHeader"><staticText><reportElement x="0" y="0" width="231" height="32" uuid="c631eb3d-196a-4c8b-9d90-9964bb18e7c7"/><textElement verticalAlignment="Middle"><font isBold="true"/></textElement><text><![CDATA[Indicadores]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="38" style="TableCell"><textField isStretchWithOverflow="true"><reportElement x="0" y="0" width="231" height="38" uuid="b5e88d07-049a-4cf2-815c-3b5572475542"/><textElement verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:detailCell height="38" style="TableCell"><textField textAdjust="StretchHeight"><reportElement x="0" y="0" width="231" height="38" uuid="b5e88d07-049a-4cf2-815c-3b5572475542"/><textElement verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                     <jr:column width="64" uuid="d162e7a6-5a0d-4744-a62d-f3c8ac00f6bb">
                         <jr:columnHeader height="32" style="TableHeader"><staticText><reportElement x="0" y="0" width="64" height="32" uuid="686ef1a9-ad14-4a87-92f4-151293b12a8a"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[1.º Trimestre]]></text></staticText></jr:columnHeader>
@@ -160,7 +160,7 @@
                 <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="10" isBold="true"/></textElement>
                 <text><![CDATA[APRECIAÇÃO GERAL]]></text>
             </staticText>
-            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+            <textField textAdjust="StretchHeight" isBlankWhenNull="true">
                 <reportElement style="FormText" x="0" y="528" width="555" height="54" uuid="912d5754-b3bb-42f5-928a-808168ccf397"/>
                 <box leftPadding="6" rightPadding="6" topPadding="5" bottomPadding="5"><pen lineWidth="0.5" lineColor="#555555"/></box>
                 <textElement verticalAlignment="Top"/><textFieldExpression><![CDATA[$P{apreciacaoGeral}]]></textFieldExpression>

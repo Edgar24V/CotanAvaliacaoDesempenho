@@ -47,6 +47,7 @@ class AvaliacaoProfessorReportServiceTest {
         service.generateDocx(output, relatorio);
 
         assertTrue(Files.size(output) > 0);
+        assertTrue(service.generatePdfBytes(relatorio).length > 0);
         try (ZipFile docx = new ZipFile(output.toFile())) {
             var document = docx.getEntry("word/document.xml");
             assertTrue(document != null);

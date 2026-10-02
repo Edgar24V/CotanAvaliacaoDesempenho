@@ -114,7 +114,8 @@ public class AdvancedTableView<S> extends TableView<S> {
     public AdvancedTableView() {
         super();
         setEditable(true);
-        getStyleClass().addAll("advanced-table", "bordered", "striped");
+        getStyleClass().addAll("bordered", "striped");
+        loadingLabel.getStyleClass().add("text-muted");
         setDensity(RowDensity.COMFORTABLE);
         setPlaceholder(new Label("Nenhum registo encontrado."));
         setLoadingIndicator();
@@ -296,12 +297,11 @@ public class AdvancedTableView<S> extends TableView<S> {
      */
     public void setDensity(RowDensity density) {
         RowDensity next = density == null ? RowDensity.COMFORTABLE : density;
-        getStyleClass().removeIf(style ->
-                style.equals("table-density-compact")
-                        || style.equals("table-density-comfortable")
-                        || style.equals("table-density-spacious")
-        );
-        getStyleClass().add(next.cssClass);
+        setFixedCellSize(switch (next) {
+            case COMPACT -> 34;
+            case COMFORTABLE -> 42;
+            case SPACIOUS -> 52;
+        });
         rowDensity = next;
     }
 
@@ -574,7 +574,6 @@ public class AdvancedTableView<S> extends TableView<S> {
             loadingIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
             VBox pane = new VBox(8, loadingIndicator, loadingLabel);
             pane.setAlignment(Pos.CENTER);
-            pane.getStyleClass().add("table-loading");
             setPlaceholder(pane);
         } else {
             setPlaceholder(new Label("Nenhum registo encontrado."));
@@ -590,7 +589,7 @@ public class AdvancedTableView<S> extends TableView<S> {
         TextField searchField = new TextField();
         activeSearchField = searchField;
         searchField.setPromptText("Pesquisar...");
-        searchField.getStyleClass().add("table-search-field");
+        searchField.getStyleClass().add("large");
         searchField.setPrefWidth(300);
 
         Button clearButton = new Button("", IconUtilsForTable.icon("CLEAR"));
@@ -630,7 +629,7 @@ public class AdvancedTableView<S> extends TableView<S> {
             searchDebounce.playFromStart();
         });
 
-        resultCountLabel.getStyleClass().add("table-result-count");
+        resultCountLabel.getStyleClass().addAll("text-muted", "text-small");
         updatePagerState();
 
         pageSizeCombo = createPageSizeCombo();
@@ -645,7 +644,6 @@ public class AdvancedTableView<S> extends TableView<S> {
                 pageSizeCombo
         );
         toolbar.setPadding(new Insets(7, 8, 7, 8));
-        toolbar.getStyleClass().add("table-toolbar");
         toolbar.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(searchBox, Priority.NEVER);
 
@@ -660,9 +658,7 @@ public class AdvancedTableView<S> extends TableView<S> {
 
         HBox pager = new HBox(6);
         pager.setAlignment(Pos.CENTER_RIGHT);
-        pager.getStyleClass().add("table-pager");
-
-        pageLabel.getStyleClass().add("table-page-label");
+        pageLabel.getStyleClass().addAll("text-muted", "text-small");
         pager.getChildren().addAll(
                 previousPageButton,
                 pageLabel,
@@ -904,7 +900,7 @@ public class AdvancedTableView<S> extends TableView<S> {
         combo.setPrefWidth(84);
         combo.setAccessibleText("Registos por página");
         combo.setOnAction(e -> setPageSize(combo.getValue()));
-        combo.getStyleClass().add("table-page-size");
+        combo.getStyleClass().add("small");
         return combo;
     }
 
@@ -967,7 +963,7 @@ public class AdvancedTableView<S> extends TableView<S> {
     }
 
     private void setupSortIndicator() {
-        sortIndicatorLabel.getStyleClass().add("table-sort-indicator");
+        sortIndicatorLabel.getStyleClass().addAll("accent", "text-small");
         updateSortIndicator();
     }
 
@@ -1363,15 +1359,9 @@ public class AdvancedTableView<S> extends TableView<S> {
     }
 
     public enum RowDensity {
-        COMPACT("table-density-compact"),
-        COMFORTABLE("table-density-comfortable"),
-        SPACIOUS("table-density-spacious");
-
-        private final String cssClass;
-
-        RowDensity(String cssClass) {
-            this.cssClass = cssClass;
-        }
+        COMPACT,
+        COMFORTABLE,
+        SPACIOUS
     }
 
     /**

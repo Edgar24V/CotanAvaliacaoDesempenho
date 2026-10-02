@@ -1,6 +1,6 @@
 package com.cotan.avaliacao.ui;
 
-import javafx.animation.PauseTransition;
+import atlantafx.base.controls.CustomTextField;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -30,40 +30,40 @@ public final class CotanHeader extends HBox {
     private final Label title = new Label();
     private final Label breadcrumb = new Label();
     private final Label notificationBadge = new Label();
-    private final TextField searchField = new TextField();
+    private final CustomTextField searchField = new CustomTextField();
     private final List<String> notifications = new ArrayList<>();
     private final Consumer<String> searchConsumer;
     private final Runnable toggleSidebar;
     private final Runnable themeToggle;
     private final ContextMenu notificationMenu = new ContextMenu();
     private final MenuButton account = new MenuButton();
-    private final Button primaryAction = CotanIcons.button("", Feather.PLUS, "header-primary-action", "accent-button", "accent");
+    private final Button primaryAction = CotanIcons.button("", Feather.PLUS, "accent-button");
 
     public CotanHeader(Consumer<String> searchConsumer, Runnable toggleSidebar, Runnable themeToggle) {
         this.searchConsumer = searchConsumer;
         this.toggleSidebar = toggleSidebar;
         this.themeToggle = themeToggle;
 
-        getStyleClass().add("cotan-header");
         setAlignment(Pos.CENTER_LEFT);
-        setPadding(new Insets(9, 16, 9, 16));
-        setSpacing(12);
+        setPadding(new Insets(12, 20, 12, 20));
+        setSpacing(16);
 
-        Button menu = CotanIcons.button("", Feather.MENU, "header-icon-button");
+        Button menu = CotanIcons.button("", Feather.MENU, "button-icon", "flat");
         menu.setTooltip(new Tooltip("Alternar menu lateral"));
         menu.setOnAction(e -> toggleSidebar.run());
 
         VBox titles = new VBox(1, title, breadcrumb);
-        titles.getStyleClass().add("header-titles");
+        title.getStyleClass().add("title-3");
+        breadcrumb.getStyleClass().addAll("text-muted", "text-small");
 
-        StackPane searchWrap = new StackPane(searchField, CotanIcons.icon(Feather.SEARCH, 15));
         searchField.setPromptText("Pesquisar no sistema...");
-        searchField.setPrefWidth(390);
-        searchField.getStyleClass().add("header-search");
-        searchWrap.getStyleClass().add("header-search-wrap");
-        StackPane.setAlignment(searchWrap.getChildren().get(1), Pos.CENTER_LEFT);
-        StackPane.setMargin(searchWrap.getChildren().get(1), new Insets(0, 0, 0, 12));
-        searchField.setPadding(new Insets(8, 12, 8, 34));
+        searchField.setPrefWidth(360);
+        searchField.setMinWidth(190);
+        searchField.setLeft(CotanIcons.icon(Feather.SEARCH, 15));
+        Button clearSearch = CotanIcons.button("", Feather.X, "button-icon", "flat", "small");
+        clearSearch.setTooltip(new Tooltip("Limpar pesquisa"));
+        clearSearch.setOnAction(e -> clearSearch());
+        searchField.setRight(clearSearch);
 
         Region spacerLeft = new Region();
         HBox.setHgrow(spacerLeft, Priority.ALWAYS);
@@ -71,9 +71,9 @@ public final class CotanHeader extends HBox {
         primaryAction.setVisible(false);
         primaryAction.setManaged(false);
 
-        Button bell = CotanIcons.button("", Feather.BELL, "header-icon-button");
+        Button bell = CotanIcons.button("", Feather.BELL, "button-icon", "flat");
         bell.setTooltip(new Tooltip("Notificações"));
-        notificationBadge.getStyleClass().add("notification-badge");
+        notificationBadge.getStyleClass().addAll("accent", "text-small");
         notificationBadge.setVisible(false);
         notificationBadge.setManaged(false);
 
@@ -82,14 +82,14 @@ public final class CotanHeader extends HBox {
         StackPane.setMargin(notificationBadge, new Insets(-4, -4, 0, 0));
         bell.setOnAction(e -> rebuildNotifications(bell));
 
-        Button theme = CotanIcons.button("", Feather.MOON, "header-icon-button");
+        Button theme = CotanIcons.button("", Feather.MOON, "button-icon", "flat");
         theme.setTooltip(new Tooltip("Alternar tema"));
         theme.setOnAction(e -> themeToggle.run());
 
         account.setGraphic(CotanIcons.icon(Feather.USER, 16));
         account.setText("Administrador");
         account.setTooltip(new Tooltip("Conta e sessão"));
-        account.getStyleClass().add("account-menu");
+        account.getStyleClass().add("button-outlined");
         MenuItem profile = new MenuItem("Perfil", CotanIcons.icon(Feather.USER, 13));
         profile.setDisable(true);
         MenuItem settings = new MenuItem("Configurações", CotanIcons.icon(Feather.SETTINGS, 13));
@@ -98,7 +98,8 @@ public final class CotanHeader extends HBox {
         about.setOnAction(e -> searchConsumer.accept("about"));
         account.getItems().addAll(profile, new SeparatorMenuItem(), settings, about);
 
-        getChildren().addAll(menu, titles, searchWrap, primaryAction, spacerLeft, bellWrap, theme, account);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+        getChildren().addAll(menu, titles, searchField, primaryAction, spacerLeft, bellWrap, theme, account);
 
         searchField.setOnAction(e -> {
             String query = searchField.getText() == null

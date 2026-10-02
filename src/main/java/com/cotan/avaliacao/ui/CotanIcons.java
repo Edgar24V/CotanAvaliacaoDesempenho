@@ -18,7 +18,6 @@ public final class CotanIcons {
     public static FontIcon icon(Feather icon, int size) {
         FontIcon fontIcon = new FontIcon(icon);
         fontIcon.setIconSize(size);
-        fontIcon.getStyleClass().add("cotan-icon");
         return fontIcon;
     }
 
@@ -26,10 +25,24 @@ public final class CotanIcons {
         Button button = new Button(text, icon(icon));
         for (String styleClass : styleClasses) {
             if (styleClass != null && !styleClass.isBlank()) {
-                button.getStyleClass().add(styleClass);
+                switch (styleClass) {
+                    case "accent-button" -> addStyleClass(button, "accent");
+                    case "danger-button" -> addStyleClass(button, "danger");
+                    case "mini-button", "table-action-button" -> addStyleClass(button, "small");
+                    case "header-icon-button", "modal-close-button" -> addStyleClass(button, "button-icon");
+                    case "button-flat" -> addStyleClass(button, "flat");
+                    case "accent", "danger", "success", "button-icon", "button-outlined", "flat", "small", "large" -> addStyleClass(button, styleClass);
+                    default -> { }
+                }
             }
         }
         return button;
+    }
+
+    private static void addStyleClass(Button button, String styleClass) {
+        if (!button.getStyleClass().contains(styleClass)) {
+            button.getStyleClass().add(styleClass);
+        }
     }
 
     public static void applyIcon(Button button, Feather icon) {

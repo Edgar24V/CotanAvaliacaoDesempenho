@@ -16,7 +16,6 @@ public final class CotanUi {
         scroll.setPannable(true);
         scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-        scroll.getStyleClass().add("cotan-scroll");
         return scroll;
     }
 
@@ -27,7 +26,6 @@ public final class CotanUi {
         scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
         scroll.setPannable(true);
-        scroll.getStyleClass().add("sidebar-scroll");
         return scroll;
     }
 

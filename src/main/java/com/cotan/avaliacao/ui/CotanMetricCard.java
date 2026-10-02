@@ -1,5 +1,6 @@
 package com.cotan.avaliacao.ui;
 
+import atlantafx.base.controls.Card;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -8,36 +9,31 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
 
-public final class CotanMetricCard extends VBox {
+public final class CotanMetricCard extends Card {
 
     public CotanMetricCard(String title, String value, String note, Feather icon, String tone) {
-        getStyleClass().addAll("cotan-metric-card", "tone-" + (tone == null ? "accent" : tone));
-        setPadding(new Insets(16));
-        setSpacing(9);
-        setPrefWidth(235);
-        setMinHeight(118);
-
-        HBox top = new HBox(9);
-        top.setAlignment(Pos.CENTER_LEFT);
-
-        Label iconBox = new Label("", CotanIcons.icon(icon, 18));
-        iconBox.getStyleClass().add("metric-icon");
+        Label iconBox = new Label("", CotanIcons.icon(icon, 16));
+        iconBox.getStyleClass().add("success".equals(tone) ? "success" : "accent");
 
         Label caption = new Label(title);
-        caption.getStyleClass().add("metric-title");
+        caption.getStyleClass().addAll("text-muted", "text-small");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-
-        top.getChildren().addAll(iconBox, caption, spacer);
+        HBox header = new HBox(9, iconBox, caption);
+        header.setAlignment(Pos.CENTER_LEFT);
+        setHeader(header);
 
         Label amount = new Label(value);
-        amount.getStyleClass().add("metric-value");
+        amount.getStyleClass().add("title-2");
 
         Label detail = new Label(note == null ? "" : note);
-        detail.getStyleClass().add("metric-note");
+        detail.getStyleClass().addAll("text-muted", "text-small");
         detail.setWrapText(true);
 
-        getChildren().addAll(top, amount, detail);
+        VBox body = new VBox(6, amount, detail);
+        body.setPadding(new Insets(4, 0, 0, 0));
+        setBody(body);
+
+        setPrefWidth(235);
+        setMinHeight(132);
     }
 }

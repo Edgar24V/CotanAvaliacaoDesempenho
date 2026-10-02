@@ -15,7 +15,6 @@ public final class TableUtils {
 
     public static void standardize(TableView<?> table) {
         if (table == null) return;
-        addStyleIfMissing(table, "advanced-table");
         addStyleIfMissing(table, "bordered");
         addStyleIfMissing(table, "striped");
         table.setTableMenuButtonVisible(true);
@@ -27,21 +26,18 @@ public final class TableUtils {
         standardize(table);
         table.setEditable(false);
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        addStyleIfMissing(table, "read-only-table");
     }
 
     public static void editable(TableView<?> table) {
         standardize(table);
         table.setEditable(true);
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        addStyleIfMissing(table, "editable-table");
     }
 
     public static void report(TableView<?> table) {
         standardize(table);
         table.setEditable(false);
         table.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        addStyleIfMissing(table, "report-table");
     }
 
     private static void addStyleIfMissing(TableView<?> table, String style) {
