@@ -679,6 +679,9 @@ public final class Database implements AutoCloseable {
         Objects.requireNonNull(evaluation, "evaluation");
         validateAcademicYear(evaluation.academicYear());
         if (evaluation.staffId() <= 0) throw new IllegalArgumentException("O profissional é obrigatório.");
+        if (evaluation.evaluatorStaffId() == null || evaluation.evaluatorStaffId() <= 0) {
+            throw new IllegalArgumentException("O avaliador da ficha anual é obrigatório.");
+        }
         if (evaluation.evaluationDate() != null && evaluation.evaluationDate().isAfter(java.time.LocalDate.now())) {
             throw new IllegalArgumentException("A data de avaliação não pode estar no futuro.");
         }
