@@ -11,15 +11,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.util.Units;
-import org.apache.poi.xwpf.usermodel.Document;
-import org.apache.poi.wp.usermodel.HeaderFooterType;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFHeader;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +51,6 @@ public class AvaliacaoProfessorReportService {
                 exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
                 exporter.exportReport();
             }
-            addCoatOfArms(outputPath);
         }
     }
 
@@ -161,29 +151,5 @@ public class AvaliacaoProfessorReportService {
         return "Muito bom";
     }
 
-    private void addCoatOfArms(Path outputPath) throws IOException {
-        Path absoluteOutput = outputPath.toAbsolutePath();
-        Path temporaryOutput = Files.createTempFile(absoluteOutput.getParent(), "ficha-avaliacao-", ".docx");
-        try (InputStream docxStream = Files.newInputStream(absoluteOutput);
-             InputStream brasaoStream = getClass().getResourceAsStream("/reports/brasao-angola.png");
-             XWPFDocument document = new XWPFDocument(docxStream);
-             OutputStream outputStream = Files.newOutputStream(temporaryOutput)) {
-            if (brasaoStream == null) {
-                throw new IllegalStateException("O brasão não foi encontrado em /reports/brasao-angola.png");
-            }
-            XWPFHeader header = document.getHeaderList().stream()
-                    .findFirst()
-                    .orElseGet(() -> document.createHeader(HeaderFooterType.DEFAULT));
-            XWPFParagraph paragraph = header.getParagraphs().isEmpty()
-                    ? header.createParagraph()
-                    : header.getParagraphs().get(0);
-            XWPFRun run = paragraph.insertNewRun(0);
-            run.addPicture(brasaoStream, Document.PICTURE_TYPE_PNG, "brasao-angola.png",
-                    Units.toEMU(42), Units.toEMU(50));
-            document.write(outputStream);
-        } catch (InvalidFormatException ex) {
-            throw new IOException("Não foi possível incorporar o brasão no relatório DOCX.", ex);
-        }
-        Files.move(temporaryOutput, absoluteOutput, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-    }
+
 }
