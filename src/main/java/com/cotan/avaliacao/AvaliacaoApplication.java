@@ -1314,7 +1314,7 @@ public class AvaliacaoApplication extends Application {
                 : "Avaliação de desempenho — Administrativos";
 
         HBox heading = sectionHeading(title,
-                "Lançamento trimestral ligado à ficha anual persistente do profissional.");
+                "Ficha anual completa: três trimestres, comentários, médias e classificação.");
 
         ComboBox<StaffOption> staff = new ComboBox<>();
         staff.setPrefWidth(360);
@@ -1330,17 +1330,6 @@ public class AvaliacaoApplication extends Application {
         ComboBox<StaffOption> homologante = new ComboBox<>();
         ComboBox<String> concordance = new ComboBox<>();
         concordance.getItems().setAll("", "Concordo", "Não concordo");
-
-        TextArea comment1 = new TextArea();
-        TextArea comment2 = new TextArea();
-        TextArea comment3 = new TextArea();
-        TextArea appreciation = new TextArea();
-        for (TextArea area : List.of(comment1, comment2, comment3, appreciation)) {
-            area.setWrapText(true);
-            area.setPrefRowCount(2);
-            area.setPromptText("Texto que será impresso na ficha anual…");
-        }
-        appreciation.setPrefRowCount(3);
 
         evaluator.setMaxWidth(Double.MAX_VALUE);
         homologante.setMaxWidth(Double.MAX_VALUE);
@@ -1387,10 +1376,6 @@ public class AvaliacaoApplication extends Application {
         annualForm.addRow(3, label("Avaliador", "field-label"), evaluator);
         annualForm.addRow(4, label("Homologante", "field-label"), homologante);
         annualForm.addRow(5, label("Concordância", "field-label"), concordance);
-        annualForm.addRow(6, label("Comentário 1", "field-label"), comment1);
-        annualForm.addRow(7, label("Comentário 2", "field-label"), comment2);
-        annualForm.addRow(8, label("Comentário 3", "field-label"), comment3);
-        annualForm.addRow(9, label("Comentário final", "field-label"), appreciation);
 
         Label annualHint = label(
                 "Estes dados pertencem à ficha anual. O sistema guarda-os no SQLite e o JasperViewer "
@@ -1405,51 +1390,75 @@ public class AvaliacaoApplication extends Application {
         result.setAlignment(Pos.CENTER_LEFT);
         Label average = label("—", "result-number");
         Label classification = label("Aguardando lançamento", "result-badge");
-        Label completeness = label("0/0 indicadores", "muted");
+        Label completeness = label("0/3 trimestres completos", "muted");
         result.getChildren().addAll(
-                labelledMetric("MÉDIA", average),
-                labelledMetric("CLASSIFICAÇÃO", classification),
+                labelledMetric("MÉDIA DOS LANÇAMENTOS", average),
+                labelledMetric("CLASSIFICAÇÃO ANUAL", classification),
                 labelledMetric("PREENCHIMENTO", completeness)
         );
-        resultCard.getChildren().addAll(label("Resultado do período", "card-title"), result);
+        resultCard.getChildren().addAll(label("Resultado da ficha", "card-title"), result);
 
         AdvancedTableView<PerformanceInputRow> table = new AdvancedTableView<>();
         table.setEditable(true);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        addColumn(table, "Código", 110, PerformanceInputRow::codeProperty);
-        addColumn(table, "Indicador", 280, PerformanceInputRow::nameProperty);
-        addColumn(table, "Peso", 95, PerformanceInputRow::weightProperty);
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        table.setMinWidth(1780);
+        table.setUserData(result);
 
-        TableColumn<PerformanceInputRow,String> score = new TableColumn<>("Pontuação");
-        score.setPrefWidth(170);
-        score.setCellValueFactory(cel -> cel.getValue().scoreProperty());
-        score.setCellFactory(ComboBoxTableCell.forTableColumn("", "5", "10", "15", "20"));
-        score.setOnEditCommit(e -> {
-            String v = e.getNewValue() == null ? "" : e.getNewValue().trim();
-            if (v.isBlank() || EXCEL_PERFORMANCE_SCORES.contains(v)) {
-                e.getRowValue().score.set(v);
-                recalcPerformance(table, result);
-            } else {
-                showWarning("Pontuação inválida. A escala do ficheiro Excel é 5, 10, 15 ou 20.");
-                table.refresh();
-            }
-        });
+        addColumn(table, "Código", 95, PerformanceInputRow::codeProperty);
+        addColumn(table, "Indicador", 300, PerformanceInputRow::nameProperty);
+        addColumn(table, "Peso", 80, PerformanceInputRow::weightProperty);
 
-        TableColumn<PerformanceInputRow,String> obs = new TableColumn<>("Observação");
-        obs.setPrefWidth(360);
-        obs.setCellValueFactory(cel -> cel.getValue().observationProperty());
-        obs.setCellFactory(TextFieldTableCell.forTableColumn());
-        obs.setOnEditCommit(e -> {
+        TableColumn<PerformanceInputRow,String> t1Score = performanceScoreColumn(
+                table, "1º Trim. — Pontuação", PerformanceInputRow::trim1ScoreProperty,
+                (row, value) -> row.trim1Score.set(value)
+        );
+        TableColumn<PerformanceInputRow,String> t1Comment = performanceCommentColumn(
+                table, "1º Trim. — Comentário", PerformanceInputRow::trim1CommentProperty,
+                (row, value) -> row.trim1Comment.set(value)
+        );
+        TableColumn<PerformanceInputRow,String> t2Score = performanceScoreColumn(
+                table, "2º Trim. — Pontuação", PerformanceInputRow::trim2ScoreProperty,
+                (row, value) -> row.trim2Score.set(value)
+        );
+        TableColumn<PerformanceInputRow,String> t2Comment = performanceCommentColumn(
+                table, "2º Trim. — Comentário", PerformanceInputRow::trim2CommentProperty,
+                (row, value) -> row.trim2Comment.set(value)
+        );
+        TableColumn<PerformanceInputRow,String> t3Score = performanceScoreColumn(
+                table, "3º Trim. — Pontuação", PerformanceInputRow::trim3ScoreProperty,
+                (row, value) -> row.trim3Score.set(value)
+        );
+        TableColumn<PerformanceInputRow,String> t3Comment = performanceCommentColumn(
+                table, "3º Trim. — Comentário", PerformanceInputRow::trim3CommentProperty,
+                (row, value) -> row.trim3Comment.set(value)
+        );
+        addColumn(table, "Média anual", 100, PerformanceInputRow::annualAverageProperty);
+        addColumn(table, "Classificação", 125, PerformanceInputRow::classificationProperty);
+        table.getColumns().addAll(t1Score, t1Comment, t2Score, t2Comment, t3Score, t3Comment);
+
+        AdvancedTableView<AnnualCommentRow> commentTable = new AdvancedTableView<>();
+        commentTable.setEditable(true);
+        commentTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        commentTable.setMinHeight(210);
+        commentTable.setPrefHeight(230);
+        addColumn(commentTable, "Campo", 240, AnnualCommentRow::labelProperty);
+
+        TableColumn<AnnualCommentRow,String> commentValue = new TableColumn<>("Conteúdo");
+        commentValue.setPrefWidth(1200);
+        commentValue.setMinWidth(700);
+        commentValue.setCellValueFactory(cell -> cell.getValue().value);
+        commentValue.setCellFactory(TextFieldTableCell.forTableColumn());
+        commentValue.setOnEditCommit(e -> {
             String value = e.getNewValue() == null ? "" : e.getNewValue().trim();
-            if (value.length() > 500) {
-                showWarning("A observação não pode exceder 500 caracteres.");
-                table.refresh();
+            if (value.length() > 2000) {
+                showWarning("O comentário não pode exceder 2000 caracteres.");
+                commentTable.refresh();
                 return;
             }
-            e.getRowValue().observation.set(value);
-            table.refresh();
+            e.getRowValue().value.set(value);
+            e.getRowValue().dirty.set(true);
         });
-        table.getColumns().addAll(score, obs);
+        commentTable.getColumns().add(commentValue);
 
         Runnable load = () -> {
             try {
@@ -1514,12 +1523,20 @@ public class AvaliacaoApplication extends Application {
                 }
 
                 ObservableList<PerformanceInputRow> items = FXCollections.observableArrayList();
-                for (Map<String,Object> row : database.performanceScores(
-                        selectedStaff.id(), selectedYear, trimester.getValue())) {
-                    items.add(PerformanceInputRow.from(row));
+                for (Map<String,Object> row : database.performanceScoresMatrix(
+                        selectedStaff.id(), selectedYear)) {
+                    items.add(PerformanceInputRow.fromMatrix(row));
                 }
                 table.setItems(items);
-                recalcPerformance(table, result);
+
+                ObservableList<AnnualCommentRow> comments = FXCollections.observableArrayList(
+                        new AnnualCommentRow("Comentário do 1º Trimestre", annual == null ? "" : annual.comment1()),
+                        new AnnualCommentRow("Comentário do 2º Trimestre", annual == null ? "" : annual.comment2()),
+                        new AnnualCommentRow("Comentário do 3º Trimestre", annual == null ? "" : annual.comment3()),
+                        new AnnualCommentRow("Comentário Final", annual == null ? "" : annual.appreciationGeneral())
+                );
+                commentTable.setItems(comments);
+                recalcAnnualPerformance(table, result);
             } catch (Exception ex) {
                 showError("Não foi possível carregar a ficha anual e os indicadores", ex);
             }
@@ -1533,8 +1550,8 @@ public class AvaliacaoApplication extends Application {
         trimester.setOnAction(e -> load.run());
         load.run();
 
-        Button save = CotanIcons.button("Guardar avaliação", Feather.SAVE, "accent-button", "accent");
-        save.setTooltip(new Tooltip("Guardar dados da ficha anual e lançamentos do trimestre selecionado"));
+        Button save = CotanIcons.button("Guardar ficha completa", Feather.SAVE, "accent-button", "accent");
+        save.setTooltip(new Tooltip("Guardar os três trimestres, comentários e dados finais da ficha."));
         save.setOnAction(e -> {
             StaffOption selectedStaff = staff.getValue();
             if (selectedStaff == null) {
@@ -1548,28 +1565,52 @@ public class AvaliacaoApplication extends Application {
             }
 
             try {
-                int filled = 0;
+                int[] trimesterFilled = {0, 0, 0};
+                int[] trimesterIncomplete = {0, 0, 0};
+
                 for (PerformanceInputRow row : table.getItems()) {
-                    if (row.score.get().isBlank()) continue;
-                    filled++;
-                    if (!EXCEL_PERFORMANCE_SCORES.contains(row.score.get().trim())) {
-                        showWarning("A pontuação de " + row.name.get()
-                                + " deve ser 5, 10, 15 ou 20, conforme a escala do Excel.");
-                        return;
-                    }
-                    if (row.observation.get() != null && row.observation.get().length() > 500) {
-                        showWarning("A observação de " + row.name.get() + " excede 500 caracteres.");
-                        return;
+                    String[] scores = {row.trim1Score.get(), row.trim2Score.get(), row.trim3Score.get()};
+                    String[] comments = {row.trim1Comment.get(), row.trim2Comment.get(), row.trim3Comment.get()};
+
+                    for (int i = 0; i < 3; i++) {
+                        String scoreValue = scores[i] == null ? "" : scores[i].trim();
+                        String commentValue = comments[i] == null ? "" : comments[i].trim();
+
+                        if (!scoreValue.isBlank()) {
+                            trimesterFilled[i]++;
+                            if (!EXCEL_PERFORMANCE_SCORES.contains(scoreValue)) {
+                                showWarning("A pontuação de " + row.name.get()
+                                        + " no " + (i + 1) + "º trimestre deve ser 5, 10, 15 ou 20.");
+                                return;
+                            }
+                            if (commentValue.length() > 500) {
+                                showWarning("O comentário do " + row.name.get()
+                                        + " no " + (i + 1) + "º trimestre excede 500 caracteres.");
+                                return;
+                            }
+                        } else if (!commentValue.isBlank()) {
+                            showWarning("Preencha a pontuação antes de guardar o comentário de "
+                                    + row.name.get() + " no " + (i + 1) + "º trimestre.");
+                            return;
+                        }
                     }
                 }
-                if (filled > 0 && filled < table.getItems().size()) {
-                    showWarning("Preencha todos os " + table.getItems().size()
-                            + " indicadores antes de guardar o trimestre.");
+
+                int indicatorCount = table.getItems().size();
+                for (int i = 0; i < 3; i++) {
+                    trimesterIncomplete[i] = trimesterFilled[i] > 0 && trimesterFilled[i] < indicatorCount ? 1 : 0;
+                }
+
+                if (trimesterIncomplete[0] + trimesterIncomplete[1] + trimesterIncomplete[2] > 0) {
+                    showWarning("Cada trimestre iniciado deve ter todos os indicadores preenchidos. "
+                            + "Complete os trimestres parcialmente lançados antes de guardar.");
                     return;
                 }
-                for (TextArea area : List.of(comment1, comment2, comment3, appreciation)) {
-                    if (area.getText() != null && area.getText().length() > 2000) {
-                        showWarning("Os textos da ficha anual não podem exceder 2000 caracteres.");
+
+                List<AnnualCommentRow> annualComments = commentTable.getItems();
+                for (AnnualCommentRow row : annualComments) {
+                    if (row.value.get().length() > 2000) {
+                        showWarning("O comentário '" + row.label.get() + "' não pode exceder 2000 caracteres.");
                         return;
                     }
                 }
@@ -1593,40 +1634,181 @@ public class AvaliacaoApplication extends Application {
                         current == null ? "" : current.qualitative3(),
                         current == null ? "" : current.finalQuantitative(),
                         current == null ? "" : current.finalQualitative(),
-                        comment1.getText(),
-                        comment2.getText(),
-                        comment3.getText(),
-                        appreciation.getText(),
+                        annualComments.size() > 0 ? annualComments.get(0).value.get() : "",
+                        annualComments.size() > 1 ? annualComments.get(1).value.get() : "",
+                        annualComments.size() > 2 ? annualComments.get(2).value.get() : "",
+                        annualComments.size() > 3 ? annualComments.get(3).value.get() : "",
                         concordance.getValue(),
                         homologante.getValue() == null ? null : homologante.getValue().id()
                 ));
 
                 String evaluatorName = evaluator.getValue().name();
+                String selectedYear = year.getValue();
                 for (PerformanceInputRow row : table.getItems()) {
-                    if (row.score.get().isBlank()) continue;
-                    database.upsertPerformanceScore(
-                            selectedStaff.id(), row.id.get(), year.getValue(), trimester.getValue(),
-                            Double.parseDouble(row.score.get().replace(",", ".")),
-                            row.observation.get(), evaluatorName);
+                    String[] scores = {row.trim1Score.get(), row.trim2Score.get(), row.trim3Score.get()};
+                    String[] comments = {row.trim1Comment.get(), row.trim2Comment.get(), row.trim3Comment.get()};
+                    for (int i = 0; i < 3; i++) {
+                        if (scores[i] == null || scores[i].isBlank()) continue;
+                        database.upsertPerformanceScore(
+                                selectedStaff.id(), row.id.get(), selectedYear, i + 1,
+                                Double.parseDouble(scores[i].replace(",", ".")),
+                                comments[i], evaluatorName);
+                    }
                 }
 
-                database.refreshEvaluationClassification(selectedStaff.id(), year.getValue());
-                showToast("Ficha anual e avaliação do período guardadas com sucesso.");
+                database.refreshEvaluationClassification(selectedStaff.id(), selectedYear);
+                showToast("Ficha completa guardada com sucesso.");
                 load.run();
             } catch (Exception ex) {
                 showError("Não foi possível guardar a ficha anual", ex);
             }
         });
 
-        Button clear = CotanIcons.button("Limpar lançamento", Feather.ROTATE_CCW, "button-outlined");
+        Button clear = CotanIcons.button("Limpar trimestre em foco", Feather.ROTATE_CCW, "button-outlined");
         clear.setOnAction(e -> {
-            for (PerformanceInputRow row : table.getItems()) row.score.set("");
-            recalcPerformance(table, result);
+            int focus = trimester.getValue();
+            for (PerformanceInputRow row : table.getItems()) {
+                if (focus == 1) {
+                    row.trim1Score.set("");
+                    row.trim1Comment.set("");
+                } else if (focus == 2) {
+                    row.trim2Score.set("");
+                    row.trim2Comment.set("");
+                } else {
+                    row.trim3Score.set("");
+                    row.trim3Comment.set("");
+                }
+            }
+            recalcAnnualPerformance(table, result);
         });
 
         HBox actions = new HBox(10, save, clear);
-        page.getChildren().addAll(heading, selectors, annualCard, resultCard, tableFill(table), actions);
+        Card commentsCard = new Card();
+        commentsCard.setHeader(label("Comentários da ficha", "card-title"));
+        commentsCard.setBody(commentTable);
+        page.getChildren().addAll(heading, selectors, annualCard, resultCard,
+                label("Matriz completa de avaliação", "section-title"),
+                tableFill(table),
+                commentsCard,
+                actions);
         return page;
+    }
+
+    private TableColumn<PerformanceInputRow,String> performanceScoreColumn(
+            AdvancedTableView<PerformanceInputRow> table,
+            String title,
+            java.util.function.Function<PerformanceInputRow, javafx.beans.value.ObservableValue<String>> value,
+            java.util.function.BiConsumer<PerformanceInputRow,String> setter) {
+
+        TableColumn<PerformanceInputRow,String> column = new TableColumn<>(title);
+        column.setPrefWidth(140);
+        column.setMinWidth(120);
+        column.setCellValueFactory(cell -> value.apply(cell.getValue()));
+        column.setCellFactory(ComboBoxTableCell.forTableColumn("", "5", "10", "15", "20"));
+        column.setOnEditCommit(e -> {
+            String v = e.getNewValue() == null ? "" : e.getNewValue().trim();
+            if (v.isBlank() || EXCEL_PERFORMANCE_SCORES.contains(v)) {
+                setter.accept(e.getRowValue(), v);
+                recalcAnnualPerformance(table, (HBox) table.getUserData());
+            } else {
+                showWarning("Pontuação inválida. Use 5, 10, 15 ou 20.");
+                table.refresh();
+            }
+        });
+        return column;
+    }
+
+    private TableColumn<PerformanceInputRow,String> performanceCommentColumn(
+            AdvancedTableView<PerformanceInputRow> table,
+            String title,
+            java.util.function.Function<PerformanceInputRow, javafx.beans.value.ObservableValue<String>> value,
+            java.util.function.BiConsumer<PerformanceInputRow,String> setter) {
+
+        TableColumn<PerformanceInputRow,String> column = new TableColumn<>(title);
+        column.setPrefWidth(270);
+        column.setMinWidth(220);
+        column.setCellValueFactory(cell -> value.apply(cell.getValue()));
+        column.setCellFactory(TextFieldTableCell.forTableColumn());
+        column.setOnEditCommit(e -> {
+            String v = e.getNewValue() == null ? "" : e.getNewValue().trim();
+            if (v.length() > 500) {
+                showWarning("O comentário não pode exceder 500 caracteres.");
+                table.refresh();
+                return;
+            }
+            setter.accept(e.getRowValue(), v);
+            recalcAnnualPerformance(table, (HBox) table.getUserData());
+        });
+        return column;
+    }
+
+    private void recalcAnnualPerformance(AdvancedTableView<PerformanceInputRow> table, HBox result) {
+        if (result == null) return;
+
+        double total = 0.0;
+        int scoreCount = 0;
+        int completeTrimesters = 0;
+        int[] complete = {0, 0, 0};
+        int size = table.getItems().size();
+
+        for (PerformanceInputRow row : table.getItems()) {
+            String[] scores = {row.trim1Score.get(), row.trim2Score.get(), row.trim3Score.get()};
+            for (int i = 0; i < 3; i++) {
+                if (scores[i] != null && !scores[i].isBlank()) {
+                    try {
+                        total += Double.parseDouble(scores[i].replace(",", "."));
+                        scoreCount++;
+                        complete[i]++;
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 3; i++) {
+            if (size > 0 && complete[i] == size) completeTrimesters++;
+        }
+
+        double average = scoreCount == 0 ? 0 : total / scoreCount;
+        if (result.getChildren().size() > 0
+                && result.getChildren().get(0) instanceof VBox box
+                && box.getChildren().size() > 1) {
+            ((Label) box.getChildren().get(1)).setText(
+                    scoreCount == 0 ? "—" : String.format(Locale.US, "%.1f", average)
+            );
+        }
+        if (result.getChildren().size() > 1
+                && result.getChildren().get(1) instanceof VBox box
+                && box.getChildren().size() > 1) {
+            ((Label) box.getChildren().get(1)).setText(
+                    scoreCount == 0 ? "Aguardando lançamento" : performanceClassification(average)
+            );
+        }
+        if (result.getChildren().size() > 2
+                && result.getChildren().get(2) instanceof VBox box
+                && box.getChildren().size() > 1) {
+            ((Label) box.getChildren().get(1)).setText(
+                    completeTrimesters + "/3 trimestres completos"
+            );
+        }
+
+        for (PerformanceInputRow row : table.getItems()) {
+            double sum = 0;
+            int count = 0;
+            String[] scores = {row.trim1Score.get(), row.trim2Score.get(), row.trim3Score.get()};
+            for (String scoreValue : scores) {
+                try {
+                    if (scoreValue != null && !scoreValue.isBlank()) {
+                        sum += Double.parseDouble(scoreValue.replace(",", "."));
+                        count++;
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            String avg = count == 0 ? "" : String.format(Locale.US, "%.1f", sum / count);
+            row.annualAverage.set(avg);
+            row.classification.set(count == 0 ? "Sem avaliação" : performanceClassification(sum / count));
+        }
     }
 
     private HBox labelledMetric(String caption, Node value) {
@@ -2104,15 +2286,80 @@ public class AvaliacaoApplication extends Application {
 
     private static final class PerformanceInputRow {
         final SimpleLongProperty id;
-        final SimpleStringProperty code,name,weight,score,observation;
-        PerformanceInputRow(long id,String code,String name,String weight,String score,String observation){
-            this.id=new SimpleLongProperty(id);this.code=new SimpleStringProperty(code);this.name=new SimpleStringProperty(name);
-            this.weight=new SimpleStringProperty(weight);this.score=new SimpleStringProperty(score);this.observation=new SimpleStringProperty(observation);
+        final SimpleStringProperty code,name,weight;
+        final SimpleStringProperty trim1Score,trim1Comment,trim2Score,trim2Comment,trim3Score,trim3Comment;
+        final SimpleStringProperty annualAverage,classification;
+
+        PerformanceInputRow(long id,String code,String name,String weight,
+                            String trim1Score,String trim1Comment,
+                            String trim2Score,String trim2Comment,
+                            String trim3Score,String trim3Comment,
+                            String annualAverage) {
+            this.id=new SimpleLongProperty(id);
+            this.code=new SimpleStringProperty(code);
+            this.name=new SimpleStringProperty(name);
+            this.weight=new SimpleStringProperty(weight);
+            this.trim1Score=new SimpleStringProperty(trim1Score);
+            this.trim1Comment=new SimpleStringProperty(trim1Comment);
+            this.trim2Score=new SimpleStringProperty(trim2Score);
+            this.trim2Comment=new SimpleStringProperty(trim2Comment);
+            this.trim3Score=new SimpleStringProperty(trim3Score);
+            this.trim3Comment=new SimpleStringProperty(trim3Comment);
+            this.annualAverage=new SimpleStringProperty(annualAverage);
+            this.classification=new SimpleStringProperty(classifyValue(annualAverage));
         }
-        static PerformanceInputRow from(Map<String,Object> r){return new PerformanceInputRow(n(r.get("indicator_id")),s(r.get("code")),s(r.get("name")),s(r.get("weight")),s(r.get("score")),s(r.get("observation")));}
-        SimpleStringProperty codeProperty(){return code;} SimpleStringProperty nameProperty(){return name;}
-        SimpleStringProperty weightProperty(){return weight;} SimpleStringProperty scoreProperty(){return score;}
-        SimpleStringProperty observationProperty(){return observation;}
+
+        static PerformanceInputRow from(Map<String,Object> r){
+            return fromMatrix(r);
+        }
+
+        static PerformanceInputRow fromMatrix(Map<String,Object> r){
+            return new PerformanceInputRow(
+                    n(r.get("indicator_id")),s(r.get("code")),s(r.get("name")),s(r.get("weight")),
+                    s(r.get("trim1_score")),s(r.get("trim1_comment")),
+                    s(r.get("trim2_score")),s(r.get("trim2_comment")),
+                    s(r.get("trim3_score")),s(r.get("trim3_comment")),
+                    s(r.get("annual_average"))
+            );
+        }
+
+        SimpleStringProperty codeProperty(){return code;}
+        SimpleStringProperty nameProperty(){return name;}
+        SimpleStringProperty weightProperty(){return weight;}
+        SimpleStringProperty trim1ScoreProperty(){return trim1Score;}
+        SimpleStringProperty trim1CommentProperty(){return trim1Comment;}
+        SimpleStringProperty trim2ScoreProperty(){return trim2Score;}
+        SimpleStringProperty trim2CommentProperty(){return trim2Comment;}
+        SimpleStringProperty trim3ScoreProperty(){return trim3Score;}
+        SimpleStringProperty trim3CommentProperty(){return trim3Comment;}
+        SimpleStringProperty annualAverageProperty(){return annualAverage;}
+        SimpleStringProperty classificationProperty(){return classification;}
+
+        private static String classifyValue(String v){
+            try {
+                double d=Double.parseDouble(v);
+                if(d<10)return "Mau";
+                if(d<14)return "Suficiente";
+                if(d<18)return "Bom";
+                return "Muito bom";
+            } catch(Exception e) {
+                return "Sem avaliação";
+            }
+        }
+    }
+
+    private static final class AnnualCommentRow {
+        final SimpleStringProperty label;
+        final SimpleStringProperty value;
+        final javafx.beans.property.BooleanProperty dirty = new javafx.beans.property.SimpleBooleanProperty(false);
+
+        AnnualCommentRow(String label, String value) {
+            this.label = new SimpleStringProperty(label);
+            this.value = new SimpleStringProperty(value == null ? "" : value);
+        }
+
+        SimpleStringProperty labelProperty(){return label;}
+        SimpleStringProperty valueProperty(){return value;}
     }
 
     private static final class PerformanceMapRow {
