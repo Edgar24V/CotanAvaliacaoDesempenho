@@ -2904,6 +2904,15 @@ public class AvaliacaoApplication extends Application {
         dark.selectedProperty().addListener((obs, oldValue, selected) -> {
             darkMode = selected;
             Application.setUserAgentStylesheet(darkMode ? DARK_THEME : LIGHT_THEME);
+            if (stage != null && stage.getScene() != null && stage.getScene().getRoot() != null) {
+                if (darkMode) {
+                    if (!stage.getScene().getRoot().getStyleClass().contains("cotan-dark")) {
+                        stage.getScene().getRoot().getStyleClass().add("cotan-dark");
+                    }
+                } else {
+                    stage.getScene().getRoot().getStyleClass().remove("cotan-dark");
+                }
+            }
         });
         appearance.setBody(dark);
 
@@ -2973,8 +2982,8 @@ public class AvaliacaoApplication extends Application {
         GridPane tech = new GridPane();
         tech.setHgap(18);
         tech.setVgap(12);
-        tech.add(infoPill("Java", "21"), 0, 0);
-        tech.add(infoPill("JavaFX", "21"), 1, 0);
+        tech.add(infoPill("Java", "25"), 0, 0);
+        tech.add(infoPill("JavaFX", "27"), 1, 0);
         tech.add(infoPill("AtlantaFX", "3.0.0"), 2, 0);
         tech.add(infoPill("Banco", "SQLite"), 3, 0);
         tech.add(infoPill("Arquitetura", "Desktop + Spring Boot"), 0, 1);
@@ -2993,12 +3002,14 @@ public class AvaliacaoApplication extends Application {
 
     private VBox pageContainer() {
         VBox box = new VBox(22);
+        box.getStyleClass().add("cotan-document-page");
         box.setFillWidth(true);
         return box;
     }
 
     private HBox sectionHeading(String title, String subtitle) {
         HBox row = new HBox(12);
+        row.getStyleClass().add("section-heading");
         row.setAlignment(Pos.CENTER_LEFT);
 
         VBox labels = new VBox(3);
@@ -3022,17 +3033,21 @@ public class AvaliacaoApplication extends Application {
 
     private Tile actionCard(String title, String text, Runnable action) {
         Tile tile = new Tile(title, text, CotanIcons.icon(Feather.ARROW_RIGHT, 16));
+        tile.getStyleClass().add("cotan-action-tile");
         tile.setActionHandler(action);
         tile.setMaxWidth(Double.MAX_VALUE);
         return tile;
     }
 
     private Tile infoPill(String title, String value) {
-        return new Tile(title, value, CotanIcons.icon(Feather.CHECK, 15));
+        Tile tile = new Tile(title, value, CotanIcons.icon(Feather.CHECK, 15));
+        tile.getStyleClass().add("cotan-info-tile");
+        return tile;
     }
 
     private VBox card() {
         VBox box = new VBox(10);
+        box.getStyleClass().add("cotan-inline-card");
         box.setPadding(new Insets(14, 0, 14, 0));
         return box;
     }
