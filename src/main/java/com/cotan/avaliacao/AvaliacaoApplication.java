@@ -195,6 +195,7 @@ public class AvaliacaoApplication extends Application {
         pane.getChildren().add(box);
 
         Scene scene = new Scene(pane);
+        applyWordVisual(scene, pane);
         stage.setScene(scene);
     }
 
@@ -241,6 +242,7 @@ public class AvaliacaoApplication extends Application {
         StackPane pane = new StackPane(box);
 
         Scene scene = new Scene(pane, 1180, 720);
+        applyWordVisual(scene, pane);
         stage.setScene(scene);
     }
 
@@ -312,9 +314,11 @@ public class AvaliacaoApplication extends Application {
         modalHost.setEscapeHandler(event -> closeTopModal());
 
         StackPane sceneRoot = new StackPane(root, modalHost);
+        sceneRoot.getStyleClass().add("cotan-word-shell");
         StackPane.setAlignment(modalHost, Pos.CENTER);
 
         Scene scene = new Scene(sceneRoot, stage.getWidth(), stage.getHeight());
+        applyWordVisual(scene, sceneRoot);
         scene.widthProperty().addListener((obs, oldWidth, newWidth) ->
                 applyResponsiveLayout(newWidth.doubleValue()));
         stage.setScene(scene);
@@ -335,11 +339,13 @@ public class AvaliacaoApplication extends Application {
                 this::toggleTheme
         );
         header.setPage("Início", "Início");
+        header.getStyleClass().add("cotan-header");
         return header;
     }
 
     private TabPane buildNavigationTabs() {
         navigationTabs = new TabPane();
+        navigationTabs.getStyleClass().add("cotan-ribbon-tabs");
         navigationTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
         navigationTabs.setSide(javafx.geometry.Side.TOP);
         navigationTabs.setPrefHeight(46);
@@ -354,6 +360,7 @@ public class AvaliacaoApplication extends Application {
 
     private HBox buildStatusBar() {
         HBox bar = new HBox(10);
+        bar.getStyleClass().addAll("status-bar", "cotan-status-bar");
         bar.setAlignment(Pos.CENTER_LEFT);
         bar.setPadding(new Insets(9, 18, 9, 18));
 
@@ -386,6 +393,31 @@ public class AvaliacaoApplication extends Application {
         return bar;
     }
 
+    private void applyWordVisual(Scene scene, Node sceneRoot) {
+        if (scene == null) return;
+
+        try {
+            String stylesheet = Objects.requireNonNull(
+                    getClass().getResource("/styles/cotan-word-2024.css"),
+                    "stylesheet /styles/cotan-word-2024.css"
+            ).toExternalForm();
+
+            if (!scene.getStylesheets().contains(stylesheet)) {
+                scene.getStylesheets().add(stylesheet);
+            }
+
+            if (sceneRoot != null && !sceneRoot.getStyleClass().contains("cotan-word-shell")) {
+                sceneRoot.getStyleClass().add("cotan-word-shell");
+            }
+
+            if (darkMode && sceneRoot != null && !sceneRoot.getStyleClass().contains("cotan-dark")) {
+                sceneRoot.getStyleClass().add("cotan-dark");
+            }
+        } catch (RuntimeException ex) {
+            logTerminal("Não foi possível carregar o tema visual COTAN", ex);
+        }
+    }
+
     private void updateFooterClock() {
         if (footerClock != null) {
             footerClock.setText(java.time.LocalDateTime.now()
@@ -400,6 +432,15 @@ public class AvaliacaoApplication extends Application {
     private void toggleTheme() {
         darkMode = !darkMode;
         Application.setUserAgentStylesheet(darkMode ? DARK_THEME : LIGHT_THEME);
+        if (stage != null && stage.getScene() != null && stage.getScene().getRoot() != null) {
+            if (darkMode) {
+                if (!stage.getScene().getRoot().getStyleClass().contains("cotan-dark")) {
+                    stage.getScene().getRoot().getStyleClass().add("cotan-dark");
+                }
+            } else {
+                stage.getScene().getRoot().getStyleClass().remove("cotan-dark");
+            }
+        }
         if (header != null) {
             header.addNotification(darkMode ? "Modo escuro ativado." : "Modo claro ativado.");
         }
