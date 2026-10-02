@@ -1442,10 +1442,10 @@ public class AvaliacaoApplication extends Application {
         addColumn(table,"Classificação",170,PerformanceFinalRow::classificationProperty);
         if ("PROFESSOR".equals(type)) {
             TableColumn<PerformanceFinalRow, Void> reportActions = actionColumn(table, row -> {
-                Button print = CotanIcons.button("", Feather.PRINTER, "button-icon", "flat", "small");
-                print.setTooltip(new Tooltip("Abrir ficha anual em PDF para imprimir"));
-                print.setAccessibleText("Imprimir ficha anual de " + row.name.get());
-                print.setOnAction(event -> printAnnualProfessorReport(row));
+                Button print = CotanIcons.button("", Feather.EYE, "button-icon", "flat", "small");
+                print.setTooltip(new Tooltip("Abrir ficha anual no JasperViewer"));
+                print.setAccessibleText("Abrir ficha anual de " + row.name.get() + " no JasperViewer");
+                print.setOnAction(event -> viewAnnualProfessorReport(row));
 
                 Button docx = CotanIcons.button("", Feather.FILE_TEXT, "button-icon", "flat", "small");
                 docx.setTooltip(new Tooltip("Exportar ficha anual para Word"));
@@ -1563,23 +1563,15 @@ public class AvaliacaoApplication extends Application {
         }
     }
 
-    private void printAnnualProfessorReport(PerformanceFinalRow row) {
+    private void viewAnnualProfessorReport(PerformanceFinalRow row) {
         try {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Guardar ficha anual para impressão");
-            chooser.setInitialFileName("ficha-anual-" + safeFileName(row.code.get()) + ".pdf");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-            File selected = chooser.showSaveDialog(stage);
-            if (selected == null) return;
-
-            Files.write(selected.toPath(), new AvaliacaoProfessorReportService()
-                    .generatePdfBytes(buildAnnualProfessorReport(row)));
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(selected);
-            }
-            showToast("Ficha anual pronta para impressão.");
+            new AvaliacaoProfessorReportService().showViewer(
+                    buildAnnualProfessorReport(row),
+                    "COTAN — Ficha de Avaliação de Desempenho Anual — " + row.name.get()
+            );
+            showToast("Ficha anual aberta no JasperViewer.");
         } catch (Exception ex) {
-            showError("Não foi possível gerar a ficha anual em PDF", ex);
+            showError("Não foi possível abrir a ficha anual no JasperViewer", ex);
         }
     }
 
