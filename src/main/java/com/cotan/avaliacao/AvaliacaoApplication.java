@@ -1292,7 +1292,7 @@ public class AvaliacaoApplication extends Application {
         TableColumn<PerformanceInputRow,String> obs = new TableColumn<>("Observação");
         obs.setPrefWidth(360);
         obs.setCellValueFactory(cel -> cel.getValue().observationProperty());
-        obs.setCellFactory(TextFieldTableCell.forTableView());
+        obs.setCellFactory(TextFieldTableCell.forTableColumn());
         obs.setOnEditCommit(e -> {
             String value = e.getNewValue() == null ? "" : e.getNewValue().trim();
             if (value.length() > 500) {
