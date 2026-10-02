@@ -578,6 +578,185 @@ public final class Database implements AutoCloseable {
             """, staffId, academicYear);
     }
 
+    public AvaliacaoDesempenhoAnual performanceEvaluation(long staffId, String academicYear) throws SQLException {
+        Map<String,Object> row = query("""
+            SELECT id,staff_id,academic_year,evaluation_date,period_start,period_end,evaluator_staff_id,
+                   COALESCE(quantitative_1,'') quantitative_1,
+                   COALESCE(quantitative_2,'') quantitative_2,
+                   COALESCE(quantitative_3,'') quantitative_3,
+                   COALESCE(qualitative_1,'') qualitative_1,
+                   COALESCE(qualitative_2,'') qualitative_2,
+                   COALESCE(qualitative_3,'') qualitative_3,
+                   COALESCE(final_quantitative,'') final_quantitative,
+                   COALESCE(final_qualitative,'') final_qualitative,
+                   COALESCE(comment1,'') comment1,
+                   COALESCE(comment2,'') comment2,
+                   COALESCE(comment3,'') comment3,
+                   COALESCE(appreciation_general,'') appreciation_general,
+                   COALESCE(concordance,'') concordance,
+                   homologante_staff_id
+            FROM performance_evaluations
+            WHERE staff_id=? AND academic_year=?
+            """, staffId, academicYear).stream().findFirst().orElse(null);
+        if (row == null) return null;
+
+        return new AvaliacaoDesempenhoAnual(
+                n(row.get("id")), n(row.get("staff_id")), s(row.get("academic_year")),
+                parseDate(row.get("evaluation_date")), parseDate(row.get("period_start")), parseDate(row.get("period_end")),
+                row.get("evaluator_staff_id") == null ? null : n(row.get("evaluator_staff_id")),
+                s(row.get("quantitative_1")), s(row.get("quantitative_2")), s(row.get("quantitative_3")),
+                s(row.get("qualitative_1")), s(row.get("qualitative_2")), s(row.get("qualitative_3")),
+                s(row.get("final_quantitative")), s(row.get("final_qualitative")),
+                s(row.get("comment1")), s(row.get("comment2")), s(row.get("comment3")),
+                s(row.get("appreciation_general")), s(row.get("concordance")),
+                row.get("homologante_staff_id") == null ? null : n(row.get("homologante_staff_id"))
+        );
+    }
+
+    public void savePerformanceEvaluation(AvaliacaoDesempenhoAnual evaluation) throws SQLException {
+        Objects.requireNonNull(evaluation, "evaluation");
+        validateAcademicYear(evaluation.academicYear());
+        if (evaluation.staffId() <= 0) throw new IllegalArgumentException("O profissional é obrigatório.");
+        if (evaluation.evaluationDate() != null && evaluation.evaluationDate().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("A data de avaliação não pode estar no futuro.");
+        }
+        if (evaluation.periodStart() != null && evaluation.periodEnd() != null
+                && evaluation.periodEnd().isBefore(evaluation.periodStart())) {
+            throw new IllegalArgumentException("O período final não pode ser anterior ao período inicial.");
+        }
+        String concordance = blankToNull(evaluation.concordance());
+        if (concordance != null && !Set.of("Concordo", "Não concordo").contains(concordance)) {
+            throw new IllegalArgumentException("A concordância deve ser Concordo ou Não concordo.");
+        }
+
+        update("""
+            INSERT INTO performance_evaluations(
+                staff_id,academic_year,evaluation_date,period_start,period_end,evaluator_staff_id,
+                quantitative_1,quantitative_2,quantitative_3,
+                qualitative_1,qualitative_2,qualitative_3,
+                final_quantitative,final_qualitative,
+                comment1,comment2,comment3,appreciation_general,concordance,homologante_staff_id,
+                updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+            ON CONFLICT(staff_id,academic_year) DO UPDATE SET
+                evaluation_date=excluded.evaluation_date,
+                period_start=excluded.period_start,
+                period_end=excluded.period_end,
+                evaluator_staff_id=excluded.evaluator_staff_id,
+                quantitative_1=excluded.quantitative_1,
+                quantitative_2=excluded.quantitative_2,
+                quantitative_3=excluded.quantitative_3,
+                qualitative_1=excluded.qualitative_1,
+                qualitative_2=excluded.qualitative_2,
+                qualitative_3=excluded.qualitative_3,
+                final_quantitative=excluded.final_quantitative,
+                final_qualitative=excluded.final_qualitative,
+                comment1=excluded.comment1,
+                comment2=excluded.comment2,
+                comment3=excluded.comment3,
+                appreciation_general=excluded.appreciation_general,
+                concordance=excluded.concordance,
+                homologante_staff_id=excluded.homologante_staff_id,
+                updated_at=CURRENT_TIMESTAMP
+            """,
+            evaluation.staffId(), evaluation.academicYear(),
+            toIso(evaluation.evaluationDate()), toIso(evaluation.periodStart()), toIso(evaluation.periodEnd()),
+            evaluation.evaluatorStaffId(),
+            blankToNull(evaluation.quantitative1()), blankToNull(evaluation.quantitative2()), blankToNull(evaluation.quantitative3()),
+            blankToNull(evaluation.qualitative1()), blankToNull(evaluation.qualitative2()), blankToNull(evaluation.qualitative3()),
+            blankToNull(evaluation.finalQuantitative()), blankToNull(evaluation.finalQualitative()),
+            blankToNull(evaluation.comment1()), blankToNull(evaluation.comment2()), blankToNull(evaluation.comment3()),
+            blankToNull(evaluation.appreciationGeneral()), concordance, evaluation.homologanteStaffId()
+        );
+    }
+
+    public void refreshEvaluationClassification(long staffId, String academicYear) throws SQLException {
+        validateAcademicYear(academicYear);
+        List<Object> values = new ArrayList<>();
+        for (int trimester = 1; trimester <= 3; trimester++) {
+            values.add(scalar("""
+                SELECT CASE
+                    WHEN COUNT(ps.id) = (
+                        SELECT COUNT(*) FROM performance_indicators pi
+                        JOIN staff sx ON sx.id=?
+                        WHERE pi.active=1 AND (pi.staff_type='AMBOS' OR pi.staff_type=sx.staff_type)
+                    )
+                    THEN ROUND(SUM(ps.score),0)
+                    ELSE NULL
+                END
+                FROM performance_scores ps
+                JOIN performance_indicators i ON i.id=ps.indicator_id
+                WHERE ps.staff_id=? AND ps.academic_year=? AND ps.trimester=?
+                """, staffId, staffId, academicYear, trimester));
+        }
+
+        String q1 = formatOptionalInteger(values.get(0));
+        String q2 = formatOptionalInteger(values.get(1));
+        String q3 = formatOptionalInteger(values.get(2));
+        String l1 = classificationFromQuantity(values.get(0));
+        String l2 = classificationFromQuantity(values.get(1));
+        String l3 = classificationFromQuantity(values.get(2));
+
+        String finalQuantitative = "";
+        String finalQualitative = "";
+        Double a = number(values.get(0)), b = number(values.get(1)), d = number(values.get(2));
+        if (a != null && b != null && d != null) {
+            finalQuantitative = String.format(Locale.US, "%.0f", Math.round((a + b + d) / 3.0));
+            finalQualitative = classificationFromQuantity((a + b + d) / 3.0);
+        }
+
+        update("""
+            UPDATE performance_evaluations SET
+                quantitative_1=?,quantitative_2=?,quantitative_3=?,
+                qualitative_1=?,qualitative_2=?,qualitative_3=?,
+                final_quantitative=?,final_qualitative=?,updated_at=CURRENT_TIMESTAMP
+            WHERE staff_id=? AND academic_year=?
+            """,
+            blankToNull(q1), blankToNull(q2), blankToNull(q3),
+            blankToNull(l1), blankToNull(l2), blankToNull(l3),
+            blankToNull(finalQuantitative), blankToNull(finalQualitative),
+            staffId, academicYear);
+    }
+
+    private void validateAcademicYear(String academicYear) {
+        if (academicYear == null || !academicYear.matches("20\\d{2}/20\\d{2}$")) {
+            throw new IllegalArgumentException("Ano lectivo inválido.");
+        }
+        int start = Integer.parseInt(academicYear.substring(0,4));
+        int end = Integer.parseInt(academicYear.substring(5));
+        if (end != start + 1) throw new IllegalArgumentException("Ano lectivo inválido.");
+    }
+
+    private java.time.LocalDate parseDate(Object value) {
+        if (value == null || String.valueOf(value).isBlank()) return null;
+        try { return java.time.LocalDate.parse(String.valueOf(value).substring(0,10)); }
+        catch (RuntimeException ex) { return null; }
+    }
+
+    private String toIso(java.time.LocalDate value) {
+        return value == null ? null : value.toString();
+    }
+
+    private String formatOptionalInteger(Object value) {
+        Double number = number(value);
+        return number == null ? "" : String.format(Locale.US,"%.0f",number);
+    }
+
+    private Double number(Object value) {
+        if (value instanceof Number n) return n.doubleValue();
+        try { return value == null ? null : Double.parseDouble(String.valueOf(value)); }
+        catch (RuntimeException ex) { return null; }
+    }
+
+    private String classificationFromQuantity(Object value) {
+        Double number = number(value);
+        if (number == null) return "";
+        if (number < 10) return "Mau";
+        if (number < 14) return "Suficiente";
+        if (number < 18) return "Bom";
+        return "Muito bom";
+    }
+
     public void upsertPerformanceScore(long staffId, long indicatorId, String year, int trimester,
                                        double score, String observation, String evaluator) throws SQLException {
         if (staffId <= 0 || indicatorId <= 0) {
