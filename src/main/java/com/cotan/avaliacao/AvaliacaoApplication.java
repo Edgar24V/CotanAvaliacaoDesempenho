@@ -1478,10 +1478,6 @@ public class AvaliacaoApplication extends Application {
                     periodStart.setValue(LocalDate.of(startYear, 9, 1));
                     periodEnd.setValue(LocalDate.of(startYear + 1, 6, 30));
                     concordance.setValue("");
-                    comment1.clear();
-                    comment2.clear();
-                    comment3.clear();
-                    appreciation.clear();
 
                     InstitutionProfile profile = database.institutionProfileEntity();
                     evaluator.getSelectionModel().clearSelection();
@@ -1503,10 +1499,6 @@ public class AvaliacaoApplication extends Application {
                     periodEnd.setValue(annual.periodEnd() != null
                             ? annual.periodEnd() : LocalDate.of(startYear + 1, 6, 30));
                     concordance.setValue(annual.concordance());
-                    comment1.setText(annual.comment1());
-                    comment2.setText(annual.comment2());
-                    comment3.setText(annual.comment3());
-                    appreciation.setText(annual.appreciationGeneral());
 
                     evaluator.getSelectionModel().clearSelection();
                     homologante.getSelectionModel().clearSelection();
@@ -1574,7 +1566,7 @@ public class AvaliacaoApplication extends Application {
 
                     for (int i = 0; i < 3; i++) {
                         String scoreValue = scores[i] == null ? "" : scores[i].trim();
-                        String commentValue = comments[i] == null ? "" : comments[i].trim();
+                        String trimesterCommentValue = comments[i] == null ? "" : comments[i].trim();
 
                         if (!scoreValue.isBlank()) {
                             trimesterFilled[i]++;
@@ -1583,12 +1575,12 @@ public class AvaliacaoApplication extends Application {
                                         + " no " + (i + 1) + "º trimestre deve ser 5, 10, 15 ou 20.");
                                 return;
                             }
-                            if (commentValue.length() > 500) {
+                            if (trimesterCommentValue.length() > 500) {
                                 showWarning("O comentário do " + row.name.get()
                                         + " no " + (i + 1) + "º trimestre excede 500 caracteres.");
                                 return;
                             }
-                        } else if (!commentValue.isBlank()) {
+                        } else if (!trimesterCommentValue.isBlank()) {
                             showWarning("Preencha a pontuação antes de guardar o comentário de "
                                     + row.name.get() + " no " + (i + 1) + "º trimestre.");
                             return;
@@ -1819,28 +1811,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void recalcPerformance(AdvancedTableView<PerformanceInputRow> table, HBox result) {
-        double total=0, weights=0;
-        int filled=0;
-        for (PerformanceInputRow row : table.getItems()) {
-            if (row.score.get().isBlank()) continue;
-            try {
-                double score=Double.parseDouble(row.score.get().replace(",", "."));
-                double weight=Double.parseDouble(row.weight.get());
-                total += score*weight;
-                weights += weight;
-                filled++;
-            } catch(Exception ignored) {}
-        }
-        double avg = weights == 0 ? 0 : total/weights;
-        if (!result.getChildren().isEmpty() && result.getChildren().get(0) instanceof VBox b && b.getChildren().size()>1) {
-            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "—" : String.format(Locale.US,"%.1f",Math.round(avg * 10.0) / 10.0));
-        }
-        if (result.getChildren().size()>1 && result.getChildren().get(1) instanceof VBox b && b.getChildren().size()>1) {
-            ((Label)b.getChildren().get(1)).setText(weights == 0 ? "Aguardando lançamento" : performanceClassification(avg));
-        }
-        if (result.getChildren().size()>2 && result.getChildren().get(2) instanceof VBox b && b.getChildren().size()>1) {
-            ((Label)b.getChildren().get(1)).setText(filled+"/"+table.getItems().size()+" indicadores");
-        }
+        recalcAnnualPerformance(table, result);
     }
 
     private Node buildPerformanceMapAll(int trimester) throws SQLException {
