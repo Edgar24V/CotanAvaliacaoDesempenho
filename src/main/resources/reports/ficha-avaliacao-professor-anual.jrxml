@@ -91,7 +91,8 @@
     <parameter name="nomeAvaliado" class="java.lang.String"/>
     <parameter name="concordancia" class="java.lang.String"/>
     <parameter name="nomeHomologante" class="java.lang.String"/>
-    <parameter name="indicadores" class="java.util.Collection"/>
+    <parameter name="indicadoresDataSource1" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="indicadoresDataSource2" class="net.sf.jasperreports.engine.JRDataSource"/>
     <parameter name="brasao" class="java.awt.Image"/>
 
     <detail>
@@ -151,7 +152,7 @@ PRIMÁRIO E SECUNDÁRIO]]></text>
                 <reportElement x="0" y="377" width="519" height="146" uuid="30000000-0000-4000-8000-000000000032"/>
                 <jr:table>
                     <datasetRun subDataset="IndicadoresDataset" uuid="30000000-0000-4000-8000-000000000033">
-                        <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JRBeanCollectionDataSource($P{indicadores})]]></dataSourceExpression>
+                        <dataSourceExpression><![CDATA[$P{indicadoresDataSource1}]]></dataSourceExpression>
                     </datasetRun>
                     <jr:column width="34" uuid="30000000-0000-4000-8000-000000000034">
                         <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="28" height="20" uuid="30000000-0000-4000-8000-000000000035"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader>
@@ -201,7 +202,7 @@ PRIMÁRIO E SECUNDÁRIO]]></text>
                 <reportElement x="0" y="604" width="519" height="118" uuid="30000000-0000-4000-8000-000000000065"/>
                 <jr:table>
                     <datasetRun subDataset="IndicadoresDataset" uuid="30000000-0000-4000-8000-000000000066">
-                        <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JRBeanCollectionDataSource($P{indicadores})]]></dataSourceExpression>
+                        <dataSourceExpression><![CDATA[$P{indicadoresDataSource2}]]></dataSourceExpression>
                     </datasetRun>
                     <jr:column width="34" uuid="30000000-0000-4000-8000-000000000067">
                         <jr:columnHeader height="22" style="TableHeader"><staticText><reportElement x="0" y="0" width="28" height="18" uuid="30000000-0000-4000-8000-000000000068"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader>
