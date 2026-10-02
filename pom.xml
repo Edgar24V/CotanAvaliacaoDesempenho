@@ -10,17 +10,18 @@
     <name>Cotan Avaliação de Desempenho</name>
 
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.release>21</maven.compiler.release>
+        <java.version>25</java.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>3.5.16</spring.boot.version>
         <javafx.version>21.0.8</javafx.version>
-        <atlantafx.version>2.1.0</atlantafx.version>
+        <atlantafx.version>3.0.0</atlantafx.version>
         <sqlite.version>3.53.1.0</sqlite.version>
         <junit.version>5.10.2</junit.version>
         <ikonli.version>12.4.0</ikonli.version>
+        <jasperreports.version>6.21.3</jasperreports.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +90,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>${jasperreports.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
@@ -105,6 +112,11 @@
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

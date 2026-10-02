@@ -128,16 +128,6 @@ public class AvaliacaoApplication extends Application {
         stage.setOnCloseRequest(e -> shutdown());
     }
 
-    private void applyAppStyles(Scene scene) {
-        var css = getClass().getResource("/app.css");
-        if (css != null) {
-            String stylesheet = css.toExternalForm();
-            if (!scene.getStylesheets().contains(stylesheet)) {
-                scene.getStylesheets().add(stylesheet);
-            }
-        }
-    }
-
     private void showLoading() {
         Application.setUserAgentStylesheet(LIGHT_THEME);
         StackPane pane = new StackPane();
@@ -162,7 +152,6 @@ public class AvaliacaoApplication extends Application {
         pane.getChildren().add(box);
 
         Scene scene = new Scene(pane);
-        applyAppStyles(scene);
         stage.setScene(scene);
     }
 
@@ -186,7 +175,6 @@ public class AvaliacaoApplication extends Application {
         pane.getStyleClass().add("app-background");
 
         Scene scene = new Scene(pane, 1180, 720);
-        applyAppStyles(scene);
         stage.setScene(scene);
     }
 
@@ -212,7 +200,6 @@ public class AvaliacaoApplication extends Application {
         StackPane.setAlignment(modalHost, Pos.CENTER);
 
         Scene scene = new Scene(sceneRoot, stage.getWidth(), stage.getHeight());
-        applyAppStyles(scene);
         scene.widthProperty().addListener((obs, oldWidth, newWidth) ->
                 applyResponsiveLayout(newWidth.doubleValue()));
         stage.setScene(scene);

@@ -115,7 +115,6 @@ public class AdvancedTableView<S> extends TableView<S> {
         super();
         setEditable(true);
         getStyleClass().addAll("advanced-table", "bordered", "striped");
-        loadTableCss();
         setDensity(RowDensity.COMFORTABLE);
         setPlaceholder(new Label("Nenhum registo encontrado."));
         setLoadingIndicator();
@@ -158,22 +157,6 @@ public class AdvancedTableView<S> extends TableView<S> {
     public AdvancedTableView(ObservableList<S> items) {
         this();
         setData(items);
-    }
-
-    private void loadTableCss() {
-        try {
-            var resource = AdvancedTableView.class.getResource("/css/kubata-table.css");
-            if (resource == null) {
-                return;
-            }
-
-            String css = resource.toExternalForm();
-            if (!getStylesheets().contains(css)) {
-                getStylesheets().add(css);
-            }
-        } catch (RuntimeException ignored) {
-            // A tabela continua funcional mesmo sem o recurso CSS.
-        }
     }
 
     private void installKeyboardShortcuts() {
