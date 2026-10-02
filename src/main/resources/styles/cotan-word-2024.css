@@ -1,0 +1,536 @@
+/* COTAN — Office / Word 2024 inspired visual layer
+ * AtlantaFX remains the base theme. This stylesheet adds the COTAN Fluent surface,
+ * spacing, hierarchy, ribbon-like navigation and document-oriented data views.
+ */
+.cotan-word-shell {
+    -fx-font-family: "Segoe UI", "Inter", "Arial";
+    -fx-background-color: #f3f5f8;
+}
+
+.cotan-word-shell.cotan-dark {
+    -fx-background-color: #1f2328;
+}
+
+.cotan-ribbon-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 16 8 16;
+    -fx-spacing: 12;
+}
+
+.cotan-dark .cotan-ribbon-header {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3a414a;
+}
+
+.cotan-title-block {
+    -fx-spacing: 1;
+    -fx-min-width: 210;
+}
+
+.cotan-title-block .title-3 {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2937;
+}
+
+.cotan-dark .cotan-title-block .title-3 {
+    -fx-text-fill: #f3f4f6;
+}
+
+.cotan-command-search {
+    -fx-background-color: #f7f8fa;
+    -fx-border-color: #cfd5df;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 7 10;
+}
+
+.cotan-dark .cotan-command-search {
+    -fx-background-color: #1e2329;
+    -fx-border-color: #4a535e;
+}
+
+.cotan-command-search:focused {
+    -fx-border-color: #2b70c9;
+    -fx-border-width: 1.5;
+}
+
+.cotan-ribbon-sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-width: 0 1 0 0;
+}
+
+.cotan-dark .cotan-ribbon-sidebar {
+    -fx-background-color: #20252b;
+    -fx-border-color: #3a414a;
+}
+
+.cotan-sidebar-brand {
+    -fx-padding: 16 14 14 14;
+}
+
+.cotan-sidebar-footer {
+    -fx-padding: 12 14 14 14;
+}
+
+.cotan-ribbon-sidebar .sidebar-group {
+    -fx-padding: 4 8 7 8;
+}
+
+.cotan-ribbon-sidebar .sidebar-group > .label {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #6b7280;
+    -fx-padding: 8 9 6 9;
+}
+
+.cotan-dark .cotan-ribbon-sidebar .sidebar-group > .label {
+    -fx-text-fill: #9aa4b2;
+}
+
+.cotan-ribbon-sidebar .sidebar-nav {
+    -fx-background-radius: 5;
+    -fx-padding: 8 10;
+}
+
+.cotan-ribbon-sidebar .sidebar-nav:hover {
+    -fx-background-color: #f0f4fa;
+}
+
+.cotan-ribbon-sidebar .sidebar-nav:selected {
+    -fx-background-color: #e7f0fb;
+    -fx-border-color: #2b70c9;
+    -fx-border-width: 0 0 0 3;
+}
+
+.cotan-dark .cotan-ribbon-sidebar .sidebar-nav:hover {
+    -fx-background-color: #2b3139;
+}
+
+.cotan-dark .cotan-ribbon-sidebar .sidebar-nav:selected {
+    -fx-background-color: #24354b;
+    -fx-border-color: #4d9bea;
+}
+
+.cotan-word-shell .tab-pane {
+    -fx-background-color: transparent;
+}
+
+.cotan-word-shell .cotan-ribbon-tabs,
+.cotan-word-shell .tab-pane {
+    -fx-tab-min-height: 38px;
+    -fx-tab-max-height: 38px;
+}
+
+.cotan-word-shell .tab-header-area {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 8 0 8;
+}
+
+.cotan-dark .cotan-word-shell .tab-header-area {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3a414a;
+}
+
+.cotan-word-shell .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 0 15 0 15;
+    -fx-border-width: 0 0 3 0;
+    -fx-border-color: transparent;
+}
+
+.cotan-word-shell .tab:hover {
+    -fx-background-color: #f2f5f9;
+}
+
+.cotan-word-shell .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #2b70c9;
+}
+
+.cotan-dark .cotan-word-shell .tab:hover {
+    -fx-background-color: #2c333c;
+}
+
+.cotan-dark .cotan-word-shell .tab:selected {
+    -fx-background-color: #252a31;
+    -fx-border-color: #4d9bea;
+}
+
+.cotan-word-shell .tab .tab-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4b5563;
+}
+
+.cotan-word-shell .tab:selected .tab-label {
+    -fx-text-fill: #1f5fae;
+}
+
+.cotan-dark .cotan-word-shell .tab .tab-label {
+    -fx-text-fill: #b6bec9;
+}
+
+.cotan-dark .cotan-word-shell .tab:selected .tab-label {
+    -fx-text-fill: #7eb6ef;
+}
+
+.cotan-word-shell .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.cotan-word-shell .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.cotan-word-shell .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.cotan-word-shell .button {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 8 13;
+}
+
+.cotan-word-shell .button:hover {
+    -fx-cursor: hand;
+}
+
+.cotan-word-shell .button:focused {
+    -fx-border-color: #2b70c9;
+}
+
+.cotan-word-shell .accent-button,
+.cotan-word-shell .button.accent {
+    -fx-background-color: #2b70c9;
+    -fx-text-fill: white;
+    -fx-border-color: #2b70c9;
+}
+
+.cotan-word-shell .accent-button:hover,
+.cotan-word-shell .button.accent:hover {
+    -fx-background-color: #1f5fae;
+    -fx-border-color: #1f5fae;
+}
+
+.cotan-word-shell .button-outlined {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c7ced8;
+    -fx-text-fill: #344054;
+}
+
+.cotan-dark .cotan-word-shell .button-outlined {
+    -fx-background-color: #292f36;
+    -fx-border-color: #505a66;
+    -fx-text-fill: #e5e7eb;
+}
+
+.cotan-word-shell .button-outlined:hover {
+    -fx-background-color: #f5f7fa;
+}
+
+.cotan-dark .cotan-word-shell .button-outlined:hover {
+    -fx-background-color: #343b44;
+}
+
+.cotan-word-shell .button-icon {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 6;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+}
+
+.cotan-word-shell .button-icon:hover {
+    -fx-background-color: #eef2f7;
+}
+
+.cotan-dark .cotan-word-shell .button-icon:hover {
+    -fx-background-color: #323943;
+}
+
+.cotan-word-shell .combo-box,
+.cotan-word-shell .date-picker,
+.cotan-word-shell .text-field,
+.cotan-word-shell .text-area,
+.cotan-word-shell .spinner {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cfd5df;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.cotan-dark .cotan-word-shell .combo-box,
+.cotan-dark .cotan-word-shell .date-picker,
+.cotan-dark .cotan-word-shell .text-field,
+.cotan-dark .cotan-word-shell .text-area,
+.cotan-dark .cotan-word-shell .spinner {
+    -fx-background-color: #1e2329;
+    -fx-border-color: #4a535e;
+}
+
+.cotan-word-shell .text-field,
+.cotan-word-shell .text-area,
+.cotan-word-shell .combo-box,
+.cotan-word-shell .date-picker,
+.cotan-word-shell .spinner {
+    -fx-padding: 7 9;
+}
+
+.cotan-word-shell .text-field:focused,
+.cotan-word-shell .text-area:focused,
+.cotan-word-shell .combo-box:focused,
+.cotan-word-shell .date-picker:focused {
+    -fx-border-color: #2b70c9;
+    -fx-border-width: 1.5;
+}
+
+.cotan-word-shell .card,
+.cotan-word-shell .cotan-metric-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(31,41,55,0.08), 10, 0.15, 0, 2);
+}
+
+.cotan-dark .cotan-word-shell .card,
+.cotan-dark .cotan-word-shell .cotan-metric-card {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3b434d;
+    -fx-effect: none;
+}
+
+.cotan-word-shell .cotan-metric-card {
+    -fx-padding: 14;
+}
+
+.cotan-word-shell .cotan-metric-card .title-2 {
+    -fx-font-size: 25px;
+    -fx-font-weight: 700;
+}
+
+.cotan-word-shell .label {
+    -fx-text-fill: #263241;
+}
+
+.cotan-dark .cotan-word-shell .label {
+    -fx-text-fill: #e4e7eb;
+}
+
+.cotan-word-shell .text-muted,
+.cotan-word-shell .muted {
+    -fx-text-fill: #6b7280;
+}
+
+.cotan-dark .cotan-word-shell .text-muted,
+.cotan-dark .cotan-word-shell .muted {
+    -fx-text-fill: #9aa4b2;
+}
+
+.cotan-word-shell .title-1 {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+}
+
+.cotan-word-shell .title-2 {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+}
+
+.cotan-word-shell .title-3 {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+}
+
+.cotan-word-shell .field-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #475467;
+}
+
+.cotan-dark .cotan-word-shell .field-label {
+    -fx-text-fill: #b7c0cc;
+}
+
+.cotan-word-shell .table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ccd3dc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-fixed-cell-size: 42px;
+}
+
+.cotan-dark .cotan-word-shell .table-view {
+    -fx-background-color: #22272e;
+    -fx-border-color: #414a55;
+}
+
+.cotan-word-shell .table-view .column-header-background {
+    -fx-background-color: #f2f4f7;
+    -fx-border-color: #d7dce4;
+}
+
+.cotan-dark .cotan-word-shell .table-view .column-header-background {
+    -fx-background-color: #2b3139;
+    -fx-border-color: #414a55;
+}
+
+.cotan-word-shell .table-view .column-header,
+.cotan-word-shell .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-border-color: transparent #d9dee6 transparent transparent;
+}
+
+.cotan-word-shell .table-view .column-header .label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #344054;
+}
+
+.cotan-dark .cotan-word-shell .table-view .column-header .label {
+    -fx-text-fill: #d9dee7;
+}
+
+.cotan-word-shell .table-row-cell {
+    -fx-border-color: transparent transparent #eef1f4 transparent;
+}
+
+.cotan-word-shell .table-row-cell:filled:selected {
+    -fx-background-color: #e8f1fb;
+    -fx-text-fill: #1f2937;
+}
+
+.cotan-dark .cotan-word-shell .table-row-cell:filled:selected {
+    -fx-background-color: #2a4058;
+    -fx-text-fill: #f3f4f6;
+}
+
+.cotan-word-shell .table-row-cell:filled:hover {
+    -fx-background-color: #f7f9fb;
+}
+
+.cotan-dark .cotan-word-shell .table-row-cell:filled:hover {
+    -fx-background-color: #2d343d;
+}
+
+.cotan-word-shell .table-cell {
+    -fx-padding: 6 10;
+    -fx-border-color: transparent;
+}
+
+.cotan-word-shell .separator:horizontal .line {
+    -fx-border-color: #dde2e8;
+}
+
+.cotan-dark .cotan-word-shell .separator:horizontal .line {
+    -fx-border-color: #424a54;
+}
+
+.cotan-word-shell .check-box,
+.cotan-word-shell .radio-button,
+.cotan-word-shell .toggle-button {
+    -fx-font-size: 12px;
+}
+
+.cotan-word-shell .progress-bar > .track,
+.cotan-word-shell .progress-indicator {
+    -fx-accent: #2b70c9;
+}
+
+.cotan-word-shell .tooltip {
+    -fx-font-size: 11px;
+    -fx-background-color: #1f2937;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+}
+
+.cotan-word-shell .status-bar,
+.cotan-word-shell .bottom-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-width: 1 0 0 0;
+}
+
+.cotan-dark .cotan-word-shell .status-bar,
+.cotan-dark .cotan-word-shell .bottom-bar {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3a414a;
+}
+
+.cotan-word-shell .menu-button,
+.cotan-word-shell .menu-item {
+    -fx-font-size: 12px;
+}
+
+.cotan-word-shell .context-menu {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cfd5df;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+
+.cotan-dark .cotan-word-shell .context-menu {
+    -fx-background-color: #252a31;
+    -fx-border-color: #4a535e;
+}
+
+.cotan-word-shell .success {
+    -fx-text-fill: #107c41;
+}
+
+.cotan-word-shell .danger {
+    -fx-text-fill: #c4314b;
+}
+
+.cotan-word-shell .accent {
+    -fx-text-fill: #1f5fae;
+}
+
+.cotan-dark .cotan-word-shell .accent {
+    -fx-text-fill: #7eb6ef;
+}
+
+/* Document-like section heading */
+.cotan-word-shell .section-heading {
+    -fx-padding: 2 0 10 0;
+}
+
+.cotan-word-shell .section-heading .title-2,
+.cotan-word-shell .section-heading .title-3 {
+    -fx-text-fill: #1f2937;
+}
+
+.cotan-dark .cotan-word-shell .section-heading .title-2,
+.cotan-dark .cotan-word-shell .section-heading .title-3 {
+    -fx-text-fill: #f3f4f6;
+}
+
+/* Word-like command strip emphasis for module actions */
+.cotan-word-shell .primary-action,
+.cotan-word-shell .command-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 7;
+}
+
+.cotan-dark .cotan-word-shell .primary-action,
+.cotan-dark .cotan-word-shell .command-bar {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3a414a;
+}
