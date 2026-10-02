@@ -1434,7 +1434,19 @@ public class AvaliacaoApplication extends Application {
         );
         addColumn(table, "Média anual", 100, PerformanceInputRow::annualAverageProperty);
         addColumn(table, "Classificação", 125, PerformanceInputRow::classificationProperty);
-        table.getColumns().addAll(t1Score, t1Comment, t2Score, t2Comment, t3Score, t3Comment);
+
+        TableColumn<PerformanceInputRow,String> codeColumn = castStringColumn(table.getColumns().get(0));
+        TableColumn<PerformanceInputRow,String> nameColumn = castStringColumn(table.getColumns().get(1));
+        TableColumn<PerformanceInputRow,String> weightColumn = castStringColumn(table.getColumns().get(2));
+        TableColumn<PerformanceInputRow,String> annualColumn = castStringColumn(table.getColumns().get(3));
+        TableColumn<PerformanceInputRow,String> classificationColumn = castStringColumn(table.getColumns().get(4));
+        table.getColumns().setAll(
+                codeColumn, nameColumn, weightColumn,
+                t1Score, t1Comment,
+                t2Score, t2Comment,
+                t3Score, t3Comment,
+                annualColumn, classificationColumn
+        );
 
         AdvancedTableView<AnnualCommentRow> commentTable = new AdvancedTableView<>();
         commentTable.setEditable(true);
@@ -1684,6 +1696,11 @@ public class AvaliacaoApplication extends Application {
                 commentsCard,
                 actions);
         return page;
+    }
+
+    @SuppressWarnings("unchecked")
+    private TableColumn<PerformanceInputRow,String> castStringColumn(TableColumn<PerformanceInputRow, ?> column) {
+        return (TableColumn<PerformanceInputRow,String>) column;
     }
 
     private TableColumn<PerformanceInputRow,String> performanceScoreColumn(
