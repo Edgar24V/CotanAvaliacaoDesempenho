@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 
 public record AvaliacaoProfessorRelatorio(
+        String gabineteProvincial,
+        String direccaoMunicipal,
+        String escola,
         String professorNome,
         String categoria,
         String agenteNumero,
@@ -15,6 +18,9 @@ public record AvaliacaoProfessorRelatorio(
         String classificacaoFinalQuantitativa,
         String classificacaoFinalQualitativa,
         String apreciacaoGeral,
+        String comentario1,
+        String comentario2,
+        String comentario3,
         String nomeAvaliador,
         String funcaoAvaliador,
         LocalDate dataAvaliacaoAvaliador,
@@ -43,6 +49,40 @@ public record AvaliacaoProfessorRelatorio(
             String nomeHomologante,
             List<Indicador> indicadores
     ) {
+        this("", "", "", professorNome, categoria, agenteNumero, dataAvaliacao,
+                periodoInicio, periodoFim, classificacaoFinalQuantitativa,
+                classificacaoFinalQualitativa, apreciacaoGeral, "", "", "",
+                nomeAvaliador, funcaoAvaliador, dataAvaliacaoAvaliador,
+                nomeAvaliado, concordancia, nomeHomologante, indicadores);
+    }
+
+    public AvaliacaoProfessorRelatorio(
+            String gabineteProvincial,
+            String direccaoMunicipal,
+            String escola,
+            String professorNome,
+            String categoria,
+            String agenteNumero,
+            LocalDate dataAvaliacao,
+            LocalDate periodoInicio,
+            LocalDate periodoFim,
+            String classificacaoFinalQuantitativa,
+            String classificacaoFinalQualitativa,
+            String apreciacaoGeral,
+            String comentario1,
+            String comentario2,
+            String comentario3,
+            String nomeAvaliador,
+            String funcaoAvaliador,
+            LocalDate dataAvaliacaoAvaliador,
+            String nomeAvaliado,
+            String concordancia,
+            String nomeHomologante,
+            List<Indicador> indicadores
+    ) {
+        this.gabineteProvincial = gabineteProvincial == null ? "" : gabineteProvincial;
+        this.direccaoMunicipal = direccaoMunicipal == null ? "" : direccaoMunicipal;
+        this.escola = escola == null ? "" : escola;
         this.professorNome = professorNome == null ? "" : professorNome;
         this.categoria = categoria == null ? "" : categoria;
         this.agenteNumero = agenteNumero == null ? "" : agenteNumero;
@@ -52,6 +92,9 @@ public record AvaliacaoProfessorRelatorio(
         this.classificacaoFinalQuantitativa = classificacaoFinalQuantitativa == null ? "" : classificacaoFinalQuantitativa;
         this.classificacaoFinalQualitativa = classificacaoFinalQualitativa == null ? "" : classificacaoFinalQualitativa;
         this.apreciacaoGeral = apreciacaoGeral == null ? "" : apreciacaoGeral;
+        this.comentario1 = comentario1 == null ? "" : comentario1;
+        this.comentario2 = comentario2 == null ? "" : comentario2;
+        this.comentario3 = comentario3 == null ? "" : comentario3;
         this.nomeAvaliador = nomeAvaliador == null ? "" : nomeAvaliador;
         this.funcaoAvaliador = funcaoAvaliador == null ? "" : funcaoAvaliador;
         this.dataAvaliacaoAvaliador = dataAvaliacaoAvaliador == null ? LocalDate.now() : dataAvaliacaoAvaliador;
