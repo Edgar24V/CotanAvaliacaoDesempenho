@@ -1165,11 +1165,11 @@ public class AvaliacaoApplication extends Application {
 
     private Node buildPerformanceEvaluation(String type) {
         VBox page = pageContainer();
-        String title = "PROFESSOR".equals(type) ? "Avaliação de desempenho — Professores" :
-                "Avaliação de desempenho — Administrativos";
+        String title = "PROFESSOR".equals(type) ? "Avaliação de desempenho — Professores"
+                : "Avaliação de desempenho — Administrativos";
 
         HBox heading = sectionHeading(title,
-                "Modelo digital do preenchimento do Excel: indicadores, pontuação 0–20 e classificação automática.");
+                "Lançamento trimestral ligado à ficha anual persistente do profissional.");
 
         ComboBox<StaffOption> staff = new ComboBox<>();
         staff.setPrefWidth(360);
@@ -1178,15 +1178,46 @@ public class AvaliacaoApplication extends Application {
         ComboBox<Integer> trimester = combo(1, 2, 3);
         trimester.setValue(1);
 
+        DatePicker evaluationDate = new DatePicker(LocalDate.now());
+        DatePicker periodStart = new DatePicker();
+        DatePicker periodEnd = new DatePicker();
+        ComboBox<StaffOption> evaluator = new ComboBox<>();
+        ComboBox<StaffOption> homologante = new ComboBox<>();
+        ComboBox<String> concordance = new ComboBox<>();
+        concordance.getItems().setAll("", "Concordo", "Não concordo");
+
+        TextArea comment1 = new TextArea();
+        TextArea comment2 = new TextArea();
+        TextArea comment3 = new TextArea();
+        TextArea appreciation = new TextArea();
+        for (TextArea area : List.of(comment1, comment2, comment3, appreciation)) {
+            area.setWrapText(true);
+            area.setPrefRowCount(2);
+            area.setPromptText("Texto que será impresso na ficha anual…");
+        }
+        appreciation.setPrefRowCount(3);
+
+        evaluator.setMaxWidth(Double.MAX_VALUE);
+        homologante.setMaxWidth(Double.MAX_VALUE);
+
         try {
-            for (Map<String,Object> r : database.staff(type)) staff.getItems().add(StaffOption.from(r));
+            for (Map<String,Object> row : database.staff(type)) {
+                staff.getItems().add(StaffOption.from(row));
+            }
+            for (Map<String,Object> row : database.staffAll()) {
+                StaffOption option = StaffOption.from(row);
+                evaluator.getItems().add(option);
+                homologante.getItems().add(option);
+            }
         } catch (SQLException e) {
             showError("Erro ao carregar profissionais", e);
             return page;
         }
 
         if (selectedPerformanceStaffId != null) {
-            staff.getItems().stream().filter(s -> s.id() == selectedPerformanceStaffId).findFirst().ifPresent(staff::setValue);
+            staff.getItems().stream()
+                    .filter(v -> v.id() == selectedPerformanceStaffId)
+                    .findFirst().ifPresent(staff::setValue);
         } else if (!staff.getItems().isEmpty()) {
             staff.setValue(staff.getItems().get(0));
         }
@@ -1199,6 +1230,29 @@ public class AvaliacaoApplication extends Application {
                 label("Trimestre", "field-label"), trimester);
         selectors.setAlignment(Pos.CENTER_LEFT);
         selectors.setPadding(new Insets(12));
+
+        Card annualCard = new Card();
+        annualCard.setHeader(label("Dados da ficha anual", "card-title"));
+
+        GridPane annualForm = formGrid();
+        annualForm.addRow(0, label("Data de avaliação", "field-label"), evaluationDate);
+        annualForm.addRow(1, label("Início do período", "field-label"), periodStart);
+        annualForm.addRow(2, label("Fim do período", "field-label"), periodEnd);
+        annualForm.addRow(3, label("Avaliador", "field-label"), evaluator);
+        annualForm.addRow(4, label("Homologante", "field-label"), homologante);
+        annualForm.addRow(5, label("Concordância", "field-label"), concordance);
+        annualForm.addRow(6, label("Comentário 1", "field-label"), comment1);
+        annualForm.addRow(7, label("Comentário 2", "field-label"), comment2);
+        annualForm.addRow(8, label("Comentário 3", "field-label"), comment3);
+        annualForm.addRow(9, label("Comentário final", "field-label"), appreciation);
+
+        Label annualHint = label(
+                "Estes dados pertencem à ficha anual. O sistema guarda-os no SQLite e o JasperViewer "
+                        + "apenas consulta a ficha; nenhum parâmetro é solicitado durante a impressão.",
+                "muted"
+        );
+        annualHint.setWrapText(true);
+        annualCard.setBody(new VBox(12, annualForm, annualHint));
 
         VBox resultCard = card();
         HBox result = new HBox(22);
@@ -1222,13 +1276,13 @@ public class AvaliacaoApplication extends Application {
 
         TableColumn<PerformanceInputRow,String> score = new TableColumn<>("Pontuação");
         score.setPrefWidth(170);
-        score.setCellValueFactory(c -> c.getValue().scoreProperty());
+        score.setCellValueFactory(cel -> cel.getValue().scoreProperty());
         score.setCellFactory(ComboBoxTableCell.forTableColumn("", "5", "10", "15", "20"));
         score.setOnEditCommit(e -> {
             String v = e.getNewValue() == null ? "" : e.getNewValue().trim();
             if (v.isBlank() || EXCEL_PERFORMANCE_SCORES.contains(v)) {
                 e.getRowValue().score.set(v);
-                recalcPerformance(table,result);
+                recalcPerformance(table, result);
             } else {
                 showWarning("Pontuação inválida. A escala do ficheiro Excel é 5, 10, 15 ou 20.");
                 table.refresh();
@@ -1237,8 +1291,8 @@ public class AvaliacaoApplication extends Application {
 
         TableColumn<PerformanceInputRow,String> obs = new TableColumn<>("Observação");
         obs.setPrefWidth(360);
-        obs.setCellValueFactory(c -> c.getValue().observationProperty());
-        obs.setCellFactory(TextFieldTableCell.forTableColumn());
+        obs.setCellValueFactory(cel -> cel.getValue().observationProperty());
+        obs.setCellFactory(TextFieldTableCell.forTableView());
         obs.setOnEditCommit(e -> {
             String value = e.getNewValue() == null ? "" : e.getNewValue().trim();
             if (value.length() > 500) {
@@ -1258,26 +1312,95 @@ public class AvaliacaoApplication extends Application {
                     table.getItems().clear();
                     return;
                 }
+
+                String selectedYear = year.getValue();
+                int startYear = Integer.parseInt(selectedYear.substring(0, 4));
+                AvaliacaoDesempenhoAnual annual = database.performanceEvaluation(
+                        selectedStaff.id(), selectedYear);
+
+                if (annual == null) {
+                    evaluationDate.setValue(LocalDate.now());
+                    periodStart.setValue(LocalDate.of(startYear, 9, 1));
+                    periodEnd.setValue(LocalDate.of(startYear + 1, 6, 30));
+                    concordance.setValue("");
+                    comment1.clear();
+                    comment2.clear();
+                    comment3.clear();
+                    appreciation.clear();
+
+                    InstitutionProfile profile = database.institutionProfileEntity();
+                    evaluator.getSelectionModel().clearSelection();
+                    homologante.getSelectionModel().clearSelection();
+                    if (profile.defaultEvaluatorStaffId() != null) {
+                        evaluator.getItems().stream()
+                                .filter(v -> v.id() == profile.defaultEvaluatorStaffId())
+                                .findFirst().ifPresent(evaluator::setValue);
+                    }
+                    if (profile.defaultHomologanteStaffId() != null) {
+                        homologante.getItems().stream()
+                                .filter(v -> v.id() == profile.defaultHomologanteStaffId())
+                                .findFirst().ifPresent(homologante::setValue);
+                    }
+                } else {
+                    evaluationDate.setValue(annual.evaluationDate());
+                    periodStart.setValue(annual.periodStart() != null
+                            ? annual.periodStart() : LocalDate.of(startYear, 9, 1));
+                    periodEnd.setValue(annual.periodEnd() != null
+                            ? annual.periodEnd() : LocalDate.of(startYear + 1, 6, 30));
+                    concordance.setValue(annual.concordance());
+                    comment1.setText(annual.comment1());
+                    comment2.setText(annual.comment2());
+                    comment3.setText(annual.comment3());
+                    appreciation.setText(annual.appreciationGeneral());
+
+                    evaluator.getSelectionModel().clearSelection();
+                    homologante.getSelectionModel().clearSelection();
+                    if (annual.evaluatorStaffId() != null) {
+                        evaluator.getItems().stream()
+                                .filter(v -> v.id() == annual.evaluatorStaffId())
+                                .findFirst().ifPresent(evaluator::setValue);
+                    }
+                    if (annual.homologanteStaffId() != null) {
+                        homologante.getItems().stream()
+                                .filter(v -> v.id() == annual.homologanteStaffId())
+                                .findFirst().ifPresent(homologante::setValue);
+                    }
+                }
+
                 ObservableList<PerformanceInputRow> items = FXCollections.observableArrayList();
-                for (Map<String,Object> r : database.performanceScores(selectedStaff.id(), year.getValue(), trimester.getValue())) {
-                    items.add(PerformanceInputRow.from(r));
+                for (Map<String,Object> row : database.performanceScores(
+                        selectedStaff.id(), selectedYear, trimester.getValue())) {
+                    items.add(PerformanceInputRow.from(row));
                 }
                 table.setItems(items);
                 recalcPerformance(table, result);
-            } catch (SQLException ex) {
-                showError("Não foi possível carregar os indicadores", ex);
+            } catch (Exception ex) {
+                showError("Não foi possível carregar a ficha anual e os indicadores", ex);
             }
         };
 
-        staff.setOnAction(e -> { selectedPerformanceStaffId = staff.getValue() == null ? null : staff.getValue().id(); load.run(); });
+        staff.setOnAction(e -> {
+            selectedPerformanceStaffId = staff.getValue() == null ? null : staff.getValue().id();
+            load.run();
+        });
         year.setOnAction(e -> load.run());
         trimester.setOnAction(e -> load.run());
         load.run();
 
         Button save = CotanIcons.button("Guardar avaliação", Feather.SAVE, "accent-button", "accent");
+        save.setTooltip(new Tooltip("Guardar dados da ficha anual e lançamentos do trimestre selecionado"));
         save.setOnAction(e -> {
             StaffOption selectedStaff = staff.getValue();
-            if (selectedStaff == null) { showWarning("Selecione o profissional."); return; }
+            if (selectedStaff == null) {
+                showWarning("Selecione o profissional.");
+                return;
+            }
+            if (evaluator.getValue() == null) {
+                showWarning("Selecione o avaliador da ficha anual. "
+                        + "Pode defini-lo uma vez em Configurações como avaliador padrão.");
+                return;
+            }
+
             try {
                 int filled = 0;
                 for (PerformanceInputRow row : table.getItems()) {
@@ -1294,32 +1417,69 @@ public class AvaliacaoApplication extends Application {
                     }
                 }
                 if (filled > 0 && filled < table.getItems().size()) {
-                    showWarning("O Excel deixa o resultado em branco quando faltam componentes. "
-                            + "Preencha todos os " + table.getItems().size() + " indicadores antes de guardar.");
+                    showWarning("Preencha todos os " + table.getItems().size()
+                            + " indicadores antes de guardar o trimestre.");
                     return;
                 }
+                for (TextArea area : List.of(comment1, comment2, comment3, appreciation)) {
+                    if (area.getText() != null && area.getText().length() > 2000) {
+                        showWarning("Os textos da ficha anual não podem exceder 2000 caracteres.");
+                        return;
+                    }
+                }
+
+                AvaliacaoDesempenhoAnual current = database.performanceEvaluation(
+                        selectedStaff.id(), year.getValue());
+
+                database.savePerformanceEvaluation(new AvaliacaoDesempenhoAnual(
+                        current == null ? 0 : current.id(),
+                        selectedStaff.id(),
+                        year.getValue(),
+                        evaluationDate.getValue(),
+                        periodStart.getValue(),
+                        periodEnd.getValue(),
+                        evaluator.getValue().id(),
+                        current == null ? "" : current.quantitative1(),
+                        current == null ? "" : current.quantitative2(),
+                        current == null ? "" : current.quantitative3(),
+                        current == null ? "" : current.qualitative1(),
+                        current == null ? "" : current.qualitative2(),
+                        current == null ? "" : current.qualitative3(),
+                        current == null ? "" : current.finalQuantitative(),
+                        current == null ? "" : current.finalQualitative(),
+                        comment1.getText(),
+                        comment2.getText(),
+                        comment3.getText(),
+                        appreciation.getText(),
+                        concordance.getValue(),
+                        homologante.getValue() == null ? null : homologante.getValue().id()
+                ));
+
+                String evaluatorName = evaluator.getValue().name();
                 for (PerformanceInputRow row : table.getItems()) {
                     if (row.score.get().isBlank()) continue;
                     database.upsertPerformanceScore(
                             selectedStaff.id(), row.id.get(), year.getValue(), trimester.getValue(),
                             Double.parseDouble(row.score.get().replace(",", ".")),
-                            row.observation.get(), "Administrador");
+                            row.observation.get(), evaluatorName);
                 }
-                showToast("Avaliação guardada com sucesso.");
+
+                database.refreshEvaluationClassification(selectedStaff.id(), year.getValue());
+                showToast("Ficha anual e avaliação do período guardadas com sucesso.");
                 load.run();
             } catch (Exception ex) {
-                showError("Não foi possível guardar a avaliação", ex);
+                showError("Não foi possível guardar a ficha anual", ex);
             }
         });
 
-        Button clear = CotanIcons.button("Limpar", Feather.ROTATE_CCW, "button-outlined");
+        Button clear = CotanIcons.button("Limpar lançamento", Feather.ROTATE_CCW, "button-outlined");
         clear.setOnAction(e -> {
             for (PerformanceInputRow row : table.getItems()) row.score.set("");
             recalcPerformance(table, result);
         });
 
         HBox actions = new HBox(10, save, clear);
-        page.getChildren().addAll(heading, selectors, resultCard, tableFill(table), actions);
+        page.getChildren().addAll(heading, selectors, annualCard, resultCard, tableFill(table), actions);
         return page;
     }
 
