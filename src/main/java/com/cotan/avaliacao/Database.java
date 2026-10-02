@@ -645,7 +645,8 @@ public final class Database implements AutoCloseable {
 
     public AvaliacaoDesempenhoAnual performanceEvaluation(long staffId, String academicYear) throws SQLException {
         Map<String,Object> row = query("""
-            SELECT id,staff_id,academic_year,evaluation_date,period_start,period_end,evaluator_staff_id,
+            SELECT pe.id,pe.staff_id,pe.academic_year,pe.evaluation_date,pe.period_start,pe.period_end,
+                   COALESCE(pe.evaluator_staff_id,ip.default_evaluator_staff_id) evaluator_staff_id,
                    COALESCE(quantitative_1,'') quantitative_1,
                    COALESCE(quantitative_2,'') quantitative_2,
                    COALESCE(quantitative_3,'') quantitative_3,
@@ -659,9 +660,10 @@ public final class Database implements AutoCloseable {
                    COALESCE(comment3,'') comment3,
                    COALESCE(appreciation_general,'') appreciation_general,
                    COALESCE(concordance,'') concordance,
-                   homologante_staff_id
-            FROM performance_evaluations
-            WHERE staff_id=? AND academic_year=?
+                   COALESCE(pe.homologante_staff_id,ip.default_homologante_staff_id) homologante_staff_id
+            FROM performance_evaluations pe
+            LEFT JOIN institution_profile ip ON ip.id=1
+            WHERE pe.staff_id=? AND pe.academic_year=?
             """, staffId, academicYear).stream().findFirst().orElse(null);
         if (row == null) return null;
 
