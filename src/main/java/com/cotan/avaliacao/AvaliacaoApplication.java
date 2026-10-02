@@ -302,10 +302,12 @@ public class AvaliacaoApplication extends Application {
         root.setLeft(sidebar);
 
         VBox applicationTop = new VBox(buildTopBar(), buildNavigationTabs());
+        applicationTop.getStyleClass().add("cotan-top-ribbon");
         root.setTop(applicationTop);
 
         content = new StackPane();
-        content.setPadding(new Insets(20));
+        content.getStyleClass().add("cotan-content-host");
+        content.setPadding(new Insets(4));
         root.setCenter(content);
 
         root.setBottom(buildStatusBar());
