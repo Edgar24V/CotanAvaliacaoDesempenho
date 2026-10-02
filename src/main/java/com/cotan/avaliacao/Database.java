@@ -1099,6 +1099,10 @@ public final class Database implements AutoCloseable {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    private static String s(Object o) {
+        return o == null ? "" : String.valueOf(o);
+    }
+
     private static long n(Object o){
         if(o==null)return 0;
         if(o instanceof Number number)return number.longValue();
