@@ -1477,14 +1477,18 @@ public class AvaliacaoApplication extends Application {
     private AvaliacaoProfessorRelatorio buildAnnualProfessorReport(PerformanceFinalRow row) throws SQLException {
         long staffId = row.id.get();
         String academicYear = "2026/2027";
+
         Map<String, Object> staff = database.staff("PROFESSOR").stream()
                 .filter(candidate -> n(candidate.get("id")) == staffId)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("O professor selecionado não foi encontrado."));
 
+        Map<String, Object> institution = database.institutionProfile();
+
         List<Map<String, Object>> trimesterOne = database.performanceScores(staffId, academicYear, 1);
         List<Map<String, Object>> trimesterTwo = database.performanceScores(staffId, academicYear, 2);
         List<Map<String, Object>> trimesterThree = database.performanceScores(staffId, academicYear, 3);
+
         Map<Long, Map<String, Object>> firstScores = indexIndicatorScores(trimesterOne);
         Map<Long, Map<String, Object>> secondScores = indexIndicatorScores(trimesterTwo);
         Map<Long, Map<String, Object>> thirdScores = indexIndicatorScores(trimesterThree);
@@ -1495,9 +1499,11 @@ public class AvaliacaoApplication extends Application {
             Number first = scoreFor(firstScores, indicatorId);
             Number second = scoreFor(secondScores, indicatorId);
             Number third = scoreFor(thirdScores, indicatorId);
+
             Number annualAverage = first != null && second != null && third != null
                     ? (first.doubleValue() + second.doubleValue() + third.doubleValue()) / 3.0
                     : null;
+
             indicators.add(new AvaliacaoProfessorRelatorio.Indicador(
                     indicators.size() + 1,
                     s(indicator.get("name")),
@@ -1508,26 +1514,72 @@ public class AvaliacaoApplication extends Application {
             ));
         }
 
-        String evaluator = findEvaluator(trimesterOne, trimesterTwo, trimesterThree);
+        List<Map<String,Object>> reportFacts = database.performanceReportFacts(staffId, academicYear);
+        String evaluator = firstNonBlank(reportFacts, "evaluator");
+        LocalDate evaluationDate = latestDate(reportFacts, "updated_at");
+
+        String evaluatorFunction = database.staff("ADMINISTRATIVO").stream()
+                .filter(candidate -> !evaluator.isBlank()
+                        && evaluator.equalsIgnoreCase(s(candidate.get("name"))))
+                .map(candidate -> s(candidate.get("role")))
+                .filter(value -> !value.isBlank())
+                .findFirst()
+                .orElse("");
+
+        List<String> comments = reportFacts.stream()
+                .map(fact -> s(fact.get("observation")))
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .limit(3)
+                .toList();
+
         int startYear = Integer.parseInt(academicYear.substring(0, 4));
         return new AvaliacaoProfessorRelatorio(
+                s(institution.get("provincial_office")),
+                s(institution.get("municipal_direction")),
+                s(institution.get("school")),
                 s(staff.get("name")),
                 s(staff.get("role")),
                 s(staff.get("code")),
-                LocalDate.now(),
+                evaluationDate != null ? evaluationDate : LocalDate.now(),
                 LocalDate.of(startYear, 9, 1),
                 LocalDate.of(startYear + 1, 6, 30),
                 formatReportScore(row.finalAverage.get()),
                 row.classification.get(),
                 "",
+                comments.size() > 0 ? comments.get(0) : "",
+                comments.size() > 1 ? comments.get(1) : "",
+                comments.size() > 2 ? comments.get(2) : "",
                 evaluator,
-                "",
-                LocalDate.now(),
+                evaluatorFunction,
+                evaluationDate != null ? evaluationDate : LocalDate.now(),
                 s(staff.get("name")),
                 "",
                 "",
                 indicators
         );
+    }
+
+    private String firstNonBlank(List<Map<String,Object>> rows, String key) {
+        for (Map<String,Object> row : rows) {
+            String value = s(row.get(key));
+            if (!value.isBlank()) return value;
+        }
+        return "";
+    }
+
+    private LocalDate latestDate(List<Map<String,Object>> rows, String key) {
+        for (Map<String,Object> row : rows) {
+            String value = s(row.get(key));
+            if (value.length() >= 10) {
+                try {
+                    return LocalDate.parse(value.substring(0, 10));
+                } catch (RuntimeException ignored) {
+                    // Continua para a próxima data persistida.
+                }
+            }
+        }
+        return null;
     }
 
     private Map<Long, Map<String, Object>> indexIndicatorScores(List<Map<String, Object>> rows) {
