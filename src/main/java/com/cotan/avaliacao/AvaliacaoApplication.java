@@ -1670,8 +1670,9 @@ public class AvaliacaoApplication extends Application {
             );
         }
 
+        final long evaluatorStaffId = evaluation.evaluatorStaffId();
         Map<String,Object> evaluator = database.staffAll().stream()
-                .filter(candidate -> n(candidate.get("id")) == evaluation.evaluatorStaffId())
+                .filter(candidate -> n(candidate.get("id")) == evaluatorStaffId)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("O avaliador selecionado não existe mais no cadastro."));
 
@@ -1712,8 +1713,9 @@ public class AvaliacaoApplication extends Application {
 
         String homologanteName = "";
         if (evaluation.homologanteStaffId() != null) {
+            final long homologanteStaffId = evaluation.homologanteStaffId();
             homologanteName = database.staffAll().stream()
-                    .filter(candidate -> n(candidate.get("id")) == evaluation.homologanteStaffId())
+                    .filter(candidate -> n(candidate.get("id")) == homologanteStaffId)
                     .map(candidate -> s(candidate.get("name")))
                     .findFirst()
                     .orElse("");
