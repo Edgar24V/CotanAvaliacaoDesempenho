@@ -3,7 +3,7 @@
  * spacing, hierarchy, ribbon-like navigation and document-oriented data views.
  */
 .cotan-word-shell {
-    -fx-font-family: "Segoe UI", "Inter", "Arial";
+    -fx-font-family: "Aptos", "Segoe UI", "Inter", "Arial";
     -fx-background-color: #f3f5f8;
 }
 
@@ -533,4 +533,109 @@
 .cotan-word-shell.cotan-word-shell.cotan-dark .command-bar {
     -fx-background-color: #252a31;
     -fx-border-color: #3a414a;
+}
+
+.cotan-word-shell .cotan-document-page {
+    -fx-padding: 16 18 24 18;
+}
+
+.cotan-word-shell .section-heading {
+    -fx-padding: 4 4 12 4;
+    -fx-border-color: transparent transparent #d8dde5 transparent;
+}
+
+.cotan-word-shell .section-heading .section-title {
+    -fx-font-size: 23px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2937;
+}
+
+.cotan-word-shell.cotan-dark .section-heading {
+    -fx-border-color: transparent transparent #3a414a transparent;
+}
+
+.cotan-word-shell.cotan-dark .section-heading .section-title {
+    -fx-text-fill: #f3f4f6;
+}
+
+.cotan-word-shell .cotan-action-tile,
+.cotan-word-shell .cotan-info-tile {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6;
+    -fx-border-color: #d8dde5;
+    -fx-border-radius: 6;
+    -fx-padding: 12;
+}
+
+.cotan-word-shell .cotan-action-tile:hover,
+.cotan-word-shell .cotan-info-tile:hover {
+    -fx-background-color: #f5f8fc;
+    -fx-border-color: #aeb9c7;
+}
+
+.cotan-word-shell.cotan-dark .cotan-action-tile,
+.cotan-word-shell.cotan-dark .cotan-info-tile {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3b434d;
+}
+
+.cotan-word-shell.cotan-dark .cotan-action-tile:hover,
+.cotan-word-shell.cotan-dark .cotan-info-tile:hover {
+    -fx-background-color: #2d343d;
+    -fx-border-color: #56616e;
+}
+
+.cotan-word-shell .cotan-inline-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d8dde5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 12;
+}
+
+.cotan-word-shell.cotan-dark .cotan-inline-card {
+    -fx-background-color: #252a31;
+    -fx-border-color: #3b434d;
+}
+
+.cotan-status-bar {
+    -fx-min-height: 34px;
+    -fx-padding: 5 12 5 12;
+}
+
+.cotan-word-shell .status-bar .label {
+    -fx-font-size: 10px;
+}
+
+.cotan-word-shell .menu-button {
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.cotan-word-shell .tooltip {
+    -fx-background-color: #202124;
+    -fx-background-radius: 4;
+    -fx-padding: 7 9;
+}
+
+.cotan-word-shell .text-area .content {
+    -fx-background-color: transparent;
+}
+
+.cotan-word-shell .check-box:selected .box,
+.cotan-word-shell .radio-button:selected .radio {
+    -fx-background-color: #2b70c9;
+    -fx-border-color: #2b70c9;
+}
+
+.cotan-word-shell .table-view .corner {
+    -fx-background-color: #f2f4f7;
+}
+
+.cotan-word-shell.cotan-dark .table-view .corner {
+    -fx-background-color: #2b3139;
+}
+
+.cotan-word-shell .tab-pane:focused > .tab-header-area > .headers-region > .tab:selected {
+    -fx-border-color: #2b70c9;
 }
