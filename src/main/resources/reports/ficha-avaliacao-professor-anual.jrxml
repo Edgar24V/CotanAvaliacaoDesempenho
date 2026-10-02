@@ -86,8 +86,8 @@ PRIMÁRIO E SECUNDÁRIO]]></text>
             <textField isBlankWhenNull="true"><reportElement style="Text" x="28" y="190" width="483" height="18" uuid="20000000-0000-4000-8000-000000000037"/><textFieldExpression><![CDATA[$P{gabineteProvincial}]]></textFieldExpression></textField>
             <staticText><reportElement style="Text" x="0" y="208" width="28" height="18" uuid="20000000-0000-4000-8000-000000000038"/><text><![CDATA[b)]]></text></staticText>
             <textField isBlankWhenNull="true"><reportElement style="Text" x="28" y="208" width="483" height="18" uuid="20000000-0000-4000-8000-000000000039"/><textFieldExpression><![CDATA[$P{direccaoMunicipal}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Bold" x="0" y="226" width="28" height="18" uuid="20000000-0000-4000-8000-000000000040"/><text><![CDATA[c)]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Bold" x="28" y="226" width="483" height="18" uuid="20000000-0000-4000-8000-000000000041"/><textFieldExpression><![CDATA[$P{escola}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="226" width="28" height="18" uuid="20000000-0000-4000-8000-000000000040"/><text><![CDATA[c)]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="TextBold" x="28" y="226" width="483" height="18" uuid="20000000-0000-4000-8000-000000000041"/><textFieldExpression><![CDATA[$P{escola}]]></textFieldExpression></textField>
 
             <staticText><reportElement style="Text" x="0" y="270" width="112" height="18" uuid="20000000-0000-4000-8000-000000000042"/><text><![CDATA[Nome Completo:]]></text></staticText>
             <textField isBlankWhenNull="true"><reportElement style="TextBold" x="112" y="270" width="399" height="18" uuid="20000000-0000-4000-8000-000000000043"/><textFieldExpression><![CDATA[$P{professorNome}]]></textFieldExpression></textField>
