@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.zip.ZipFile;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AvaliacaoProfessorReportServiceTest {
@@ -44,6 +45,8 @@ class AvaliacaoProfessorReportServiceTest {
         );
 
         AvaliacaoProfessorReportService service = new AvaliacaoProfessorReportService();
+        var jasperPrint = service.buildJasperPrint(relatorio);
+        assertEquals(2, jasperPrint.getPages().size(), "A ficha anual deve ocupar exatamente 2 páginas.");
         service.generateDocx(output, relatorio);
 
         assertTrue(Files.size(output) > 0);
