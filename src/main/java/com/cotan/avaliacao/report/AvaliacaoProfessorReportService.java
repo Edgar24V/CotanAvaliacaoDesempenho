@@ -7,6 +7,8 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -108,7 +110,10 @@ public class AvaliacaoProfessorReportService {
         params.put("nomeAvaliado", relatorio.nomeAvaliado());
         params.put("concordancia", relatorio.concordancia());
         params.put("nomeHomologante", relatorio.nomeHomologante());
-        params.put("indicadores", relatorio.indicadores());
+        // Cada tabela recebe o seu próprio datasource: JasperReports consome o cursor
+        // durante a renderização, portanto não reutilizamos a mesma instância nas duas tabelas.
+        params.put("indicadoresDataSource1", (JRDataSource) new JRBeanCollectionDataSource(relatorio.indicadores()));
+        params.put("indicadoresDataSource2", (JRDataSource) new JRBeanCollectionDataSource(relatorio.indicadores()));
         params.put("brasao", brasao);
     }
 
