@@ -3,23 +3,35 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
               xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd
-                                  http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/jasperreports/components.xsd"
+                                  http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
               name="ficha-avaliacao-professor-anual"
-              pageWidth="595" pageHeight="842" columnWidth="511"
-              leftMargin="42" rightMargin="42" topMargin="20" bottomMargin="20"
-              whenNoDataType="AllSectionsNoDetail" uuid="20000000-0000-4000-8000-000000000108">
+              pageWidth="595" pageHeight="842"
+              columnWidth="519"
+              leftMargin="38" rightMargin="38" topMargin="20" bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="30000000-0000-4000-8000-000000000001">
 
-    <style name="Base" fontName="Arial" fontSize="10" forecolor="#111111"/>
-    <style name="Text" fontName="Arial" fontSize="10" forecolor="#111111"/>
-    <style name="TextBold" fontName="Arial" fontSize="10" isBold="true" forecolor="#111111"/>
-    <style name="Small" fontName="Arial" fontSize="8.5" forecolor="#111111"/>
-    <style name="TableHeader" mode="Opaque" backcolor="#FFFFFF" fontName="Arial" fontSize="9" isBold="true" forecolor="#111111">
-        <box leftPadding="3" rightPadding="3" topPadding="2" bottomPadding="2"><pen lineWidth="0.7" lineColor="#222222"/></box>
+    <style name="Base" fontName="Arial" fontSize="9" forecolor="#111111"/>
+    <style name="Text" fontName="Arial" fontSize="9" forecolor="#111111"/>
+    <style name="TextBold" fontName="Arial" fontSize="9" isBold="true" forecolor="#111111"/>
+    <style name="Small" fontName="Arial" fontSize="8" forecolor="#111111"/>
+    <style name="TableHeader" mode="Opaque" backcolor="#FFFFFF" fontName="Arial" fontSize="8" isBold="true" forecolor="#111111">
+        <box leftPadding="2" rightPadding="2" topPadding="1" bottomPadding="1">
+            <pen lineWidth="0.7" lineColor="#222222"/>
+        </box>
     </style>
-    <style name="TableCell" fontName="Arial" fontSize="8.5" forecolor="#111111">
-        <box leftPadding="3" rightPadding="3" topPadding="2" bottomPadding="2"><pen lineWidth="0.5" lineColor="#333333"/></box>
+    <style name="TableCell" fontName="Arial" fontSize="7.7" forecolor="#111111">
+        <box leftPadding="2" rightPadding="2" topPadding="1" bottomPadding="1">
+            <pen lineWidth="0.5" lineColor="#333333"/>
+        </box>
     </style>
-    <subDataset name="IndicadoresDataset" uuid="20000000-0000-4000-8000-000000000109">
+    <style name="TableCellCenter" fontName="Arial" fontSize="7.7" forecolor="#111111">
+        <box leftPadding="2" rightPadding="2" topPadding="1" bottomPadding="1">
+            <pen lineWidth="0.5" lineColor="#333333"/>
+        </box>
+    </style>
+
+    <subDataset name="IndicadoresDataset" uuid="30000000-0000-4000-8000-000000000002">
         <field name="numero" class="java.lang.Integer"/>
         <field name="nome" class="java.lang.String"/>
         <field name="trim1" class="java.lang.String"/>
@@ -28,194 +40,261 @@
         <field name="media" class="java.lang.String"/>
     </subDataset>
 
-    <parameter name="gabineteProvincial" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="direccaoMunicipal" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="escola" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="gabineteProvincial" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="direccaoMunicipal" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="escola" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
     <parameter name="professorNome" class="java.lang.String"/>
     <parameter name="categoria" class="java.lang.String"/>
     <parameter name="agenteNumero" class="java.lang.String"/>
     <parameter name="dataAvaliacao" class="java.lang.String"/>
     <parameter name="periodoInicio" class="java.lang.String"/>
     <parameter name="periodoFim" class="java.lang.String"/>
-    <parameter name="classificacaoQuantitativa1" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="classificacaoQuantitativa2" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="classificacaoQuantitativa3" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="classificacaoQualitativa1" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="classificacaoQualitativa2" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="classificacaoQualitativa3" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="classificacaoQuantitativa1" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="classificacaoQuantitativa2" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="classificacaoQuantitativa3" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="classificacaoQualitativa1" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="classificacaoQualitativa2" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="classificacaoQualitativa3" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
     <parameter name="classificacaoFinalQuantitativa" class="java.lang.String"/>
     <parameter name="classificacaoFinalQualitativa" class="java.lang.String"/>
     <parameter name="apreciacaoGeral" class="java.lang.String"/>
-    <parameter name="comentario1" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="comentario2" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
-    <parameter name="comentario3" class="java.lang.String"><defaultValueExpression><![CDATA[""]]></defaultValueExpression></parameter>
+    <parameter name="comentario1" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="comentario2" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
+    <parameter name="comentario3" class="java.lang.String">
+        <defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+    </parameter>
     <parameter name="nomeAvaliador" class="java.lang.String"/>
     <parameter name="funcaoAvaliador" class="java.lang.String"/>
     <parameter name="dataAvaliacaoAvaliador" class="java.lang.String"/>
     <parameter name="nomeAvaliado" class="java.lang.String"/>
     <parameter name="concordancia" class="java.lang.String"/>
     <parameter name="nomeHomologante" class="java.lang.String"/>
-    <parameter name="indicadores" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <parameter name="indicadores" class="java.util.Collection"/>
     <parameter name="brasao" class="java.awt.Image"/>
-    <detail>
 
+    <detail>
+        <!-- PÁGINA 1: cabeçalho, identificação, classificação trimestral e média por indicador -->
         <band height="782" splitType="Prevent">
-            <image scaleImage="RetainShape">
-                <reportElement x="225" y="0" width="61" height="62" uuid="20000000-0000-4000-8000-000000000032"/>
+
+            <image scaleImage="RetainShape" hAlign="Center" vAlign="Middle">
+                <reportElement x="229" y="0" width="61" height="54" uuid="30000000-0000-4000-8000-000000000010"/>
                 <imageExpression class="java.awt.Image"><![CDATA[$P{brasao}]]></imageExpression>
             </image>
+
             <staticText>
-                <reportElement x="0" y="63" width="511" height="18" uuid="20000000-0000-4000-8000-000000000033"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10.5"/></textElement>
+                <reportElement x="0" y="54" width="519" height="16" uuid="30000000-0000-4000-8000-000000000011"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9.5" isBold="true"/></textElement>
                 <text><![CDATA[REPÚBLICA DE ANGOLA]]></text>
             </staticText>
             <staticText>
-                <reportElement x="0" y="81" width="511" height="18" uuid="20000000-0000-4000-8000-000000000034"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10.5"/></textElement>
+                <reportElement x="0" y="70" width="519" height="16" uuid="30000000-0000-4000-8000-000000000012"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9.5" isBold="true"/></textElement>
                 <text><![CDATA[MINISTÉRIO DA EDUCAÇÃO]]></text>
             </staticText>
             <staticText>
-                <reportElement x="18" y="120" width="475" height="58" uuid="20000000-0000-4000-8000-000000000035"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12.5" isBold="true"/></textElement>
+                <reportElement x="12" y="91" width="495" height="52" uuid="30000000-0000-4000-8000-000000000013"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement>
                 <text><![CDATA[FICHA DE AVALIAÇÃO DE DESEMPENHO ANUAL DO
 EDUCADOR DE INFÂNCIA E DO PROFESSOR DO ENSINO
 PRIMÁRIO E SECUNDÁRIO]]></text>
             </staticText>
 
-            <staticText><reportElement style="Text" x="0" y="190" width="28" height="18" uuid="20000000-0000-4000-8000-000000000036"/><text><![CDATA[a)]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="28" y="190" width="483" height="18" uuid="20000000-0000-4000-8000-000000000037"/><textFieldExpression><![CDATA[$P{gabineteProvincial}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="208" width="28" height="18" uuid="20000000-0000-4000-8000-000000000038"/><text><![CDATA[b)]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="28" y="208" width="483" height="18" uuid="20000000-0000-4000-8000-000000000039"/><textFieldExpression><![CDATA[$P{direccaoMunicipal}]]></textFieldExpression></textField>
-            <staticText><reportElement style="TextBold" x="0" y="226" width="28" height="18" uuid="20000000-0000-4000-8000-000000000040"/><text><![CDATA[c)]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="TextBold" x="28" y="226" width="483" height="18" uuid="20000000-0000-4000-8000-000000000041"/><textFieldExpression><![CDATA[$P{escola}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="151" width="22" height="17" uuid="30000000-0000-4000-8000-000000000014"/><text><![CDATA[a)]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="22" y="151" width="497" height="17" uuid="30000000-0000-4000-8000-000000000015"/><textFieldExpression><![CDATA[$P{gabineteProvincial}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="168" width="22" height="17" uuid="30000000-0000-4000-8000-000000000016"/><text><![CDATA[b)]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="22" y="168" width="497" height="17" uuid="30000000-0000-4000-8000-000000000017"/><textFieldExpression><![CDATA[$P{direccaoMunicipal}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="185" width="22" height="17" uuid="30000000-0000-4000-8000-000000000018"/><text><![CDATA[c)]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="TextBold" x="22" y="185" width="497" height="17" uuid="30000000-0000-4000-8000-000000000019"/><textFieldExpression><![CDATA[$P{escola}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="Text" x="0" y="270" width="112" height="18" uuid="20000000-0000-4000-8000-000000000042"/><text><![CDATA[Nome Completo:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="TextBold" x="112" y="270" width="399" height="18" uuid="20000000-0000-4000-8000-000000000043"/><textFieldExpression><![CDATA[$P{professorNome}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="289" width="74" height="18" uuid="20000000-0000-4000-8000-000000000044"/><text><![CDATA[Categoria:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="74" y="289" width="437" height="18" uuid="20000000-0000-4000-8000-000000000045"/><textFieldExpression><![CDATA[$P{categoria}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="308" width="95" height="18" uuid="20000000-0000-4000-8000-000000000046"/><text><![CDATA[Agente nº]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="95" y="308" width="150" height="18" uuid="20000000-0000-4000-8000-000000000047"/><textFieldExpression><![CDATA[$P{agenteNumero}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="214" width="105" height="17" uuid="30000000-0000-4000-8000-000000000020"/><text><![CDATA[Nome Completo:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="TextBold" x="105" y="214" width="414" height="17" uuid="30000000-0000-4000-8000-000000000021"/><textFieldExpression><![CDATA[$P{professorNome}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="232" width="70" height="17" uuid="30000000-0000-4000-8000-000000000022"/><text><![CDATA[Categoria:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="70" y="232" width="449" height="17" uuid="30000000-0000-4000-8000-000000000023"/><textFieldExpression><![CDATA[$P{categoria}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="250" width="80" height="17" uuid="30000000-0000-4000-8000-000000000024"/><text><![CDATA[Agente nº]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="80" y="250" width="150" height="17" uuid="30000000-0000-4000-8000-000000000025"/><textFieldExpression><![CDATA[$P{agenteNumero}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="Text" x="0" y="342" width="145" height="18" uuid="20000000-0000-4000-8000-000000000048"/><text><![CDATA[Data de Avaliação:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="145" y="342" width="366" height="18" uuid="20000000-0000-4000-8000-000000000049"/><textFieldExpression><![CDATA[$P{dataAvaliacao}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="278" width="138" height="17" uuid="30000000-0000-4000-8000-000000000026"/><text><![CDATA[Data de Avaliação:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="138" y="278" width="381" height="17" uuid="30000000-0000-4000-8000-000000000027"/><textFieldExpression><![CDATA[$P{dataAvaliacao}]]></textFieldExpression></textField>
 
             <frame>
-                <reportElement x="0" y="364" width="511" height="46" uuid="20000000-0000-4000-8000-000000000050"/>
+                <reportElement x="0" y="301" width="519" height="47" uuid="30000000-0000-4000-8000-000000000028"/>
                 <box><pen lineWidth="0.7" lineColor="#222222"/></box>
-                <staticText><reportElement style="TextBold" x="0" y="2" width="511" height="18" uuid="20000000-0000-4000-8000-000000000051"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Período a que respeita avaliação]]></text></staticText>
-                <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="21" width="511" height="18" uuid="20000000-0000-4000-8000-000000000052"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA["De " + $P{periodoInicio} + " a " + $P{periodoFim}]]></textFieldExpression></textField>
+                <staticText><reportElement style="TextBold" x="0" y="2" width="519" height="17" uuid="30000000-0000-4000-8000-000000000029"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Período a que respeita avaliação]]></text></staticText>
+                <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="21" width="519" height="18" uuid="30000000-0000-4000-8000-000000000030"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA["De " + $P{periodoInicio} + " a " + $P{periodoFim}]]></textFieldExpression></textField>
             </frame>
 
-            <staticText><reportElement style="TextBold" x="0" y="395" width="511" height="20" uuid="20000000-0000-4000-8000-000000000053"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Classificação dos Indicadores Anual Trimestral]]></text></staticText>
-            
+            <staticText><reportElement style="TextBold" x="0" y="355" width="519" height="20" uuid="30000000-0000-4000-8000-000000000031"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Classificação dos Indicadores Anual Trimestral]]></text></staticText>
+
             <componentElement>
-                <reportElement x="0" y="420" width="511" height="167" uuid="20000000-0000-4000-8000-000000000001"/>
+                <reportElement x="0" y="377" width="519" height="146" uuid="30000000-0000-4000-8000-000000000032"/>
                 <jr:table>
-                    <datasetRun subDataset="IndicadoresDataset" uuid="20000000-0000-4000-8000-000000000002">
-                        <dataSourceExpression><![CDATA[$P{indicadores}]]></dataSourceExpression>
+                    <datasetRun subDataset="IndicadoresDataset" uuid="30000000-0000-4000-8000-000000000033">
+                        <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JRBeanCollectionDataSource($P{indicadores})]]></dataSourceExpression>
                     </datasetRun>
-                    <jr:column width="35" uuid="20000000-0000-4000-8000-000000000003"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="29" height="23" uuid="20000000-0000-4000-8000-000000000004"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="29" height="24" uuid="20000000-0000-4000-8000-000000000005"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression></textField></jr:detailCell></jr:column>
-                    <jr:column width="236" uuid="20000000-0000-4000-8000-000000000006"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="230" height="23" uuid="20000000-0000-4000-8000-000000000007"/><textElement textAlignment="Left" verticalAlignment="Middle"/><text><![CDATA[Indicadores]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement x="0" y="0" width="230" height="24" uuid="20000000-0000-4000-8000-000000000008"/><textElement textAlignment="Left" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell></jr:column>
-                    <jr:column width="60" uuid="20000000-0000-4000-8000-000000000009"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="54" height="23" uuid="20000000-0000-4000-8000-000000000010"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[I Trim]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="54" height="24" uuid="20000000-0000-4000-8000-000000000011"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim1}]]></textFieldExpression></textField></jr:detailCell></jr:column>
-                    <jr:column width="60" uuid="20000000-0000-4000-8000-000000000012"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="54" height="23" uuid="20000000-0000-4000-8000-000000000013"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[II Trim]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="54" height="24" uuid="20000000-0000-4000-8000-000000000014"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim2}]]></textFieldExpression></textField></jr:detailCell></jr:column>
-                    <jr:column width="60" uuid="20000000-0000-4000-8000-000000000015"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="54" height="23" uuid="20000000-0000-4000-8000-000000000016"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[III Trim]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="54" height="24" uuid="20000000-0000-4000-8000-000000000017"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim3}]]></textFieldExpression></textField></jr:detailCell></jr:column>
-                    <jr:column width="60" uuid="20000000-0000-4000-8000-000000000018"><jr:columnHeader height="27" style="TableHeader"><staticText><reportElement x="0" y="0" width="54" height="23" uuid="20000000-0000-4000-8000-000000000019"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Média]]></text></staticText></jr:columnHeader><jr:detailCell height="28" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="54" height="24" uuid="20000000-0000-4000-8000-000000000020"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{media}]]></textFieldExpression></textField></jr:detailCell></jr:column>
+                    <jr:column width="34" uuid="30000000-0000-4000-8000-000000000034">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="28" height="20" uuid="30000000-0000-4000-8000-000000000035"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="28" height="20" uuid="30000000-0000-4000-8000-000000000036"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="231" uuid="30000000-0000-4000-8000-000000000037">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="225" height="20" uuid="30000000-0000-4000-8000-000000000038"/><textElement textAlignment="Left" verticalAlignment="Middle"/><text><![CDATA[Indicadores]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement x="0" y="0" width="225" height="20" uuid="30000000-0000-4000-8000-000000000039"/><textElement textAlignment="Left" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="62" uuid="30000000-0000-4000-8000-000000000040">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000041"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[I Trim]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000042"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim1}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="62" uuid="30000000-0000-4000-8000-000000000043">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000044"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[II Trim]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000045"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim2}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="62" uuid="30000000-0000-4000-8000-000000000046">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000047"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[III Trim]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="56" height="20" uuid="30000000-0000-4000-8000-000000000048"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{trim3}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="68" uuid="30000000-0000-4000-8000-000000000049">
+                        <jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="62" height="20" uuid="30000000-0000-4000-8000-000000000050"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Média]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="24" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="62" height="20" uuid="30000000-0000-4000-8000-000000000051"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{media}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
                 </jr:table>
             </componentElement>
 
             <frame>
-                <reportElement x="0" y="590" width="511" height="66" uuid="20000000-0000-4000-8000-000000000054"/>
-                <staticText><reportElement style="TableCell" x="0" y="0" width="35" height="33" uuid="20000000-0000-4000-8000-000000000055"/><text><![CDATA[]]></text></staticText>
-                <staticText><reportElement style="TableCell" x="35" y="0" width="236" height="33" uuid="20000000-0000-4000-8000-000000000056"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="8.5" isBold="true"/></textElement><text><![CDATA[Classificação Quantitativa]]></text></staticText>
-                <textField><reportElement style="TableCell" x="271" y="0" width="60" height="33" uuid="20000000-0000-4000-8000-000000000057"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa1}]]></textFieldExpression></textField>
-                <textField><reportElement style="TableCell" x="331" y="0" width="60" height="33" uuid="20000000-0000-4000-8000-000000000058"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa2}]]></textFieldExpression></textField>
-                <textField><reportElement style="TableCell" x="391" y="0" width="60" height="33" uuid="20000000-0000-4000-8000-000000000059"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa3}]]></textFieldExpression></textField>
-                <textField><reportElement style="TableCell" x="451" y="0" width="60" height="33" uuid="20000000-0000-4000-8000-000000000060"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQuantitativa}]]></textFieldExpression></textField>
-                <staticText><reportElement style="TableCell" x="0" y="33" width="35" height="33" uuid="20000000-0000-4000-8000-000000000061"/><text><![CDATA[]]></text></staticText>
-                <staticText><reportElement style="TableCell" x="35" y="33" width="236" height="33" uuid="20000000-0000-4000-8000-000000000062"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="8.5" isBold="true"/></textElement><text><![CDATA[Classificação Qualitativa]]></text></staticText>
-                <textField textAdjust="ScaleFont"><reportElement style="TableCell" x="271" y="33" width="60" height="33" uuid="20000000-0000-4000-8000-000000000063"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa1}]]></textFieldExpression></textField>
-                <textField textAdjust="ScaleFont"><reportElement style="TableCell" x="331" y="33" width="60" height="33" uuid="20000000-0000-4000-8000-000000000064"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa2}]]></textFieldExpression></textField>
-                <textField textAdjust="ScaleFont"><reportElement style="TableCell" x="391" y="33" width="60" height="33" uuid="20000000-0000-4000-8000-000000000065"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa3}]]></textFieldExpression></textField>
-                <textField textAdjust="ScaleFont"><reportElement style="TableCell" x="451" y="33" width="60" height="33" uuid="20000000-0000-4000-8000-000000000066"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQualitativa}]]></textFieldExpression></textField>
+                <reportElement x="0" y="529" width="519" height="64" uuid="30000000-0000-4000-8000-000000000052"/>
+                <staticText><reportElement style="TableCell" x="0" y="0" width="34" height="32" uuid="30000000-0000-4000-8000-000000000053"/><text><![CDATA[]]></text></staticText>
+                <staticText><reportElement style="TableCell" x="34" y="0" width="231" height="32" uuid="30000000-0000-4000-8000-000000000054"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="7.7" isBold="true"/></textElement><text><![CDATA[Classificação Quantitativa]]></text></staticText>
+                <textField isBlankWhenNull="true"><reportElement style="TableCellCenter" x="265" y="0" width="62" height="32" uuid="30000000-0000-4000-8000-000000000055"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa1}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true"><reportElement style="TableCellCenter" x="327" y="0" width="62" height="32" uuid="30000000-0000-4000-8000-000000000056"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa2}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true"><reportElement style="TableCellCenter" x="389" y="0" width="62" height="32" uuid="30000000-0000-4000-8000-000000000057"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQuantitativa3}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true"><reportElement style="TableCellCenter" x="451" y="0" width="68" height="32" uuid="30000000-0000-4000-8000-000000000058"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQuantitativa}]]></textFieldExpression></textField>
+
+                <staticText><reportElement style="TableCell" x="0" y="32" width="34" height="32" uuid="30000000-0000-4000-8000-000000000059"/><text><![CDATA[]]></text></staticText>
+                <staticText><reportElement style="TableCell" x="34" y="32" width="231" height="32" uuid="30000000-0000-4000-8000-000000000060"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="7.7" isBold="true"/></textElement><text><![CDATA[Classificação Qualitativa]]></text></staticText>
+                <textField isBlankWhenNull="true" textAdjust="ScaleFont"><reportElement style="TableCellCenter" x="265" y="32" width="62" height="32" uuid="30000000-0000-4000-8000-000000000061"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="7.5" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa1}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true" textAdjust="ScaleFont"><reportElement style="TableCellCenter" x="327" y="32" width="62" height="32" uuid="30000000-0000-4000-8000-000000000062"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="7.5" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa2}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true" textAdjust="ScaleFont"><reportElement style="TableCellCenter" x="389" y="32" width="62" height="32" uuid="30000000-0000-4000-8000-000000000063"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="7.5" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoQualitativa3}]]></textFieldExpression></textField>
+                <textField isBlankWhenNull="true" textAdjust="ScaleFont"><reportElement style="TableCellCenter" x="451" y="32" width="68" height="32" uuid="30000000-0000-4000-8000-000000000064"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="7.5" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQualitativa}]]></textFieldExpression></textField>
             </frame>
-            
+
             <componentElement>
-                <reportElement x="0" y="660" width="511" height="109" uuid="20000000-0000-4000-8000-000000000030"/>
+                <reportElement x="0" y="604" width="519" height="118" uuid="30000000-0000-4000-8000-000000000065"/>
                 <jr:table>
-                    <datasetRun subDataset="IndicadoresDataset" uuid="20000000-0000-4000-8000-000000000031">
-                        <dataSourceExpression><![CDATA[$P{indicadores}]]></dataSourceExpression>
+                    <datasetRun subDataset="IndicadoresDataset" uuid="30000000-0000-4000-8000-000000000066">
+                        <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JRBeanCollectionDataSource($P{indicadores})]]></dataSourceExpression>
                     </datasetRun>
-                    <jr:column width="35" uuid="20000000-0000-4000-8000-000000000021"><jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="29" height="20" uuid="20000000-0000-4000-8000-000000000022"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader><jr:detailCell height="17" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="29" height="13" uuid="20000000-0000-4000-8000-000000000023"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression></textField></jr:detailCell></jr:column><jr:column width="376" uuid="20000000-0000-4000-8000-000000000024"><jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="370" height="20" uuid="20000000-0000-4000-8000-000000000025"/><textElement textAlignment="Left" verticalAlignment="Middle"/><text><![CDATA[Indicadores]]></text></staticText></jr:columnHeader><jr:detailCell height="17" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="370" height="13" uuid="20000000-0000-4000-8000-000000000026"/><textElement textAlignment="Left" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell></jr:column><jr:column width="100" uuid="20000000-0000-4000-8000-000000000027"><jr:columnHeader height="24" style="TableHeader"><staticText><reportElement x="0" y="0" width="94" height="20" uuid="20000000-0000-4000-8000-000000000028"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Média]]></text></staticText></jr:columnHeader><jr:detailCell height="17" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="94" height="13" uuid="20000000-0000-4000-8000-000000000029"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{media}]]></textFieldExpression></textField></jr:detailCell></jr:column>
+                    <jr:column width="34" uuid="30000000-0000-4000-8000-000000000067">
+                        <jr:columnHeader height="22" style="TableHeader"><staticText><reportElement x="0" y="0" width="28" height="18" uuid="30000000-0000-4000-8000-000000000068"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Nº]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="28" height="15" uuid="30000000-0000-4000-8000-000000000069"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="391" uuid="30000000-0000-4000-8000-000000000070">
+                        <jr:columnHeader height="22" style="TableHeader"><staticText><reportElement x="0" y="0" width="385" height="18" uuid="30000000-0000-4000-8000-000000000071"/><textElement textAlignment="Left" verticalAlignment="Middle"/><text><![CDATA[Indicadores]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18" style="TableCell"><textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement x="0" y="0" width="385" height="15" uuid="30000000-0000-4000-8000-000000000072"/><textElement textAlignment="Left" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{nome}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="94" uuid="30000000-0000-4000-8000-000000000073">
+                        <jr:columnHeader height="22" style="TableHeader"><staticText><reportElement x="0" y="0" width="88" height="18" uuid="30000000-0000-4000-8000-000000000074"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Média]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18" style="TableCell"><textField isBlankWhenNull="true"><reportElement x="0" y="0" width="88" height="15" uuid="30000000-0000-4000-8000-000000000075"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{media}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
                 </jr:table>
             </componentElement>
         </band>
 
+        <!-- PÁGINA 2: classificação final, apreciação geral e assinaturas -->
         <band height="782" splitType="Prevent">
             <frame>
-                <reportElement x="0" y="22" width="511" height="88" uuid="20000000-0000-4000-8000-000000000067"/>
-                <staticText><reportElement style="TableHeader" x="0" y="0" width="511" height="28" uuid="20000000-0000-4000-8000-000000000068"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10.5" isBold="true"/></textElement><text><![CDATA[Classificação Final]]></text></staticText>
-                <staticText><reportElement style="TableCell" x="0" y="28" width="35" height="30" uuid="20000000-0000-4000-8000-000000000069"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[1]]></text></staticText>
-                <staticText><reportElement style="TableCell" x="35" y="28" width="410" height="30" uuid="20000000-0000-4000-8000-000000000070"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="10" isBold="true"/></textElement><text><![CDATA[Quantitativa]]></text></staticText>
-                <textField><reportElement style="TableCell" x="445" y="28" width="66" height="30" uuid="20000000-0000-4000-8000-000000000071"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQuantitativa}]]></textFieldExpression></textField>
-                <staticText><reportElement style="TableCell" x="0" y="58" width="35" height="30" uuid="20000000-0000-4000-8000-000000000072"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[2]]></text></staticText>
-                <staticText><reportElement style="TableCell" x="35" y="58" width="410" height="30" uuid="20000000-0000-4000-8000-000000000073"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="10" isBold="true"/></textElement><text><![CDATA[Qualitativa]]></text></staticText>
-                <textField textAdjust="ScaleFont"><reportElement style="TableCell" x="445" y="58" width="66" height="30" uuid="20000000-0000-4000-8000-000000000074"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQualitativa}]]></textFieldExpression></textField>
+                <reportElement x="0" y="0" width="519" height="84" uuid="30000000-0000-4000-8000-000000000080"/>
+                <staticText><reportElement style="TableHeader" x="0" y="0" width="519" height="26" uuid="30000000-0000-4000-8000-000000000081"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10" isBold="true"/></textElement><text><![CDATA[Classificação Final]]></text></staticText>
+                <staticText><reportElement style="TableCell" x="0" y="26" width="34" height="29" uuid="30000000-0000-4000-8000-000000000082"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[1]]></text></staticText>
+                <staticText><reportElement style="TableCell" x="34" y="26" width="417" height="29" uuid="30000000-0000-4000-8000-000000000083"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><text><![CDATA[Quantitativa]]></text></staticText>
+                <textField isBlankWhenNull="true"><reportElement style="TableCellCenter" x="451" y="26" width="68" height="29" uuid="30000000-0000-4000-8000-000000000084"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQuantitativa}]]></textFieldExpression></textField>
+                <staticText><reportElement style="TableCell" x="0" y="55" width="34" height="29" uuid="30000000-0000-4000-8000-000000000085"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[2]]></text></staticText>
+                <staticText><reportElement style="TableCell" x="34" y="55" width="417" height="29" uuid="30000000-0000-0000-000000000086"/><textElement verticalAlignment="Middle"><font fontName="Arial" size="9" isBold="true"/></textElement><text><![CDATA[Qualitativa]]></text></staticText>
+                <textField isBlankWhenNull="true" textAdjust="ScaleFont"><reportElement style="TableCellCenter" x="451" y="55" width="68" height="29" uuid="30000000-0000-4000-8000-000000000087"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8.5" isBold="true"/></textElement><textFieldExpression><![CDATA[$P{classificacaoFinalQualitativa}]]></textFieldExpression></textField>
             </frame>
-        </band>
 
-        <band height="782" splitType="Prevent">
-            <staticText><reportElement x="0" y="12" width="511" height="21" uuid="20000000-0000-4000-8000-000000000075"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><text><![CDATA[Apreciação Geral]]></text></staticText>
-            <staticText><reportElement x="0" y="33" width="511" height="21" uuid="20000000-0000-4000-8000-000000000076"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><text><![CDATA[(Comentários dos Avaliadores)]]></text></staticText>
+            <staticText>
+                <reportElement x="0" y="96" width="519" height="20" uuid="30000000-0000-4000-8000-000000000088"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="11" isBold="true"/></textElement>
+                <text><![CDATA[Apreciação Geral]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="116" width="519" height="18" uuid="30000000-0000-4000-8000-000000000089"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="10" isBold="true"/></textElement>
+                <text><![CDATA[(Comentários dos Avaliadores)]]></text>
+            </staticText>
 
-            <staticText><reportElement style="Text" x="0" y="72" width="511" height="18" uuid="20000000-0000-4000-8000-000000000077"/><text><![CDATA[Comentário 1]]></text></staticText>
-            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="90" width="511" height="28" uuid="20000000-0000-4000-8000-000000000078"/><textFieldExpression><![CDATA[$P{comentario1}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="126" width="511" height="18" uuid="20000000-0000-4000-8000-000000000079"/><text><![CDATA[Comentário 2]]></text></staticText>
-            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="144" width="511" height="28" uuid="20000000-0000-4000-8000-000000000080"/><textFieldExpression><![CDATA[$P{comentario2}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="180" width="511" height="18" uuid="20000000-0000-4000-8000-000000000081"/><text><![CDATA[Comentário 3]]></text></staticText>
-            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="198" width="511" height="28" uuid="20000000-0000-4000-8000-000000000082"/><textFieldExpression><![CDATA[$P{comentario3}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="234" width="511" height="18" uuid="20000000-0000-4000-8000-000000000083"/><text><![CDATA[Comentário Final]]></text></staticText>
-            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="252" width="511" height="44" uuid="20000000-0000-4000-8000-000000000084"/><textFieldExpression><![CDATA[$P{apreciacaoGeral}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="145" width="519" height="16" uuid="30000000-0000-4000-8000-000000000090"/><text><![CDATA[Comentário 1]]></text></staticText>
+            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="161" width="519" height="33" uuid="30000000-0000-4000-8000-000000000091"/><textFieldExpression><![CDATA[$P{comentario1}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="TextBold" x="0" y="322" width="511" height="21" uuid="20000000-0000-4000-8000-000000000085"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Assinaturas]]></text></staticText>
+            <staticText><reportElement style="TextBold" x="0" y="199" width="519" height="16" uuid="30000000-0000-4000-8000-000000000092"/><text><![CDATA[Comentário 2]]></text></staticText>
+            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="215" width="519" height="33" uuid="30000000-0000-4000-8000-000000000093"/><textFieldExpression><![CDATA[$P{comentario2}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="Text" x="0" y="349" width="45" height="18" uuid="20000000-0000-4000-8000-000000000086"/><text><![CDATA[Nome:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="45" y="349" width="466" height="18" uuid="20000000-0000-4000-8000-000000000087"/><textFieldExpression><![CDATA[$P{nomeAvaliador}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="367" width="48" height="18" uuid="20000000-0000-4000-8000-000000000088"/><text><![CDATA[Função:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="48" y="367" width="463" height="18" uuid="20000000-0000-4000-8000-000000000089"/><textFieldExpression><![CDATA[$P{funcaoAvaliador}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="385" width="32" height="18" uuid="20000000-0000-4000-8000-000000000090"/><text><![CDATA[Data:]]></text></staticText>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="32" y="385" width="479" height="18" uuid="20000000-0000-4000-8000-000000000091"/><textFieldExpression><![CDATA[$P{dataAvaliacaoAvaliador}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="253" width="519" height="16" uuid="30000000-0000-4000-8000-000000000094"/><text><![CDATA[Comentário 3]]></text></staticText>
+            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="269" width="519" height="33" uuid="30000000-0000-4000-8000-000000000095"/><textFieldExpression><![CDATA[$P{comentario3}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="TextBold" x="0" y="415" width="511" height="20" uuid="20000000-0000-4000-8000-000000000092"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O Avaliador]]></text></staticText>
-            <line><reportElement x="145" y="455" width="220" height="1" uuid="20000000-0000-4000-8000-000000000093"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="460" width="511" height="20" uuid="20000000-0000-4000-8000-000000000094"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeAvaliador}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="307" width="519" height="16" uuid="30000000-0000-4000-8000-000000000096"/><text><![CDATA[Comentário Final]]></text></staticText>
+            <textField isBlankWhenNull="true" textAdjust="StretchHeight"><reportElement style="Text" x="0" y="323" width="519" height="42" uuid="30000000-0000-4000-8000-000000000097"/><textFieldExpression><![CDATA[$P{apreciacaoGeral}]]></textFieldExpression></textField>
 
-            <staticText><reportElement style="TextBold" x="0" y="492" width="511" height="20" uuid="20000000-0000-4000-8000-000000000095"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Concordância com Avaliação]]></text></staticText>
+            <staticText><reportElement style="TextBold" x="0" y="380" width="519" height="20" uuid="30000000-0000-4000-8000-000000000098"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Assinaturas]]></text></staticText>
+
+            <staticText><reportElement style="Text" x="0" y="406" width="45" height="16" uuid="30000000-0000-4000-8000-000000000099"/><text><![CDATA[Nome:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="45" y="406" width="474" height="16" uuid="30000000-0000-4000-8000-000000000100"/><textFieldExpression><![CDATA[$P{nomeAvaliador}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="422" width="50" height="16" uuid="30000000-0000-4000-8000-000000000101"/><text><![CDATA[Função:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="50" y="422" width="469" height="16" uuid="30000000-0000-4000-8000-000000000102"/><textFieldExpression><![CDATA[$P{funcaoAvaliador}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="438" width="35" height="16" uuid="30000000-0000-4000-8000-000000000103"/><text><![CDATA[Data:]]></text></staticText>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="35" y="438" width="484" height="16" uuid="30000000-0000-4000-8000-000000000104"/><textFieldExpression><![CDATA[$P{dataAvaliacaoAvaliador}]]></textFieldExpression></textField>
+
+            <staticText><reportElement style="TextBold" x="0" y="470" width="519" height="18" uuid="30000000-0000-4000-8000-000000000105"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O Avaliador]]></text></staticText>
+            <line><reportElement x="145" y="500" width="229" height="1" uuid="30000000-0000-4000-8000-000000000106"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="505" width="519" height="18" uuid="30000000-0000-4000-8000-000000000107"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeAvaliador}]]></textFieldExpression></textField>
+
+            <staticText><reportElement style="TextBold" x="0" y="540" width="519" height="18" uuid="30000000-0000-4000-8000-000000000108"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[Concordância com Avaliação]]></text></staticText>
 
             <frame>
-                <reportElement x="0" y="522" width="511" height="38" uuid="20000000-0000-4000-8000-000000000096"/>
-                <staticText><reportElement style="TableCell" x="0" y="0" width="110" height="38" uuid="20000000-0000-4000-8000-000000000097"/><textElement verticalAlignment="Middle"/><text><![CDATA[Concordo]]></text></staticText>
-                <textField><reportElement style="TableCell" x="110" y="0" width="110" height="38" uuid="20000000-0000-4000-8000-000000000098"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><textFieldExpression><![CDATA["Concordo".equalsIgnoreCase($P{concordancia}) ? "X" : ""]]></textFieldExpression></textField>
-                <staticText><reportElement style="TableCell" x="291" y="0" width="110" height="38" uuid="20000000-0000-4000-8000-000000000099"/><textElement verticalAlignment="Middle"/><text><![CDATA[Não concordo]]></text></staticText>
-                <textField><reportElement style="TableCell" x="401" y="0" width="110" height="38" uuid="20000000-0000-4000-8000-000000000100"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><textFieldExpression><![CDATA["Não concordo".equalsIgnoreCase($P{concordancia}) ? "X" : ""]]></textFieldExpression></textField>
+                <reportElement x="0" y="563" width="519" height="36" uuid="30000000-0000-4000-8000-000000000109"/>
+                <staticText><reportElement style="TableCell" x="0" y="0" width="105" height="36" uuid="30000000-0000-4000-8000-000000000110"/><textElement verticalAlignment="Middle"/><text><![CDATA[Concordo]]></text></staticText>
+                <textField><reportElement style="TableCellCenter" x="105" y="0" width="105" height="36" uuid="30000000-0000-4000-8000-000000000111"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><textFieldExpression><![CDATA["Concordo".equalsIgnoreCase($P{concordancia}) ? "X" : ""]]></textFieldExpression></textField>
+                <staticText><reportElement style="TableCell" x="289" y="0" width="110" height="36" uuid="30000000-0000-4000-8000-000000000112"/><textElement verticalAlignment="Middle"/><text><![CDATA[Não concordo]]></text></staticText>
+                <textField><reportElement style="TableCellCenter" x="399" y="0" width="120" height="36" uuid="30000000-0000-4000-8000-000000000113"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="12" isBold="true"/></textElement><textFieldExpression><![CDATA["Não concordo".equalsIgnoreCase($P{concordancia}) ? "X" : ""]]></textFieldExpression></textField>
             </frame>
 
-            <staticText><reportElement style="TextBold" x="0" y="584" width="511" height="20" uuid="20000000-0000-4000-8000-000000000101"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O Avaliado]]></text></staticText>
-            <line><reportElement x="145" y="624" width="220" height="1" uuid="20000000-0000-4000-8000-000000000102"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="629" width="511" height="20" uuid="20000000-0000-4000-8000-000000000103"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeAvaliado}]]></textFieldExpression></textField>
-            <staticText><reportElement style="Text" x="0" y="656" width="511" height="20" uuid="20000000-0000-4000-8000-000000000104"/><text><![CDATA[Data: ____ / ____ / ________]]></text></staticText>
+            <staticText><reportElement style="TextBold" x="0" y="620" width="519" height="18" uuid="30000000-0000-4000-8000-000000000114"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O Avaliado]]></text></staticText>
+            <line><reportElement x="145" y="650" width="229" height="1" uuid="30000000-0000-4000-8000-000000000115"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="655" width="519" height="18" uuid="30000000-0000-4000-8000-000000000116"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeAvaliado}]]></textFieldExpression></textField>
+            <staticText><reportElement style="Text" x="0" y="677" width="519" height="17" uuid="30000000-0000-4000-8000-000000000117"/><text><![CDATA[Data: _____ / _____ / __________]]></text></staticText>
 
-            <staticText><reportElement style="TextBold" x="0" y="697" width="511" height="20" uuid="20000000-0000-4000-8000-000000000105"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O HOMOLOGANTE]]></text></staticText>
-            <line><reportElement x="145" y="737" width="220" height="1" uuid="20000000-0000-4000-8000-000000000106"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
-            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="742" width="511" height="20" uuid="20000000-0000-4000-8000-000000000107"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeHomologante}]]></textFieldExpression></textField>
+            <staticText><reportElement style="TextBold" x="0" y="710" width="519" height="18" uuid="30000000-0000-4000-8000-000000000118"/><textElement textAlignment="Center" verticalAlignment="Middle"/><text><![CDATA[O HOMOLOGANTE]]></text></staticText>
+            <line><reportElement x="145" y="741" width="229" height="1" uuid="30000000-0000-4000-8000-000000000119"/><graphicElement><pen lineWidth="0.7"/></graphicElement></line>
+            <textField isBlankWhenNull="true"><reportElement style="Text" x="0" y="746" width="519" height="18" uuid="30000000-0000-4000-8000-000000000120"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$P{nomeHomologante}]]></textFieldExpression></textField>
         </band>
     </detail>
 
     <pageFooter>
         <band height="20">
-            <staticText><reportElement x="399" y="0" width="47" height="18" uuid="20000000-0000-4000-8000-000000000110"/><textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="Arial" size="9"/></textElement><text><![CDATA[Página]]></text></staticText>
-            <textField><reportElement x="447" y="0" width="18" height="18" uuid="20000000-0000-4000-8000-000000000111"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9"/></textElement><textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression></textField>
-            <staticText><reportElement x="466" y="0" width="16" height="18" uuid="20000000-0000-4000-8000-000000000112"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9"/></textElement><text><![CDATA[de]]></text></staticText>
-            <textField evaluationTime="Report"><reportElement x="482" y="0" width="29" height="18" uuid="20000000-0000-4000-8000-000000000113"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="9"/></textElement><textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression></textField>
+            <staticText><reportElement x="403" y="0" width="42" height="17" uuid="30000000-0000-4000-8000-000000000121"/><textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="Arial" size="8"/></textElement><text><![CDATA[Página]]></text></staticText>
+            <textField><reportElement x="445" y="0" width="24" height="17" uuid="30000000-0000-4000-8000-000000000122"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8"/></textElement><textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression></textField>
+            <staticText><reportElement x="469" y="0" width="18" height="17" uuid="30000000-0000-4000-8000-000000000123"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8"/></textElement><text><![CDATA[de]]></text></staticText>
+            <textField evaluationTime="Report"><reportElement x="487" y="0" width="32" height="17" uuid="30000000-0000-4000-8000-000000000124"/><textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="Arial" size="8"/></textElement><textFieldExpression><![CDATA[$V{PAGE_COUNT}]]></textFieldExpression></textField>
         </band>
     </pageFooter>
 </jasperReport>
