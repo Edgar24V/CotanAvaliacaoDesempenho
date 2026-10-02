@@ -8,7 +8,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
@@ -109,7 +108,7 @@ public class AvaliacaoProfessorReportService {
         params.put("nomeAvaliado", relatorio.nomeAvaliado());
         params.put("concordancia", relatorio.concordancia());
         params.put("nomeHomologante", relatorio.nomeHomologante());
-        params.put("indicadores", new JRBeanCollectionDataSource(relatorio.indicadores()));
+        params.put("indicadores", relatorio.indicadores());
         params.put("brasao", brasao);
     }
 
