@@ -7,6 +7,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -23,38 +24,43 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import javax.swing.SwingUtilities;
 
 public class AvaliacaoProfessorReportService {
 
     public void generateDocx(Path outputPath, AvaliacaoProfessorRelatorio relatorio) throws IOException, JRException {
         Objects.requireNonNull(outputPath, "outputPath");
-        Objects.requireNonNull(relatorio, "relatorio");
+        JasperPrint jasperPrint = buildJasperPrint(relatorio);
 
-        try (InputStream templateStream = getClass().getResourceAsStream("/reports/ficha-avaliacao-professor-anual.jrxml");
-             InputStream brasaoStream = getClass().getResourceAsStream("/reports/brasao-angola.png")) {
-            if (templateStream == null) {
-                throw new IllegalStateException("O template do relatório não foi encontrado em /reports/ficha-avaliacao-professor-anual.jrxml");
-            }
-            if (brasaoStream == null) {
-                throw new IllegalStateException("O brasão não foi encontrado em /reports/brasao-angola.png");
-            }
-
-            JasperReport jasperReport = JasperCompileManager.compileReport(templateStream);
-            Map<String, Object> params = new HashMap<>();
-            putCommonParameters(params, relatorio, ImageIO.read(brasaoStream));
-
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource(1));
-
-            try (OutputStream outputStream = Files.newOutputStream(outputPath)) {
-                JRDocxExporter exporter = new JRDocxExporter();
-                exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
-                exporter.exportReport();
-            }
+        try (OutputStream outputStream = Files.newOutputStream(outputPath)) {
+            JRDocxExporter exporter = new JRDocxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+            exporter.exportReport();
         }
     }
 
     public byte[] generatePdfBytes(AvaliacaoProfessorRelatorio relatorio) throws JRException, IOException {
+        return JasperExportManager.exportReportToPdf(buildJasperPrint(relatorio));
+    }
+
+    public void showViewer(AvaliacaoProfessorRelatorio relatorio, String title) throws JRException, IOException {
+        Objects.requireNonNull(relatorio, "relatorio");
+
+        JasperPrint jasperPrint = buildJasperPrint(relatorio);
+        String viewerTitle = (title == null || title.isBlank())
+                ? "COTAN — Ficha de Avaliação de Desempenho Anual"
+                : title;
+
+        SwingUtilities.invokeLater(() -> {
+            JasperViewer viewer = new JasperViewer(jasperPrint, false);
+            viewer.setTitle(viewerTitle);
+            viewer.setLocationByPlatform(true);
+            viewer.setVisible(true);
+        });
+    }
+
+    public JasperPrint buildJasperPrint(AvaliacaoProfessorRelatorio relatorio) throws JRException, IOException {
         Objects.requireNonNull(relatorio, "relatorio");
 
         try (InputStream templateStream = getClass().getResourceAsStream("/reports/ficha-avaliacao-professor-anual.jrxml");
@@ -69,9 +75,7 @@ public class AvaliacaoProfessorReportService {
             JasperReport jasperReport = JasperCompileManager.compileReport(templateStream);
             Map<String, Object> params = new HashMap<>();
             putCommonParameters(params, relatorio, ImageIO.read(brasaoStream));
-
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource(1));
-            return JasperExportManager.exportReportToPdf(jasperPrint);
+            return JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource(1));
         }
     }
 
