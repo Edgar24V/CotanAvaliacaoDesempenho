@@ -81,6 +81,15 @@ public class AvaliacaoApplication extends Application {
     private static final String APP_SUBTITLE = "Avaliação e Desempenho";
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> logTerminal(
+                "EXCEÇÃO NÃO TRATADA | thread=" + thread.getName(), throwable
+        ));
+        System.err.println("============================================================");
+        System.err.println("COTAN • Avaliação e Desempenho");
+        System.err.println("Início da aplicação");
+        System.err.println("Java: " + System.getProperty("java.version"));
+        System.err.println("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
+        System.err.println("============================================================");
         Application.launch(AvaliacaoApplication.class, args);
     }
 
@@ -124,23 +133,43 @@ public class AvaliacaoApplication extends Application {
         stage.setWidth(1360);
         stage.setHeight(820);
 
+        stage.setOnCloseRequest(e -> shutdown());
         showLoading();
         stage.show();
+        initializeBackendAsync();
+    }
 
+    private void initializeBackendAsync() {
+        System.err.println("[COTAN][STARTUP] A iniciar backend...");
         CompletableFuture.runAsync(() -> {
             try {
+                closeBackendSafely();
+
+                System.err.println("[COTAN][STARTUP] A iniciar contexto Spring...");
                 springContext = new SpringApplicationBuilder(AvaliacaoApplication.class)
                         .headless(false)
                         .run();
+                System.err.println("[COTAN][STARTUP] Contexto Spring iniciado.");
+
+                System.err.println("[COTAN][STARTUP] A abrir SQLite...");
                 database = new Database();
                 database.open();
-                Platform.runLater(this::showShell);
-            } catch (Exception ex) {
+                System.err.println("[COTAN][STARTUP] SQLite inicializado em: " + database.getDatabasePath());
+
+                Platform.runLater(() -> {
+                    try {
+                        showShell();
+                        System.err.println("[COTAN][STARTUP] Interface principal carregada com sucesso.");
+                    } catch (Throwable ex) {
+                        logTerminal("FALHA AO CARREGAR A INTERFACE PRINCIPAL", ex);
+                        showStartupError(ex);
+                    }
+                });
+            } catch (Throwable ex) {
+                logTerminal("FALHA NA INICIALIZAÇÃO", ex);
                 Platform.runLater(() -> showStartupError(ex));
             }
         });
-
-        stage.setOnCloseRequest(e -> shutdown());
     }
 
     private void showLoading() {
@@ -170,25 +199,98 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void showStartupError(Throwable ex) {
+        logTerminal("ERRO EXIBIDO NA TELA DE INICIALIZAÇÃO", ex);
+
         VBox box = new VBox(14);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(36));
 
-        Label title = new Label("Não foi possível iniciar o COTAN");
+        Label title = new Label("Não foi possível continuar a inicialização");
         title.getStyleClass().add("title-2");
 
-        Label detail = new Label(ex.getMessage() == null ? ex.toString() : ex.getMessage());
+        String message = ex == null || ex.getMessage() == null || ex.getMessage().isBlank()
+                ? String.valueOf(ex)
+                : ex.getMessage();
+
+        Label detail = new Label(message);
         detail.setWrapText(true);
-        detail.setMaxWidth(850);
+        detail.setMaxWidth(900);
+
+        Label terminalHint = new Label(
+                "O erro técnico completo foi enviado para o terminal.\n"
+                        + "Corrija o problema e use Reintentar para iniciar novamente."
+        );
+        terminalHint.setWrapText(true);
+        terminalHint.setMaxWidth(900);
+        terminalHint.getStyleClass().add("text-muted");
+
+        Button retry = CotanIcons.button("Reintentar", Feather.REFRESH_CW, "accent-button", "accent");
+        retry.setOnAction(e -> {
+            closeBackendSafely();
+            showLoading();
+            initializeBackendAsync();
+        });
 
         Button close = CotanIcons.button("Fechar", Feather.X, "button-outlined");
         close.setOnAction(e -> stage.close());
 
-        box.getChildren().addAll(title, detail, close);
+        HBox actions = new HBox(10, retry, close);
+        actions.setAlignment(Pos.CENTER);
+
+        box.getChildren().addAll(title, detail, terminalHint, actions);
         StackPane pane = new StackPane(box);
 
         Scene scene = new Scene(pane, 1180, 720);
         stage.setScene(scene);
+    }
+
+    private static void logTerminal(String context, Throwable ex) {
+        System.err.println();
+        System.err.println("========== COTAN / ERRO ==========");
+        System.err.println("[COTAN] " + context);
+        if (ex == null) {
+            System.err.println("[COTAN] Sem exceção técnica disponível.");
+            System.err.println("==================================");
+            return;
+        }
+
+        System.err.println("[COTAN] Exceção: " + ex.getClass().getName());
+        System.err.println("[COTAN] Mensagem: "
+                + (ex.getMessage() == null ? ex.toString() : ex.getMessage()));
+
+        Throwable cause = ex.getCause();
+        int level = 1;
+        while (cause != null && level <= 8) {
+            System.err.println("[COTAN] Causa " + level + ": "
+                    + cause.getClass().getName() + " — "
+                    + (cause.getMessage() == null ? cause.toString() : cause.getMessage()));
+            cause = cause.getCause();
+            level++;
+        }
+
+        ex.printStackTrace(System.err);
+        System.err.println("==================================");
+    }
+
+    private void closeBackendSafely() {
+        if (database != null) {
+            try {
+                database.close();
+            } catch (Throwable ex) {
+                logTerminal("Não foi possível fechar a base de dados durante uma recuperação", ex);
+            } finally {
+                database = null;
+            }
+        }
+        if (springContext != null) {
+            try {
+                springContext.close();
+            } catch (Throwable ex) {
+                logTerminal("Não foi possível fechar o contexto Spring durante uma recuperação", ex);
+            } finally {
+                springContext = null;
+            }
+        }
     }
 
     private void showShell() {
@@ -3306,6 +3408,7 @@ public class AvaliacaoApplication extends Application {
     }
 
     private void showError(String message, Throwable ex) {
+        logTerminal(message == null ? "Erro na aplicação" : message, ex);
         if (dbStatus != null) {
             dbStatus.setText("●  " + message);
             dbStatus.getStyleClass().remove("success");
