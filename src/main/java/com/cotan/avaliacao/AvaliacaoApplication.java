@@ -11,6 +11,7 @@ import com.cotan.avaliacao.ui.table.TableUtils;
 import com.cotan.avaliacao.report.AvaliacaoProfessorRelatorio;
 import com.cotan.avaliacao.report.AvaliacaoProfessorReportService;
 import com.cotan.avaliacao.domain.AvaliacaoDesempenhoAnual;
+import com.cotan.avaliacao.domain.InstitutionProfile;
 import atlantafx.base.controls.Card;
 import atlantafx.base.controls.Message;
 import atlantafx.base.controls.Tile;
@@ -2491,13 +2492,82 @@ public class AvaliacaoApplication extends Application {
     // SETTINGS
     // -------------------------------------------------------------------------
 
-    private Node buildSettings() {
+    private Node buildSettings() throws SQLException {
         VBox page = pageContainer();
 
         page.getChildren().add(sectionHeading(
                 "Configurações",
-                "Preferências visuais, segurança dos dados e manutenção da base."
+                "Defina uma única vez os dados institucionais e os responsáveis que serão reutilizados nas fichas."
         ));
+
+        Card reportIdentity = new Card();
+        reportIdentity.setHeader(label("Dados institucionais da ficha anual", "card-title"));
+
+        GridPane reportForm = formGrid();
+        TextField provincial = field("Ex.: GABINETE PROVINCIAL DE EDUCAÇÃO DE LUANDA");
+        TextField municipal = field("Ex.: DIRECÇÃO MUNICIPAL DE EDUCAÇÃO DE LUANDA");
+        TextField school = field("Ex.: ESCOLA PRIMÁRIA Nº 1118 – MAIANGA");
+        ComboBox<StaffOption> defaultEvaluator = new ComboBox<>();
+        ComboBox<StaffOption> defaultHomologante = new ComboBox<>();
+        defaultEvaluator.setMaxWidth(Double.MAX_VALUE);
+        defaultHomologante.setMaxWidth(Double.MAX_VALUE);
+
+        InstitutionProfile profile = database.institutionProfileEntity();
+        provincial.setText(profile.provincialOffice());
+        municipal.setText(profile.municipalDirection());
+        school.setText(profile.school());
+
+        List<Map<String,Object>> staffRows = database.staffAll();
+        for (Map<String,Object> row : staffRows) {
+            StaffOption option = StaffOption.from(row);
+            defaultEvaluator.getItems().add(option);
+            defaultHomologante.getItems().add(option);
+        }
+
+        if (profile.defaultEvaluatorStaffId() != null) {
+            defaultEvaluator.getItems().stream()
+                    .filter(v -> v.id() == profile.defaultEvaluatorStaffId())
+                    .findFirst().ifPresent(defaultEvaluator::setValue);
+        }
+        if (profile.defaultHomologanteStaffId() != null) {
+            defaultHomologante.getItems().stream()
+                    .filter(v -> v.id() == profile.defaultHomologanteStaffId())
+                    .findFirst().ifPresent(defaultHomologante::setValue);
+        }
+
+        reportForm.addRow(0, label("Gabinete Provincial", "field-label"), provincial);
+        reportForm.addRow(1, label("Direcção Municipal", "field-label"), municipal);
+        reportForm.addRow(2, label("Escola", "field-label"), school);
+        reportForm.addRow(3, label("Avaliador padrão", "field-label"), defaultEvaluator);
+        reportForm.addRow(4, label("Homologante padrão", "field-label"), defaultHomologante);
+
+        Label hint = label(
+                "O avaliador e o homologante são selecionados a partir do cadastro de profissionais. "
+                        + "O nome e a função nunca são digitados dentro do relatório.",
+                "muted"
+        );
+        hint.setWrapText(true);
+
+        Button saveInstitution = CotanIcons.button(
+                "Guardar dados institucionais", Feather.SAVE, "accent-button", "accent"
+        );
+        saveInstitution.setOnAction(e -> {
+            try {
+                database.saveInstitutionProfile(
+                        provincial.getText(),
+                        municipal.getText(),
+                        school.getText(),
+                        defaultEvaluator.getValue() == null ? null : defaultEvaluator.getValue().id(),
+                        defaultHomologante.getValue() == null ? null : defaultHomologante.getValue().id()
+                );
+                refreshCurrentSection();
+                showToast("Dados institucionais guardados com sucesso.");
+            } catch (Exception ex) {
+                showError("Não foi possível guardar os dados institucionais", ex);
+            }
+        });
+
+        reportIdentity.setBody(new VBox(12, reportForm, hint, saveInstitution));
 
         Card appearance = new Card();
         appearance.setHeader(label("Aparência", "card-title"));
@@ -2520,16 +2590,26 @@ public class AvaliacaoApplication extends Application {
         Button backup = CotanIcons.button("Criar backup", Feather.DATABASE, "accent-button", "accent");
         backup.setOnAction(e -> createBackup());
         Button seedInfo = CotanIcons.button("Dados de demonstração", Feather.INFO, "button-outlined");
-        seedInfo.setOnAction(e -> showInfo("O sistema cria automaticamente alguns registos de demonstração apenas quando a base está vazia."));
+        seedInfo.setOnAction(e -> showInfo(
+                "O sistema cria automaticamente alguns registos de demonstração apenas quando a base está vazia."
+        ));
         dbActions.getChildren().addAll(backup, seedInfo);
         databaseDetails.getChildren().add(dbActions);
         databaseCard.setBody(databaseDetails);
 
         Card rules = new Card();
         rules.setHeader(label("Regras académicas atuais", "card-title"));
-        rules.setBody(label("Escala configurável por avaliação\nMédia ponderada pelo peso\nReferência de aprovação: 10 valores\nNotas vinculadas a aluno e avaliação\nEliminação em cascata", "muted"));
+        rules.setBody(label(
+                "Escala configurável por avaliação\n"
+                        + "Média ponderada pelo peso\n"
+                        + "Referência de aprovação: 10 valores\n"
+                        + "Notas vinculadas a aluno e avaliação\n"
+                        + "Ficha anual vinculada ao profissional e ano lectivo\n"
+                        + "Eliminação em cascata",
+                "muted"
+        ));
 
-        page.getChildren().addAll(appearance, databaseCard, rules);
+        page.getChildren().addAll(reportIdentity, appearance, databaseCard, rules);
         return page;
     }
 
