@@ -769,7 +769,7 @@ public final class Database implements AutoCloseable {
         String finalQualitative = "";
         Double a = number(values.get(0)), b = number(values.get(1)), d = number(values.get(2));
         if (a != null && b != null && d != null) {
-            finalQuantitative = String.format(Locale.US, "%.0f", Math.round((a + b + d) / 3.0));
+            finalQuantitative = String.format(Locale.US, "%.0f", (a + b + d) / 3.0);
             finalQualitative = classificationFromQuantity((a + b + d) / 3.0);
         }
 
