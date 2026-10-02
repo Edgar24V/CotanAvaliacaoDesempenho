@@ -178,6 +178,17 @@ public final class Database implements AutoCloseable {
                 CREATE INDEX IF NOT EXISTS idx_staff_type ON staff(staff_type)
                 """);
             st.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS institution_profile (
+                    id INTEGER PRIMARY KEY CHECK(id = 1),
+                    provincial_office TEXT NOT NULL DEFAULT '',
+                    municipal_direction TEXT NOT NULL DEFAULT '',
+                    school TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+
+            st.executeUpdate("""
                 CREATE INDEX IF NOT EXISTS idx_performance_scores_cycle
                 ON performance_scores(academic_year, trimester, staff_id)
                 """);
@@ -313,6 +324,15 @@ public final class Database implements AutoCloseable {
     }
 
     private void seedPerformance() throws SQLException {
+        update("""
+            INSERT INTO institution_profile(id, provincial_office, municipal_direction, school)
+            SELECT 1, ?, ?, ?
+            WHERE NOT EXISTS (SELECT 1 FROM institution_profile WHERE id = 1)
+            """,
+            "GABINETE PROVINCIAL DE EDUCAÇÃO DE LUANDA",
+            "DIRECÇÃO MUNICIPAL DE EDUCAÇÃO DE LUANDA",
+            "ESCOLA PRIMÁRIA Nº 1118 – MAIANGA");
+
         if (count("staff") == 0) {
             insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
                     "PROF-001", "Ana Manuel", "PROFESSOR", "Professora", "Área Pedagógica", "923 100 001", "ana.manuel@cotan.edu");
@@ -401,6 +421,33 @@ public final class Database implements AutoCloseable {
             WHERE i.active=1
             ORDER BY i.sort_order,i.id
             """, staffId, academicYear, trimester);
+    }
+
+    public Map<String,Object> institutionProfile() throws SQLException {
+        Map<String,Object> row = query("""
+            SELECT COALESCE(provincial_office,'') provincial_office,
+                   COALESCE(municipal_direction,'') municipal_direction,
+                   COALESCE(school,'') school
+            FROM institution_profile
+            WHERE id=1
+            """).stream().findFirst().orElseGet(LinkedHashMap::new);
+
+        row.putIfAbsent("provincial_office", "");
+        row.putIfAbsent("municipal_direction", "");
+        row.putIfAbsent("school", "");
+        return row;
+    }
+
+    public List<Map<String,Object>> performanceReportFacts(long staffId, String academicYear) throws SQLException {
+        return query("""
+            SELECT trimester,
+                   COALESCE(observation,'') observation,
+                   COALESCE(evaluator,'') evaluator,
+                   updated_at
+            FROM performance_scores
+            WHERE staff_id=? AND academic_year=?
+            ORDER BY updated_at DESC, trimester, id
+            """, staffId, academicYear);
     }
 
     public void upsertPerformanceScore(long staffId, long indicatorId, String year, int trimester,
