@@ -469,6 +469,68 @@ public final class Database implements AutoCloseable {
                 }
             }
         }
+
+        migratePerformanceEvaluationFacts();
+    }
+
+    private void migratePerformanceEvaluationFacts() throws SQLException {
+        List<Map<String,Object>> rows = query("""
+            SELECT DISTINCT staff_id, academic_year
+            FROM performance_scores
+            ORDER BY academic_year, staff_id
+            """);
+
+        for (Map<String,Object> row : rows) {
+            long staffId = n(row.get("staff_id"));
+            String year = s(row.get("academic_year"));
+            if (performanceEvaluation(staffId, year) != null) continue;
+
+            int startYear = Integer.parseInt(year.substring(0,4));
+            String evaluatorName = s(scalar("""
+                SELECT evaluator
+                FROM performance_scores
+                WHERE staff_id=? AND academic_year=?
+                  AND evaluator IS NOT NULL AND trim(evaluator)<>''
+                ORDER BY updated_at DESC
+                LIMIT 1
+                """, staffId, year));
+
+            Object evaluator = evaluatorName.isBlank() ? null
+                    : scalar("SELECT id FROM staff WHERE active=1 AND lower(name)=lower(?) LIMIT 1", evaluatorName);
+
+            String evaluationDate = s(scalar("""
+                SELECT substr(MAX(updated_at),1,10)
+                FROM performance_scores
+                WHERE staff_id=? AND academic_year=?
+                """, staffId, year));
+
+            List<Map<String,Object>> comments = query("""
+                SELECT observation
+                FROM performance_scores
+                WHERE staff_id=? AND academic_year=?
+                  AND observation IS NOT NULL AND trim(observation)<>''
+                GROUP BY observation
+                ORDER BY MIN(updated_at), MIN(id)
+                LIMIT 3
+                """, staffId, year);
+
+            insert("""
+                INSERT INTO performance_evaluations(
+                    staff_id,academic_year,evaluation_date,period_start,period_end,evaluator_staff_id,
+                    comment1,comment2,comment3
+                ) VALUES(?,?,?,?,?,?,?,?,?)
+                """,
+                staffId, year,
+                blankToNull(evaluationDate),
+                java.time.LocalDate.of(startYear,9,1).toString(),
+                java.time.LocalDate.of(startYear + 1,6,30).toString(),
+                evaluator,
+                comments.size() > 0 ? blankToNull(s(comments.get(0).get("observation"))) : null,
+                comments.size() > 1 ? blankToNull(s(comments.get(1).get("observation"))) : null,
+                comments.size() > 2 ? blankToNull(s(comments.get(2).get("observation"))) : null
+            );
+            refreshEvaluationClassification(staffId, year);
+        }
     }
 
     public List<Map<String,Object>> staffAll() throws SQLException {
