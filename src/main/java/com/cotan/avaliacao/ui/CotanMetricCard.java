@@ -15,6 +15,8 @@ public final class CotanMetricCard extends Card {
         Label iconBox = new Label("", CotanIcons.icon(icon, 16));
         iconBox.getStyleClass().add("success".equals(tone) ? "success" : "accent");
 
+        getStyleClass().add("cotan-metric-card");
+
         Label caption = new Label(title);
         caption.getStyleClass().addAll("text-muted", "text-small");
 
