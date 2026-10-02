@@ -1,5 +1,8 @@
 package com.cotan.avaliacao;
 
+import com.cotan.avaliacao.domain.AvaliacaoDesempenhoAnual;
+import com.cotan.avaliacao.domain.InstitutionProfile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -134,6 +137,8 @@ public final class Database implements AutoCloseable {
                     name TEXT NOT NULL,
                     staff_type TEXT NOT NULL CHECK(staff_type IN ('PROFESSOR','ADMINISTRATIVO')),
                     role TEXT,
+                    category TEXT,
+                    agent_number TEXT,
                     department TEXT,
                     phone TEXT,
                     email TEXT,
@@ -178,12 +183,21 @@ public final class Database implements AutoCloseable {
                 CREATE INDEX IF NOT EXISTS idx_staff_type ON staff(staff_type)
                 """);
             st.executeUpdate("""
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_staff_agent_number
+                ON staff(agent_number)
+                WHERE agent_number IS NOT NULL AND trim(agent_number) <> ''
+                """);
+            st.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS institution_profile (
                     id INTEGER PRIMARY KEY CHECK(id = 1),
                     provincial_office TEXT NOT NULL DEFAULT '',
                     municipal_direction TEXT NOT NULL DEFAULT '',
                     school TEXT NOT NULL DEFAULT '',
-                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    default_evaluator_staff_id INTEGER,
+                    default_homologante_staff_id INTEGER,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY(default_evaluator_staff_id) REFERENCES staff(id) ON DELETE SET NULL,
+                    FOREIGN KEY(default_homologante_staff_id) REFERENCES staff(id) ON DELETE SET NULL
                 )
                 """);
 
@@ -192,7 +206,66 @@ public final class Database implements AutoCloseable {
                 CREATE INDEX IF NOT EXISTS idx_performance_scores_cycle
                 ON performance_scores(academic_year, trimester, staff_id)
                 """);
+
+            st.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS performance_evaluations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    staff_id INTEGER NOT NULL,
+                    academic_year TEXT NOT NULL,
+                    evaluation_date TEXT,
+                    period_start TEXT,
+                    period_end TEXT,
+                    evaluator_staff_id INTEGER,
+                    quantitative_1 TEXT,
+                    quantitative_2 TEXT,
+                    quantitative_3 TEXT,
+                    qualitative_1 TEXT,
+                    qualitative_2 TEXT,
+                    qualitative_3 TEXT,
+                    final_quantitative TEXT,
+                    final_qualitative TEXT,
+                    comment1 TEXT,
+                    comment2 TEXT,
+                    comment3 TEXT,
+                    appreciation_general TEXT,
+                    concordance TEXT CHECK(concordance IS NULL OR concordance IN ('Concordo','Não concordo')),
+                    homologante_staff_id INTEGER,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(staff_id, academic_year),
+                    FOREIGN KEY(staff_id) REFERENCES staff(id) ON DELETE CASCADE,
+                    FOREIGN KEY(evaluator_staff_id) REFERENCES staff(id) ON DELETE SET NULL,
+                    FOREIGN KEY(homologante_staff_id) REFERENCES staff(id) ON DELETE SET NULL
+                )
+                """);
+
+            st.executeUpdate("""
+                CREATE INDEX IF NOT EXISTS idx_performance_evaluations_year
+                ON performance_evaluations(academic_year, staff_id)
+                """);
         }
+
+        ensureColumn("staff", "category", "TEXT");
+        ensureColumn("staff", "agent_number", "TEXT");
+        ensureColumn("institution_profile", "default_evaluator_staff_id", "INTEGER");
+        ensureColumn("institution_profile", "default_homologante_staff_id", "INTEGER");
+    }
+
+    private void ensureColumn(String table, String column, String definition) throws SQLException {
+        if (columnExists(table, column)) return;
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate("ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition);
+        }
+    }
+
+    private boolean columnExists(String table, String column) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("PRAGMA table_info(" + table + ")");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                if (column.equalsIgnoreCase(rs.getString("name"))) return true;
+            }
+        }
+        return false;
     }
 
     private void seed() throws SQLException {
@@ -325,8 +398,11 @@ public final class Database implements AutoCloseable {
 
     private void seedPerformance() throws SQLException {
         update("""
-            INSERT INTO institution_profile(id, provincial_office, municipal_direction, school)
-            SELECT 1, ?, ?, ?
+            INSERT INTO institution_profile(
+                id, provincial_office, municipal_direction, school,
+                default_evaluator_staff_id, default_homologante_staff_id
+            )
+            SELECT 1, ?, ?, ?, NULL, NULL
             WHERE NOT EXISTS (SELECT 1 FROM institution_profile WHERE id = 1)
             """,
             "GABINETE PROVINCIAL DE EDUCAÇÃO DE LUANDA",
@@ -334,10 +410,20 @@ public final class Database implements AutoCloseable {
             "ESCOLA PRIMÁRIA Nº 1118 – MAIANGA");
 
         if (count("staff") == 0) {
-            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
-                    "PROF-001", "Ana Manuel", "PROFESSOR", "Professora", "Área Pedagógica", "923 100 001", "ana.manuel@cotan.edu");
-            insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
-                    "PROF-002", "Carlos José", "PROFESSOR", "Professor", "Área Pedagógica", "923 100 002", "carlos.jose@cotan.edu");
+            insert("""
+                INSERT INTO staff(code,name,staff_type,role,category,agent_number,department,phone,email)
+                VALUES(?,?,?,?,?,?,?,?,?)
+                """,
+                "PROF-001", "Ana Manuel", "PROFESSOR", "Professora",
+                "Prof. Do Ens. Prim. E Sec. Do 6º Grau", "88010001",
+                "Área Pedagógica", "923 100 001", "ana.manuel@cotan.edu");
+            insert("""
+                INSERT INTO staff(code,name,staff_type,role,category,agent_number,department,phone,email)
+                VALUES(?,?,?,?,?,?,?,?,?)
+                """,
+                "PROF-002", "Carlos José", "PROFESSOR", "Professor",
+                "Prof. Do Ens. Prim. E Sec. Do 6º Grau", "88010002",
+                "Área Pedagógica", "923 100 002", "carlos.jose@cotan.edu");
             insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
                     "ADM-001", "Maria José", "ADMINISTRATIVO", "Assistente Administrativa", "Secretaria", "923 200 001", "maria.jose@cotan.edu");
             insert("INSERT INTO staff(code,name,staff_type,role,department,phone,email) VALUES(?,?,?,?,?,?,?)",
@@ -387,16 +473,20 @@ public final class Database implements AutoCloseable {
 
     public List<Map<String,Object>> staffAll() throws SQLException {
         return query("""
-            SELECT id,code,name,staff_type,COALESCE(role,'') role,COALESCE(department,'') department,
-                   COALESCE(phone,'') phone,COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
+            SELECT id,code,name,staff_type,COALESCE(role,'') role,
+                   COALESCE(category,'') category,COALESCE(agent_number,'') agent_number,
+                   COALESCE(department,'') department,COALESCE(phone,'') phone,
+                   COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
             FROM staff WHERE active=1 ORDER BY staff_type,name
             """);
     }
 
     public List<Map<String,Object>> staff(String type) throws SQLException {
         return query("""
-            SELECT id,code,name,staff_type,COALESCE(role,'') role,COALESCE(department,'') department,
-                   COALESCE(phone,'') phone,COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
+            SELECT id,code,name,staff_type,COALESCE(role,'') role,
+                   COALESCE(category,'') category,COALESCE(agent_number,'') agent_number,
+                   COALESCE(department,'') department,COALESCE(phone,'') phone,
+                   COALESCE(email,'') email,COALESCE(admission_date,'') admission_date
             FROM staff WHERE active=1 AND staff_type=? ORDER BY name
             """, type);
     }
@@ -427,7 +517,9 @@ public final class Database implements AutoCloseable {
         Map<String,Object> row = query("""
             SELECT COALESCE(provincial_office,'') provincial_office,
                    COALESCE(municipal_direction,'') municipal_direction,
-                   COALESCE(school,'') school
+                   COALESCE(school,'') school,
+                   default_evaluator_staff_id,
+                   default_homologante_staff_id
             FROM institution_profile
             WHERE id=1
             """).stream().findFirst().orElseGet(LinkedHashMap::new);
@@ -435,7 +527,43 @@ public final class Database implements AutoCloseable {
         row.putIfAbsent("provincial_office", "");
         row.putIfAbsent("municipal_direction", "");
         row.putIfAbsent("school", "");
+        row.putIfAbsent("default_evaluator_staff_id", null);
+        row.putIfAbsent("default_homologante_staff_id", null);
         return row;
+    }
+
+    public InstitutionProfile institutionProfileEntity() throws SQLException {
+        Map<String,Object> row = institutionProfile();
+        return new InstitutionProfile(
+                1L,
+                s(row.get("provincial_office")),
+                s(row.get("municipal_direction")),
+                s(row.get("school")),
+                row.get("default_evaluator_staff_id") == null ? null : n(row.get("default_evaluator_staff_id")),
+                row.get("default_homologante_staff_id") == null ? null : n(row.get("default_homologante_staff_id"))
+        );
+    }
+
+    public void saveInstitutionProfile(String provincialOffice, String municipalDirection, String school,
+                                       Long defaultEvaluatorStaffId, Long defaultHomologanteStaffId) throws SQLException {
+        if (blankToNull(provincialOffice) == null) throw new IllegalArgumentException("O Gabinete Provincial é obrigatório.");
+        if (blankToNull(municipalDirection) == null) throw new IllegalArgumentException("A Direcção Municipal é obrigatória.");
+        if (blankToNull(school) == null) throw new IllegalArgumentException("A Escola é obrigatória.");
+
+        update("""
+            INSERT INTO institution_profile(
+                id,provincial_office,municipal_direction,school,
+                default_evaluator_staff_id,default_homologante_staff_id,updated_at
+            ) VALUES(1,?,?,?,?,?,CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET
+                provincial_office=excluded.provincial_office,
+                municipal_direction=excluded.municipal_direction,
+                school=excluded.school,
+                default_evaluator_staff_id=excluded.default_evaluator_staff_id,
+                default_homologante_staff_id=excluded.default_homologante_staff_id,
+                updated_at=CURRENT_TIMESTAMP
+            """, blankToNull(provincialOffice), blankToNull(municipalDirection),
+                blankToNull(school), defaultEvaluatorStaffId, defaultHomologanteStaffId);
     }
 
     public List<Map<String,Object>> performanceReportFacts(long staffId, String academicYear) throws SQLException {
