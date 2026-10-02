@@ -1654,11 +1654,40 @@ public class AvaliacaoApplication extends Application {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("O professor selecionado não foi encontrado."));
 
-        Map<String, Object> institution = database.institutionProfile();
+        InstitutionProfile institution = database.institutionProfileEntity();
+        AvaliacaoDesempenhoAnual evaluation = database.performanceEvaluation(staffId, academicYear);
 
-        List<Map<String, Object>> trimesterOne = database.performanceScores(staffId, academicYear, 1);
-        List<Map<String, Object>> trimesterTwo = database.performanceScores(staffId, academicYear, 2);
-        List<Map<String, Object>> trimesterThree = database.performanceScores(staffId, academicYear, 3);
+        if (evaluation == null) {
+            throw new IllegalStateException(
+                    "A ficha anual deste professor ainda não foi configurada. "
+                            + "Abra a Avaliação de desempenho, selecione o professor e guarde a ficha anual."
+            );
+        }
+        if (evaluation.evaluatorStaffId() == null) {
+            throw new IllegalStateException(
+                    "O avaliador da ficha anual ainda não foi definido. "
+                            + "Defina-o na ficha anual ou em Configurações."
+            );
+        }
+
+        Map<String,Object> evaluator = database.staffAll().stream()
+                .filter(candidate -> n(candidate.get("id")) == evaluation.evaluatorStaffId())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("O avaliador selecionado não existe mais no cadastro."));
+
+        String finalQuantitative = evaluation.finalQuantitative();
+        String finalQualitative = evaluation.finalQualitative();
+
+        if (finalQuantitative.isBlank() || finalQualitative.isBlank()) {
+            database.refreshEvaluationClassification(staffId, academicYear);
+            evaluation = database.performanceEvaluation(staffId, academicYear);
+            finalQuantitative = evaluation == null ? "" : evaluation.finalQuantitative();
+            finalQualitative = evaluation == null ? "" : evaluation.finalQualitative();
+        }
+
+        List<Map<String,Object>> trimesterOne = database.performanceScores(staffId, academicYear, 1);
+        List<Map<String,Object>> trimesterTwo = database.performanceScores(staffId, academicYear, 2);
+        List<Map<String,Object>> trimesterThree = database.performanceScores(staffId, academicYear, 3);
 
         Map<Long, Map<String, Object>> firstScores = indexIndicatorScores(trimesterOne);
         Map<Long, Map<String, Object>> secondScores = indexIndicatorScores(trimesterTwo);
@@ -1670,7 +1699,6 @@ public class AvaliacaoApplication extends Application {
             Number first = scoreFor(firstScores, indicatorId);
             Number second = scoreFor(secondScores, indicatorId);
             Number third = scoreFor(thirdScores, indicatorId);
-
             Number annualAverage = first != null && second != null && third != null
                     ? (first.doubleValue() + second.doubleValue() + third.doubleValue()) / 3.0
                     : null;
@@ -1678,55 +1706,47 @@ public class AvaliacaoApplication extends Application {
             indicators.add(new AvaliacaoProfessorRelatorio.Indicador(
                     indicators.size() + 1,
                     s(indicator.get("name")),
-                    first,
-                    second,
-                    third,
-                    annualAverage
+                    first, second, third, annualAverage
             ));
         }
 
-        List<Map<String,Object>> reportFacts = database.performanceReportFacts(staffId, academicYear);
-        String evaluator = firstNonBlank(reportFacts, "evaluator");
-        LocalDate evaluationDate = latestDate(reportFacts, "updated_at");
+        String homologanteName = "";
+        if (evaluation.homologanteStaffId() != null) {
+            homologanteName = database.staffAll().stream()
+                    .filter(candidate -> n(candidate.get("id")) == evaluation.homologanteStaffId())
+                    .map(candidate -> s(candidate.get("name")))
+                    .findFirst()
+                    .orElse("");
+        }
 
-        String evaluatorFunction = database.staff("ADMINISTRATIVO").stream()
-                .filter(candidate -> !evaluator.isBlank()
-                        && evaluator.equalsIgnoreCase(s(candidate.get("name"))))
-                .map(candidate -> s(candidate.get("role")))
-                .filter(value -> !value.isBlank())
-                .findFirst()
-                .orElse("");
+        if (evaluation.evaluationDate() == null || evaluation.periodStart() == null || evaluation.periodEnd() == null) {
+            throw new IllegalStateException(
+                    "A ficha anual precisa de data de avaliação e período preenchidos antes da impressão."
+            );
+        }
 
-        List<String> comments = reportFacts.stream()
-                .map(fact -> s(fact.get("observation")))
-                .filter(value -> !value.isBlank())
-                .distinct()
-                .limit(3)
-                .toList();
-
-        int startYear = Integer.parseInt(academicYear.substring(0, 4));
         return new AvaliacaoProfessorRelatorio(
-                s(institution.get("provincial_office")),
-                s(institution.get("municipal_direction")),
-                s(institution.get("school")),
+                institution.provincialOffice(),
+                institution.municipalDirection(),
+                institution.school(),
                 s(staff.get("name")),
-                s(staff.get("role")),
-                s(staff.get("code")),
-                evaluationDate != null ? evaluationDate : LocalDate.now(),
-                LocalDate.of(startYear, 9, 1),
-                LocalDate.of(startYear + 1, 6, 30),
-                formatReportScore(row.finalAverage.get()),
-                row.classification.get(),
-                "",
-                comments.size() > 0 ? comments.get(0) : "",
-                comments.size() > 1 ? comments.get(1) : "",
-                comments.size() > 2 ? comments.get(2) : "",
-                evaluator,
-                evaluatorFunction,
-                evaluationDate != null ? evaluationDate : LocalDate.now(),
+                s(staff.get("category")),
+                s(staff.get("agent_number")),
+                evaluation.evaluationDate(),
+                evaluation.periodStart(),
+                evaluation.periodEnd(),
+                finalQuantitative,
+                finalQualitative,
+                evaluation.appreciationGeneral(),
+                evaluation.comment1(),
+                evaluation.comment2(),
+                evaluation.comment3(),
+                s(evaluator.get("name")),
+                s(evaluator.get("role")),
+                evaluation.evaluationDate(),
                 s(staff.get("name")),
-                "",
-                "",
+                evaluation.concordance(),
+                homologanteName,
                 indicators
         );
     }
