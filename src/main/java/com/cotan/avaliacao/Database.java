@@ -578,6 +578,40 @@ public final class Database implements AutoCloseable {
             """, staffId, academicYear, trimester);
     }
 
+    /**
+     * Matriz completa da ficha: os três trimestres e os respetivos comentários
+     * por indicador, mais a média anual do indicador.
+     */
+    public List<Map<String,Object>> performanceScoresMatrix(long staffId, String academicYear) throws SQLException {
+        return query("""
+            SELECT i.id indicator_id,i.code,i.name,i.description,i.weight,
+                   ps1.score trim1_score,COALESCE(ps1.observation,'') trim1_comment,
+                   ps2.score trim2_score,COALESCE(ps2.observation,'') trim2_comment,
+                   ps3.score trim3_score,COALESCE(ps3.observation,'') trim3_comment,
+                   CASE
+                       WHEN ps1.score IS NOT NULL
+                        AND ps2.score IS NOT NULL
+                        AND ps3.score IS NOT NULL
+                       THEN ROUND((ps1.score + ps2.score + ps3.score) / 3.0, 1)
+                       ELSE NULL
+                   END annual_average
+            FROM performance_indicators i
+            JOIN staff st ON st.id=?
+            LEFT JOIN performance_scores ps1
+              ON ps1.indicator_id=i.id AND ps1.staff_id=st.id
+             AND ps1.academic_year=? AND ps1.trimester=1
+            LEFT JOIN performance_scores ps2
+              ON ps2.indicator_id=i.id AND ps2.staff_id=st.id
+             AND ps2.academic_year=? AND ps2.trimester=2
+            LEFT JOIN performance_scores ps3
+              ON ps3.indicator_id=i.id AND ps3.staff_id=st.id
+             AND ps3.academic_year=? AND ps3.trimester=3
+            WHERE i.active=1
+              AND (i.staff_type='AMBOS' OR i.staff_type=st.staff_type)
+            ORDER BY i.sort_order,i.id
+            """, staffId, academicYear, academicYear, academicYear);
+    }
+
     public Map<String,Object> institutionProfile() throws SQLException {
         Map<String,Object> row = query("""
             SELECT COALESCE(provincial_office,'') provincial_office,
