@@ -639,3 +639,44 @@
 .cotan-word-shell .tab-pane:focused > .tab-header-area > .headers-region > .tab:selected {
     -fx-border-color: #2b70c9;
 }
+
+.cotan-top-ribbon {
+    -fx-background-color: #ffffff;
+}
+
+.cotan-word-shell.cotan-dark .cotan-top-ribbon {
+    -fx-background-color: #252a31;
+}
+
+.cotan-content-host {
+    -fx-background-color: #f3f5f8;
+}
+
+.cotan-word-shell.cotan-dark .cotan-content-host {
+    -fx-background-color: #1f2328;
+}
+
+.cotan-word-shell .cotan-header {
+    -fx-min-height: 58px;
+}
+
+.cotan-word-shell .cotan-ribbon-tabs {
+    -fx-min-height: 38px;
+}
+
+.cotan-word-shell .table-view .column-header-background {
+    -fx-background-insets: 0;
+}
+
+.cotan-word-shell .table-view .placeholder .label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7b8491;
+}
+
+.cotan-word-shell .pagination {
+    -fx-background-color: transparent;
+}
+
+.cotan-word-shell .spinner {
+    -fx-padding: 0;
+}
