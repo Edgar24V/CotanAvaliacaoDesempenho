@@ -44,6 +44,7 @@ public final class CotanHeader extends HBox {
         this.toggleSidebar = toggleSidebar;
         this.themeToggle = themeToggle;
 
+        getStyleClass().add("cotan-ribbon-header");
         setAlignment(Pos.CENTER_LEFT);
         setPadding(new Insets(12, 20, 12, 20));
         setSpacing(16);
@@ -53,9 +54,11 @@ public final class CotanHeader extends HBox {
         menu.setOnAction(e -> toggleSidebar.run());
 
         VBox titles = new VBox(1, title, breadcrumb);
+        titles.getStyleClass().add("cotan-title-block");
         title.getStyleClass().add("title-3");
         breadcrumb.getStyleClass().addAll("text-muted", "text-small");
 
+        searchField.getStyleClass().add("cotan-command-search");
         searchField.setPromptText("Pesquisar no sistema...");
         searchField.setPrefWidth(360);
         searchField.setMinWidth(190);
