@@ -1301,6 +1301,7 @@ public class AvaliacaoApplication extends Application {
 
         evaluator.setMaxWidth(Double.MAX_VALUE);
         homologante.setMaxWidth(Double.MAX_VALUE);
+        homologante.setPromptText("Opcional — pode ficar em branco");
 
         try {
             for (Map<String,Object> row : database.staff(type)) {
@@ -2795,6 +2796,7 @@ public class AvaliacaoApplication extends Application {
         ComboBox<StaffOption> defaultHomologante = new ComboBox<>();
         defaultEvaluator.setMaxWidth(Double.MAX_VALUE);
         defaultHomologante.setMaxWidth(Double.MAX_VALUE);
+        defaultHomologante.setPromptText("Opcional — pode ficar em branco");
 
         InstitutionProfile profile = database.institutionProfileEntity();
         provincial.setText(profile.provincialOffice());
@@ -2826,8 +2828,9 @@ public class AvaliacaoApplication extends Application {
         reportForm.addRow(4, label("Homologante padrão", "field-label"), defaultHomologante);
 
         Label hint = label(
-                "O avaliador e o homologante são selecionados a partir do cadastro de profissionais. "
-                        + "O nome e a função nunca são digitados dentro do relatório.",
+                "O avaliador é obrigatório e o homologante é opcional. "
+                        + "O Homologante padrão pode ficar em branco; nesse caso a ficha será impressa sem homologante, "
+                        + "até que um seja definido. Os nomes e funções são sempre obtidos do cadastro de profissionais.",
                 "muted"
         );
         hint.setWrapText(true);
